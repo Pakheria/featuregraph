@@ -4,6 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue)](pyproject.toml)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Pakheria%2Ffeaturegraph-black?logo=github)](https://github.com/Pakheria/featuregraph)
 
 ---
 
@@ -44,8 +45,10 @@ AI Coding Agent / Developer
 | **Index File Size** | 2MB – 15MB (`graph.json`) | **2KB – 5KB (`FEATURE_INDEX.json`)** |
 | **Token Cost to Read Index** | ~50,000+ tokens | **< 150 tokens** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
+| **Multi-Project Workspaces** | ❌ Flat scans only | **✅ Monorepo / Subproject Auto-Detection** |
 | **Zero-Config Git Auto-Sync**| ❌ Manual re-runs | **✅ Instant Pre-Commit Git Hook** |
 | **AI Anti-Amnesia Protection**| ❌ Passive graph | **✅ Invariant Contract (`[depends_on]`)** |
+| **Agent Constitution (`AGENTS.md`)**| ❌ None | **✅ Auto-generates Token Circuit-Breakers** |
 | **Interactive HTML Visualizer**| Basic | **✅ Interactive Standalone Canvas DAG** |
 
 ---
@@ -64,11 +67,13 @@ uv tool install featuregraph
 cd your-project
 featuregraph init
 ```
-*This scans your code, generates `FEATURE_INDEX.json` and `SYSTEM_FEATURE_GRAPH.md`, and automatically installs the `.git/hooks/pre-commit` hook.*
+*This scans your code, generates `FEATURE_INDEX.json`, `SYSTEM_FEATURE_GRAPH.md`, auto-configures the `AGENTS.md` AI circuit-breaker protocol, and installs the `.git/hooks/pre-commit` hook.*
 
 ---
 
 ## 🏷️ Annotating Your Code
+
+FeatureGraph parses comments in **Python, TypeScript, JavaScript, and TSX** files.
 
 ### Python Example
 ```python
@@ -90,22 +95,36 @@ export const AnalyticsWidget = () => {
 
 ---
 
-## 🛠️ CLI Commands
+## 🛠️ CLI Reference & Commands
 
 ```bash
-# Scan codebase and update graphs
+# Scan codebase and update graphs (supports custom directory & output paths)
 featuregraph scan
+featuregraph scan --dir ./my-project --json index.json --md GRAPH.md --quiet
 
-# Generate an interactive visual HTML graph
-featuregraph visualize --out graph.html
+# Initialize repository, pre-commit hook & AGENTS.md constitution
+featuregraph init
 
 # Query exact lines and dependencies for a specific feature ID
 featuregraph query AUTH-01
+
+# Generate an interactive visual HTML DAG
+featuregraph visualize --out graph.html
 
 # Manage automated pre-commit hook
 featuregraph hook --install
 featuregraph hook --uninstall
 ```
+
+---
+
+## 🤖 AI Agent Integration Protocol
+
+When using FeatureGraph with AI coding agents (Antigravity, Claude Code, Gemini CLI, Cursor):
+
+1. FeatureGraph auto-generates an `AGENTS.md` directive at your workspace root.
+2. The AI reads `FEATURE_INDEX.json` on turn 1 to find the target feature ID and file `#Lstart-Lend`.
+3. The AI reads **only** those specific lines, preventing multi-file exploratory scans and accidental deletions of linked dependencies.
 
 ---
 
