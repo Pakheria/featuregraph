@@ -2,6 +2,12 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 
+try:
+    from importlib.metadata import version as _pkg_version
+    _VERSION = _pkg_version("featuregraph")
+except Exception:
+    _VERSION = "unknown"
+
 class JSONFormatter:
     """Formats feature graph into an ultra-compact, token-efficient JSON index for AI assistants."""
 
@@ -10,7 +16,7 @@ class JSONFormatter:
         data = {
             "_meta": {
                 "generator": "featuregraph",
-                "version": "0.1.0",
+                "version": _VERSION,
                 "total_features": len(graph_dict),
                 "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
             },

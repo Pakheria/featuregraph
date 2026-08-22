@@ -24,7 +24,7 @@ class MarkdownFormatter:
             call_str = " ".join([f"`[{c}]`" for c in called_by]) if called_by else "—"
 
             loc_links = []
-            for loc in locations[:4]:
+            for loc in locations[:4]:  # cap at 4 per feature to keep table scannable
                 file_rel = loc.get("file", "")
                 s_line = loc.get("start_line", 1)
                 e_line = loc.get("end_line", s_line + 10)
@@ -36,7 +36,7 @@ class MarkdownFormatter:
 
         mermaid_block = ""
         if mermaid_edges:
-            mermaid_block = "```mermaid\ngraph TD\n" + "\n".join(mermaid_edges[:40]) + "\n```\n\n---\n"
+            mermaid_block = "```mermaid\ngraph TD\n" + "\n".join(mermaid_edges[:40]) + "\n```\n\n---\n"  # cap at 40 edges for readable Mermaid output
 
         return f"""# System Feature Dependency Graph
 

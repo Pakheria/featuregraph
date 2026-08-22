@@ -1,0 +1,9 @@
+{
+  "_meta": {
+    "generator": "featuregraph",
+    "version": "0.1.0",
+    "total_features": 0,
+    "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
+  },
+  "features": {}
+}

@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import List, Dict, Any, Generator
+from typing import List
 
 from .parser_py import PythonFeatureParser
 from .parser_ts import TypeScriptFeatureParser
@@ -52,7 +52,7 @@ class WorkspaceScanner:
             dirs[:] = [d for d in dirs if not self._should_ignore_dir(d)]
 
             for file in files:
-                if file.startswith(".") and file != ".featureignore":
+                if file.startswith("."):
                     continue
 
                 path = Path(root) / file

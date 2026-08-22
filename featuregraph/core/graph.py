@@ -1,4 +1,4 @@
-from typing import Dict, List, Any, Set
+from __future__ import annotations
 
 class FeatureGraph:
     """Manages the directed acyclic feature dependency graph, detects cycles and orphaned features."""

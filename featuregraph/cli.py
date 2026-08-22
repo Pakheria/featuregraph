@@ -47,18 +47,22 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.command or args.command == "scan":
+    if not args.command:
+        parser.print_help()
+        sys.exit(0)
+
+    if args.command == "scan":
         root = Path(getattr(args, "dir", ".")).resolve()
         quiet = getattr(args, "quiet", False)
-        
+
         scanner = WorkspaceScanner(root)
-        subprojects = scanner.detect_subprojects()
-        
+
         if not quiet:
+            subprojects = scanner.detect_subprojects()
             if subprojects:
                 print(f"⚡ [FeatureGraph] Multi-Project Workspace detected ({len(subprojects)} projects: {', '.join(subprojects)})")
             print(f"⚡ [FeatureGraph] Scanning codebase in {root}...")
-            
+
         graph = scanner.scan()
         graph_dict = graph.to_dict()
 

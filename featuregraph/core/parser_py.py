@@ -1,7 +1,7 @@
 import ast
 import re
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
 DEPENDS_TAG_REGEX = re.compile(r"@depends\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
@@ -28,8 +28,8 @@ class PythonFeatureParser:
                 docstring = ast.get_docstring(node) or ""
                 
                 # Check for explicit feature comments above node
-                start_line = getattr(node, "lineno", 1)
-                end_line = getattr(node, "end_lineno", start_line + 10)
+                start_line = node.lineno
+                end_line = node.end_lineno
                 
                 # Look in preceding 5 lines for comment tags
                 preceding_text = "\n".join(lines[max(0, start_line - 6):start_line])
@@ -74,7 +74,7 @@ class PythonFeatureParser:
                             })
                             break
 
-        except Exception:
+        except (SyntaxError, UnicodeDecodeError, ValueError):
             pass
 
         return results

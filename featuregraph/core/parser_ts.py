@@ -5,6 +5,7 @@ from typing import Dict, List, Any
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
 DEPENDS_TAG_REGEX = re.compile(r"@depends\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 COMPONENT_EXPORT_REGEX = re.compile(r"export\s+(?:const|function|class)\s+([A-Za-z0-9_]+)", re.MULTILINE)
+TS_END_LINE_LOOKAHEAD = 35  # max lines scanned forward as component end estimate
 
 class TypeScriptFeatureParser:
     """Parses TypeScript/React files to extract UI components, features, and line positions."""
@@ -27,8 +28,8 @@ class TypeScriptFeatureParser:
                     desc = match.group(2) or "UI Feature Component"
                     
                     # Look ahead for component export
-                    symbol_name = Path(file_path).stem
-                    end_line = min(idx + 35, len(lines))
+                    symbol_name = file_path.stem
+                    end_line = min(idx + TS_END_LINE_LOOKAHEAD, len(lines))
                     
                     # Check next 5 lines for export statement
                     for sub_idx in range(idx, min(idx + 6, len(lines))):
@@ -53,7 +54,7 @@ class TypeScriptFeatureParser:
                         "file": str(file_path)
                     })
 
-        except Exception:
+        except (UnicodeDecodeError, OSError):
             pass
 
         return results
