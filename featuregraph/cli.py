@@ -83,7 +83,22 @@ def main():
         graph_dict = graph.to_dict()
         JSONFormatter.write_to_file(graph_dict, root / "FEATURE_INDEX.json", root)
         MarkdownFormatter.write_to_file(graph_dict, root / "SYSTEM_FEATURE_GRAPH.md", root)
-        print("✓ Initial graph generated successfully.")
+
+        # Generate AGENTS.md Circuit-Breaker Directive
+        agents_md = root / "AGENTS.md"
+        if not agents_md.exists():
+            agents_md.write_text(
+                "# AI AGENT SHORT-CIRCUIT CONSTITUTION\n\n"
+                "> 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**\n"
+                "> When asked about features, architecture, onboarding, or where code lives:\n"
+                "> **READ `FEATURE_INDEX.json` AND STOP IMMEDIATELY.**\n"
+                "> Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.\n"
+                "> `FEATURE_INDEX.json` is the 100% complete, AST line-indexed single source of truth.\n",
+                encoding="utf-8"
+            )
+            print("✓ Generated AI Agent Constitution: AGENTS.md")
+
+        print("✓ Initial graph and circuit-breaker protocol generated successfully.")
 
     elif args.command == "query":
         import json
