@@ -98,12 +98,15 @@ export const AnalyticsWidget = () => {
 ## 🛠️ CLI Reference & Commands
 
 ```bash
-# Scan codebase and update graphs (supports custom directory & output paths)
-featuregraph scan
-featuregraph scan --dir ./my-project --json index.json --md GRAPH.md --quiet
+# Show all commands and options
+featuregraph --help
 
 # Initialize repository, pre-commit hook & AGENTS.md constitution
 featuregraph init
+
+# Scan codebase and update graphs (supports custom directory & output paths)
+featuregraph scan
+featuregraph scan --dir ./my-project --json index.json --md GRAPH.md --quiet
 
 # Query exact lines and dependencies for a specific feature ID
 featuregraph query AUTH-01
@@ -115,6 +118,8 @@ featuregraph visualize --out graph.html
 featuregraph hook --install
 featuregraph hook --uninstall
 ```
+
+> **Note:** Running `featuregraph` with no arguments prints help. Use `featuregraph scan` or `featuregraph init` explicitly.
 
 ---
 
