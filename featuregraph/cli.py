@@ -2,11 +2,17 @@ import sys
 import argparse
 from pathlib import Path
 
-from .core.scanner import WorkspaceScanner
-from .formatters.json_formatter import JSONFormatter
-from .formatters.markdown_formatter import MarkdownFormatter
-from .formatters.html_visualizer import HTMLVisualizer
-from .hooks.git_hook import GitHookManager
+# Support running as a standalone script or installed module
+if __name__ == "__main__" and __package__ is None:
+    file_path = Path(__file__).resolve()
+    sys.path.insert(0, str(file_path.parent.parent))
+    __package__ = "featuregraph"
+
+from featuregraph.core.scanner import WorkspaceScanner
+from featuregraph.formatters.json_formatter import JSONFormatter
+from featuregraph.formatters.markdown_formatter import MarkdownFormatter
+from featuregraph.formatters.html_visualizer import HTMLVisualizer
+from featuregraph.hooks.git_hook import GitHookManager
 
 def main():
     parser = argparse.ArgumentParser(
