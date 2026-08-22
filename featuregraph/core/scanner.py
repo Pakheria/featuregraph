@@ -26,7 +26,7 @@ class WorkspaceScanner:
         subprojects = []
         try:
             for child in self.root_dir.iterdir():
-                if child.is_dir() and not child.name.startswith(".") and not self._should_ignore(child):
+                if child.is_dir() and not self._should_ignore_dir(child.name):
                     if (child / ".git").exists() or (child / "pyproject.toml").exists() or (child / "package.json").exists():
                         subprojects.append(child.name)
         except Exception:
@@ -41,21 +41,27 @@ class WorkspaceScanner:
                 if line and not line.startswith("#"):
                     self.ignore_patterns.add(line.rstrip("/"))
 
-    def _should_ignore(self, path: Path) -> bool:
-        for part in path.parts:
-            if part in self.ignore_patterns or any(part.startswith(ign) for ign in self.ignore_patterns):
-                return True
-            if part.startswith(".") and part not in [".", "..", ".featureignore"]:
-                return True
+    def _should_ignore_dir(self, dir_name: str) -> bool:
+        if dir_name.startswith(".") and dir_name not in [".", ".."]:
+            return True
+        if dir_name in self.ignore_patterns or any(dir_name.startswith(ign) for ign in self.ignore_patterns):
+            return True
         return False
 
     def scan(self) -> FeatureGraph:
         graph = FeatureGraph()
 
-        for path in self.root_dir.rglob("*"):
-            if path.is_file() and not self._should_ignore(path):
+        for root, dirs, files in os.walk(self.root_dir, topdown=True):
+            # Prune ignored directories in-place so os.walk never enters them
+            dirs[:] = [d for d in dirs if not self._should_ignore_dir(d)]
+
+            for file in files:
+                if file.startswith(".") and file != ".featureignore":
+                    continue
+
+                path = Path(root) / file
                 rel_path = path.relative_to(self.root_dir)
-                
+
                 if path.suffix == ".py":
                     parsed = PythonFeatureParser.parse_file(path)
                     for item in parsed:
@@ -67,11 +73,6 @@ class WorkspaceScanner:
                             "end_line": item["end_line"],
                             "ref": f"{rel_path}#L{item['start_line']}-L{item['end_line']}"
                         }]
-                        graph.add_feature(item["feature_id"], {
-                            "name": item["name"],
-                            "depends_on": item["depends_on"],
-                            "locations": item_loc
-                        })
                 elif path.suffix in [".ts", ".tsx", ".js", ".jsx"]:
                     parsed = TypeScriptFeatureParser.parse_file(path)
                     for item in parsed:
@@ -90,3 +91,4 @@ class WorkspaceScanner:
                         })
 
         return graph
+
