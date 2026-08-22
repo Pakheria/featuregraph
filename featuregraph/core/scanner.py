@@ -9,7 +9,8 @@ from .graph import FeatureGraph
 DEFAULT_IGNORE = {
     ".git", ".venv", "venv", "node_modules", "dist", "build",
     "__pycache__", ".pytest_cache", ".ruff_cache", "logs",
-    "coverage", ".next", ".turbo"
+    "coverage", ".next", ".turbo", ".cache", ".local", ".config",
+    ".gemini", ".nvm", ".continue", ".pnpm-store", ".npm", ".cargo", ".rustup"
 }
 
 class WorkspaceScanner:
@@ -25,7 +26,7 @@ class WorkspaceScanner:
         subprojects = []
         try:
             for child in self.root_dir.iterdir():
-                if child.is_dir() and not self._should_ignore(child):
+                if child.is_dir() and not child.name.startswith(".") and not self._should_ignore(child):
                     if (child / ".git").exists() or (child / "pyproject.toml").exists() or (child / "package.json").exists():
                         subprojects.append(child.name)
         except Exception:
@@ -43,6 +44,8 @@ class WorkspaceScanner:
     def _should_ignore(self, path: Path) -> bool:
         for part in path.parts:
             if part in self.ignore_patterns or any(part.startswith(ign) for ign in self.ignore_patterns):
+                return True
+            if part.startswith(".") and part not in [".", "..", ".featureignore"]:
                 return True
         return False
 
