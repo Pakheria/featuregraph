@@ -51,10 +51,14 @@ def main():
         root = Path(getattr(args, "dir", ".")).resolve()
         quiet = getattr(args, "quiet", False)
         
+        scanner = WorkspaceScanner(root)
+        subprojects = scanner.detect_subprojects()
+        
         if not quiet:
+            if subprojects:
+                print(f"⚡ [FeatureGraph] Multi-Project Workspace detected ({len(subprojects)} projects: {', '.join(subprojects)})")
             print(f"⚡ [FeatureGraph] Scanning codebase in {root}...")
             
-        scanner = WorkspaceScanner(root)
         graph = scanner.scan()
         graph_dict = graph.to_dict()
 

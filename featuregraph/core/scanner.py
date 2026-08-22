@@ -20,6 +20,18 @@ class WorkspaceScanner:
         self.ignore_patterns = set(DEFAULT_IGNORE)
         self._load_ignore_file()
 
+    def detect_subprojects(self) -> List[str]:
+        """Detects if current root is a multi-project workspace containing multiple repositories."""
+        subprojects = []
+        try:
+            for child in self.root_dir.iterdir():
+                if child.is_dir() and not self._should_ignore(child):
+                    if (child / ".git").exists() or (child / "pyproject.toml").exists() or (child / "package.json").exists():
+                        subprojects.append(child.name)
+        except Exception:
+            pass
+        return sorted(subprojects)
+
     def _load_ignore_file(self):
         ignore_file = self.root_dir / ".featureignore"
         if ignore_file.exists():
