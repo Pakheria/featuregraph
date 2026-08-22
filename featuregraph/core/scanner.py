@@ -7,10 +7,8 @@ from .parser_ts import TypeScriptFeatureParser
 from .graph import FeatureGraph
 
 DEFAULT_IGNORE = {
-    ".git", ".venv", "venv", "node_modules", "dist", "build",
-    "__pycache__", ".pytest_cache", ".ruff_cache", "logs",
-    "coverage", ".next", ".turbo", ".cache", ".local", ".config",
-    ".gemini", ".nvm", ".continue", ".pnpm-store", ".npm", ".cargo", ".rustup"
+    "venv", "node_modules", "dist", "build",
+    "__pycache__", "logs", "coverage"
 }
 
 class WorkspaceScanner:
@@ -29,7 +27,7 @@ class WorkspaceScanner:
                 if child.is_dir() and not self._should_ignore_dir(child.name):
                     if (child / ".git").exists() or (child / "pyproject.toml").exists() or (child / "package.json").exists():
                         subprojects.append(child.name)
-        except Exception:
+        except (PermissionError, OSError):
             pass
         return sorted(subprojects)
 
@@ -44,9 +42,7 @@ class WorkspaceScanner:
     def _should_ignore_dir(self, dir_name: str) -> bool:
         if dir_name.startswith(".") and dir_name not in [".", ".."]:
             return True
-        if dir_name in self.ignore_patterns or any(dir_name.startswith(ign) for ign in self.ignore_patterns):
-            return True
-        return False
+        return dir_name in self.ignore_patterns
 
     def scan(self) -> FeatureGraph:
         graph = FeatureGraph()
@@ -64,31 +60,25 @@ class WorkspaceScanner:
 
                 if path.suffix == ".py":
                     parsed = PythonFeatureParser.parse_file(path)
-                    for item in parsed:
-                        item_loc = [{
-                            "file": str(rel_path),
-                            "symbol": item["symbol"],
-                            "type": item["type"],
-                            "start_line": item["start_line"],
-                            "end_line": item["end_line"],
-                            "ref": f"{rel_path}#L{item['start_line']}-L{item['end_line']}"
-                        }]
                 elif path.suffix in [".ts", ".tsx", ".js", ".jsx"]:
                     parsed = TypeScriptFeatureParser.parse_file(path)
-                    for item in parsed:
-                        item_loc = [{
-                            "file": str(rel_path),
-                            "symbol": item["symbol"],
-                            "type": item["type"],
-                            "start_line": item["start_line"],
-                            "end_line": item["end_line"],
-                            "ref": f"{rel_path}#L{item['start_line']}-L{item['end_line']}"
-                        }]
-                        graph.add_feature(item["feature_id"], {
-                            "name": item["name"],
-                            "depends_on": item["depends_on"],
-                            "locations": item_loc
-                        })
+                else:
+                    continue
+
+                for item in parsed:
+                    item_loc = [{
+                        "file": str(rel_path),
+                        "symbol": item["symbol"],
+                        "type": item["type"],
+                        "start_line": item["start_line"],
+                        "end_line": item["end_line"],
+                        "ref": f"{rel_path}#L{item['start_line']}-L{item['end_line']}"
+                    }]
+                    graph.add_feature(item["feature_id"], {
+                        "name": item["name"],
+                        "depends_on": item["depends_on"],
+                        "locations": item_loc
+                    })
 
         return graph
 

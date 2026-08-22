@@ -92,12 +92,14 @@ def main():
         agents_md = root / "AGENTS.md"
         if not agents_md.exists():
             agents_md.write_text(
-                "# AI AGENT SHORT-CIRCUIT CONSTITUTION\n\n"
-                "> 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**\n"
-                "> When asked about features, architecture, onboarding, or where code lives:\n"
-                "> **READ `FEATURE_INDEX.json` AND STOP IMMEDIATELY.**\n"
-                "> Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.\n"
-                "> `FEATURE_INDEX.json` is the 100% complete, AST line-indexed single source of truth.\n",
+                """# AI AGENT SHORT-CIRCUIT CONSTITUTION
+
+> 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**
+> When asked about features, architecture, onboarding, or where code lives:
+> **READ `FEATURE_INDEX.json` AND STOP IMMEDIATELY.**
+> Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.
+> `FEATURE_INDEX.json` is the 100% complete, AST line-indexed single source of truth.
+""",
                 encoding="utf-8"
             )
             print("✓ Generated AI Agent Constitution: AGENTS.md")
