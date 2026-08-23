@@ -1,0 +1,19 @@
+{
+  "SKILL-01": {
+    "name": "Skill Manager",
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/skills/skill_manager.py",
+        "lines": [
+          146,
+          183
+        ],
+        "symbol": "SkillManager",
+        "type": "class"
+      }
+    ]
+  }
+}

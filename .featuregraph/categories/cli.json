@@ -1,0 +1,33 @@
+{
+  "CLI-01": {
+    "name": "Main",
+    "depends_on": [
+      "ANNOTATOR-04",
+      "ANNOTATOR-05",
+      "GIT_HOOK-01",
+      "GIT_HOOK-02",
+      "GIT_HOOK-03",
+      "GRAPH-04",
+      "HTML_VISUALI-01",
+      "HTML_VISUALI-02",
+      "JSON_FORMATT-01",
+      "JSON_FORMATT-03",
+      "MARKDOWN_FOR-01",
+      "SCANNER-01",
+      "SCANNER-02",
+      "SCANNER-03",
+      "SKILL-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/cli.py",
+        "lines": [
+          20,
+          287
+        ],
+        "symbol": "main",
+        "type": "function"
+      }
+    ]
+  }
+}

@@ -20,7 +20,7 @@
 
 FeatureGraph is engineered around four core metrics:
 
-1. **Token Efficiency (Context Budget):** Replaces massive code dumps with a compact line-indexed map (`< 150` to `~3,500` tokens total — **90% to 95%+ savings**).
+1. **2-Tier Hierarchical Token Budget:** Ultra-compact `manifest.json` (<80 tokens) allows agents to pinpoint domain categories and read only domain files `categories/<domain>.json` (<300 tokens — **99%+ token savings**).
 2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function calls, type references, and component usages to wire `depends_on` and `called_by` with zero manual effort.
 3. **Line-Exact Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature.
 4. **Sub-Second to Fast Scan Speed:** Optimized single-pass line-interval AST mapping scans thousands of symbols in seconds.
@@ -29,16 +29,16 @@ FeatureGraph is engineered around four core metrics:
 AI Coding Agent / Developer
             │
             ▼
- [1. Reads FEATURE_INDEX.json] ───> Compact Map (<150–3,500 tokens)
+ [1. Reads .featuregraph/manifest.json] ───> Ultra-tiny directory (<80 tokens)
             │
             ▼
- [2. Finds Target Line Span & Automated [depends_on] Callers]
+ [2. Reads .featuregraph/categories/<domain>.json] ──> Exact domain map (<300 tokens)
             │
             ▼
- [3. Slices Exact Code Only (#Lstart-Lend)] ──> 90-95% Token Savings
+ [3. Slices Exact Code Only (#Lstart-Lend)] ────────> 95-99% Token Savings
             │
             ▼
- [4. Commits Code] ───────────────> Git Hook Auto-Syncs Line Map
+ [4. Commits Code] ─────────────────────────────────> Git Hook Auto-Syncs Line Map
 ```
 
 ---

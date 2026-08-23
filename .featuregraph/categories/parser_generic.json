@@ -1,0 +1,21 @@
+{
+  "PARSER_GENERIC-01": {
+    "name": "Generic Feature Parser",
+    "called_by": [
+      "ANNOTATOR-05",
+      "SCANNER-01",
+      "SCANNER-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/parser_generic.py",
+        "lines": [
+          59,
+          196
+        ],
+        "symbol": "GenericFeatureParser",
+        "type": "class"
+      }
+    ]
+  }
+}

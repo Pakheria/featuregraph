@@ -1,0 +1,40 @@
+{
+  "TEST_SCANNER-01": {
+    "name": "Test graph dependencies",
+    "depends_on": [
+      "GRAPH-01",
+      "GRAPH-02",
+      "GRAPH-04"
+    ],
+    "locations": [
+      {
+        "file": "tests/test_scanner.py",
+        "lines": [
+          9,
+          17
+        ],
+        "symbol": "test_graph_dependencies",
+        "type": "function"
+      }
+    ]
+  },
+  "TEST_SCANNER-02": {
+    "name": "Test orphan detection",
+    "depends_on": [
+      "GRAPH-01",
+      "GRAPH-02",
+      "GRAPH-03"
+    ],
+    "locations": [
+      {
+        "file": "tests/test_scanner.py",
+        "lines": [
+          20,
+          23
+        ],
+        "symbol": "test_orphan_detection",
+        "type": "function"
+      }
+    ]
+  }
+}

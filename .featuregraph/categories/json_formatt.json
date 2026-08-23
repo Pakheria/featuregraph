@@ -1,0 +1,64 @@
+{
+  "JSON_FORMATT-01": {
+    "name": "Jsonformatter",
+    "depends_on": [
+      "JSON_FORMATT-02"
+    ],
+    "called_by": [
+      "CLI-01",
+      "JSON_FORMATT-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/formatters/json_formatter.py",
+        "lines": [
+          13,
+          113
+        ],
+        "symbol": "JSONFormatter",
+        "type": "class"
+      }
+    ]
+  },
+  "JSON_FORMATT-02": {
+    "name": "Format",
+    "called_by": [
+      "JSON_FORMATT-01",
+      "JSON_FORMATT-03",
+      "MARKDOWN_FOR-01",
+      "MARKDOWN_FOR-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/formatters/json_formatter.py",
+        "lines": [
+          74,
+          84
+        ],
+        "symbol": "format",
+        "type": "function"
+      }
+    ]
+  },
+  "JSON_FORMATT-03": {
+    "name": "Write to file",
+    "depends_on": [
+      "JSON_FORMATT-01",
+      "JSON_FORMATT-02"
+    ],
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/formatters/json_formatter.py",
+        "lines": [
+          88,
+          91
+        ],
+        "symbol": "write_to_file",
+        "type": "function"
+      }
+    ]
+  }
+}

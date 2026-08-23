@@ -1,0 +1,105 @@
+{
+  "ANNOTATOR-01": {
+    "name": "Suggestion",
+    "called_by": [
+      "ANNOTATOR-02",
+      "ANNOTATOR-03",
+      "ANNOTATOR-04",
+      "ANNOTATOR-05"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/annotator.py",
+        "lines": [
+          38,
+          45
+        ],
+        "symbol": "Suggestion",
+        "type": "class"
+      }
+    ]
+  },
+  "ANNOTATOR-02": {
+    "name": "Suggest python",
+    "depends_on": [
+      "ANNOTATOR-01"
+    ],
+    "called_by": [
+      "ANNOTATOR-05"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/annotator.py",
+        "lines": [
+          105,
+          149
+        ],
+        "symbol": "suggest_python",
+        "type": "function"
+      }
+    ]
+  },
+  "ANNOTATOR-03": {
+    "name": "Suggest typescript",
+    "depends_on": [
+      "ANNOTATOR-01"
+    ],
+    "called_by": [
+      "ANNOTATOR-05"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/annotator.py",
+        "lines": [
+          165,
+          201
+        ],
+        "symbol": "suggest_typescript",
+        "type": "function"
+      }
+    ]
+  },
+  "ANNOTATOR-04": {
+    "name": "Apply suggestions",
+    "depends_on": [
+      "ANNOTATOR-01"
+    ],
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/annotator.py",
+        "lines": [
+          268,
+          304
+        ],
+        "symbol": "apply_suggestions",
+        "type": "function"
+      }
+    ]
+  },
+  "ANNOTATOR-05": {
+    "name": "Collect suggestions",
+    "depends_on": [
+      "ANNOTATOR-01",
+      "ANNOTATOR-02",
+      "ANNOTATOR-03",
+      "PARSER_GENERIC-01"
+    ],
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/annotator.py",
+        "lines": [
+          318,
+          357
+        ],
+        "symbol": "collect_suggestions",
+        "type": "function"
+      }
+    ]
+  }
+}

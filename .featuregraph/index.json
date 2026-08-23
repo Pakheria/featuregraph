@@ -68,7 +68,7 @@
           "file": "featuregraph/cli.py",
           "lines": [
             20,
-            281
+            287
           ],
           "symbol": "main",
           "type": "function"
@@ -209,8 +209,8 @@
         {
           "file": "featuregraph/formatters/json_formatter.py",
           "lines": [
-            12,
-            33
+            13,
+            113
           ],
           "symbol": "JSONFormatter",
           "type": "class"
@@ -229,8 +229,8 @@
         {
           "file": "featuregraph/formatters/json_formatter.py",
           "lines": [
-            17,
-            27
+            74,
+            84
           ],
           "symbol": "format",
           "type": "function"
@@ -250,8 +250,8 @@
         {
           "file": "featuregraph/formatters/json_formatter.py",
           "lines": [
-            31,
-            33
+            88,
+            91
           ],
           "symbol": "write_to_file",
           "type": "function"

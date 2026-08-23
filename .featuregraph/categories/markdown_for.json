@@ -1,0 +1,55 @@
+{
+  "MARKDOWN_FOR-01": {
+    "name": "Markdown formatter",
+    "depends_on": [
+      "JSON_FORMATT-02"
+    ],
+    "called_by": [
+      "CLI-01",
+      "MARKDOWN_FOR-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/formatters/markdown_formatter.py",
+        "lines": [
+          5,
+          72
+        ],
+        "symbol": "MarkdownFormatter",
+        "type": "class"
+      }
+    ]
+  },
+  "MARKDOWN_FOR-02": {
+    "name": "Format",
+    "locations": [
+      {
+        "file": "featuregraph/formatters/markdown_formatter.py",
+        "lines": [
+          10,
+          66
+        ],
+        "symbol": "format",
+        "type": "function"
+      }
+    ]
+  },
+  "MARKDOWN_FOR-03": {
+    "name": "Write to file",
+    "depends_on": [
+      "JSON_FORMATT-02",
+      "MARKDOWN_FOR-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/formatters/markdown_formatter.py",
+        "lines": [
+          70,
+          72
+        ],
+        "symbol": "write_to_file",
+        "type": "function"
+      }
+    ]
+  }
+}

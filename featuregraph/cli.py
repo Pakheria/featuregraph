@@ -100,10 +100,14 @@ def main():
         fg_dir = root / ".featuregraph"
         fg_dir.mkdir(parents=True, exist_ok=True)
 
-        json_out = root / args.json if getattr(args, "json", None) else fg_dir / "index.json"
-        md_out = root / args.md if getattr(args, "md", None) else fg_dir / "graph.md"
+        if getattr(args, "json", None):
+            json_out = root / args.json
+            JSONFormatter.write_to_file(graph_dict, json_out, root)
+        else:
+            JSONFormatter.write_all(graph_dict, fg_dir, root)
+            json_out = fg_dir / "manifest.json"
 
-        JSONFormatter.write_to_file(graph_dict, json_out, root)
+        md_out = root / args.md if getattr(args, "md", None) else fg_dir / "graph.md"
         MarkdownFormatter.write_to_file(graph_dict, md_out, root)
 
         if getattr(args, "html", None) is not None:
@@ -111,9 +115,11 @@ def main():
             HTMLVisualizer.generate(graph_dict, html_out)
 
         if not quiet:
-            print(f"✓ Mapped {len(graph_dict)} features.")
-            print(f"✓ Created compact index: {json_out.relative_to(root) if json_out.is_relative_to(root) else json_out}")
-            print(f"✓ Created markdown graph: {md_out.relative_to(root) if md_out.is_relative_to(root) else md_out}")
+            categories = JSONFormatter.split_by_category(graph_dict)
+            print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
+            print(f"✓ Created 2-Tier Manifest: .featuregraph/manifest.json (<100 tokens)")
+            print(f"✓ Created Category Chunks: .featuregraph/categories/ ({len(categories)} files)")
+            print(f"✓ Created markdown graph:  {md_out.relative_to(root) if md_out.is_relative_to(root) else md_out}")
 
     elif args.command == "init":
         root = Path(".").resolve()
@@ -129,10 +135,8 @@ def main():
 
         fg_dir = root / ".featuregraph"
         fg_dir.mkdir(parents=True, exist_ok=True)
-        json_out = fg_dir / "index.json"
+        JSONFormatter.write_all(graph_dict, fg_dir, root)
         md_out = fg_dir / "graph.md"
-
-        JSONFormatter.write_to_file(graph_dict, json_out, root)
         MarkdownFormatter.write_to_file(graph_dict, md_out, root)
 
         # Generate AGENTS.md Circuit-Breaker Directive
@@ -143,9 +147,10 @@ def main():
 
 > 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**
 > When asked about features, architecture, onboarding, or where code lives:
-> **READ `.featuregraph/index.json` AND STOP IMMEDIATELY.**
+> 1. **READ `.featuregraph/manifest.json` (< 100 tokens)** to identify the domain category and feature IDs.
+> 2. **READ `.featuregraph/categories/<category>.json`** to get exact line spans (`#Lstart-Lend`).
+> 3. Read **ONLY** the specific lines required for the task.
 > Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.
-> `.featuregraph/index.json` is the 100% complete, AST line-indexed single source of truth.
 """,
                 encoding="utf-8"
             )
@@ -155,7 +160,8 @@ def main():
         skill_file = SkillManager.install_workspace_skill(root)
         print(f"✓ Installed workspace AI agent skill: {skill_file.relative_to(root)}")
 
-        print("✓ Initial graph and circuit-breaker protocol generated successfully.")
+        categories = JSONFormatter.split_by_category(graph_dict)
+        print(f"✓ Initialized 2-Tier Index: {len(graph_dict)} features in {len(categories)} categories.")
 
     elif args.command == "query":
         import json

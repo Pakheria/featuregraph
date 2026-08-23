@@ -1,0 +1,36 @@
+{
+  "HTML_VISUALI-01": {
+    "name": "Htmlvisualizer",
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/formatters/html_visualizer.py",
+        "lines": [
+          6,
+          159
+        ],
+        "symbol": "HTMLVisualizer",
+        "type": "class"
+      }
+    ]
+  },
+  "HTML_VISUALI-02": {
+    "name": "Generate",
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/formatters/html_visualizer.py",
+        "lines": [
+          11,
+          159
+        ],
+        "symbol": "generate",
+        "type": "function"
+      }
+    ]
+  }
+}

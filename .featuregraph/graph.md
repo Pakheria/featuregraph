@@ -62,7 +62,7 @@ graph TD
 | **`ANNOTATOR-03`** | **Suggest typescript** | — | `[ANNOTATOR-01]` | `[ANNOTATOR-05]` | [`featuregraph/core/annotator.py#L165-L201`](featuregraph/core/annotator.py#L165-L201) |
 | **`ANNOTATOR-04`** | **Apply suggestions** | — | `[ANNOTATOR-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L268-L304`](featuregraph/core/annotator.py#L268-L304) |
 | **`ANNOTATOR-05`** | **Collect suggestions** | — | `[ANNOTATOR-01]` `[ANNOTATOR-02]` `[ANNOTATOR-03]` `[PARSER_GENERIC-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L318-L357`](featuregraph/core/annotator.py#L318-L357) |
-| **`CLI-01`** | **Main** | — | `[ANNOTATOR-04]` `[ANNOTATOR-05]` `[GIT_HOOK-01]` `[GIT_HOOK-02]` `[GIT_HOOK-03]` `[GRAPH-04]` `[HTML_VISUALI-01]` `[HTML_VISUALI-02]` `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[SCANNER-01]` `[SCANNER-02]` `[SCANNER-03]` `[SKILL-01]` | — | [`featuregraph/cli.py#L20-L281`](featuregraph/cli.py#L20-L281) |
+| **`CLI-01`** | **Main** | — | `[ANNOTATOR-04]` `[ANNOTATOR-05]` `[GIT_HOOK-01]` `[GIT_HOOK-02]` `[GIT_HOOK-03]` `[GRAPH-04]` `[HTML_VISUALI-01]` `[HTML_VISUALI-02]` `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[SCANNER-01]` `[SCANNER-02]` `[SCANNER-03]` `[SKILL-01]` | — | [`featuregraph/cli.py#L20-L287`](featuregraph/cli.py#L20-L287) |
 | **`DEP_RESOLVER-01`** | **Dependency Resolver** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L27-L128`](featuregraph/core/dependency_resolver.py#L27-L128) |
 | **`DEP_RESOLVER-02`** | **Register symbols** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L37-L43`](featuregraph/core/dependency_resolver.py#L37-L43) |
 | **`DEP_RESOLVER-03`** | **Resolve dependencies for file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L46-L69`](featuregraph/core/dependency_resolver.py#L46-L69) |
@@ -75,9 +75,9 @@ graph TD
 | **`GRAPH-04`** | **To dict** | — | — | `[CLI-01]` `[TEST_SCANNER-01]` | [`featuregraph/core/graph.py#L47-L68`](featuregraph/core/graph.py#L47-L68) |
 | **`HTML_VISUALI-01`** | **Htmlvisualizer** | — | — | `[CLI-01]` | [`featuregraph/formatters/html_visualizer.py#L6-L159`](featuregraph/formatters/html_visualizer.py#L6-L159) |
 | **`HTML_VISUALI-02`** | **Generate** | — | — | `[CLI-01]` | [`featuregraph/formatters/html_visualizer.py#L11-L159`](featuregraph/formatters/html_visualizer.py#L11-L159) |
-| **`JSON_FORMATT-01`** | **Jsonformatter** | — | `[JSON_FORMATT-02]` | `[CLI-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L12-L33`](featuregraph/formatters/json_formatter.py#L12-L33) |
-| **`JSON_FORMATT-02`** | **Format** | — | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/json_formatter.py#L17-L27`](featuregraph/formatters/json_formatter.py#L17-L27) |
-| **`JSON_FORMATT-03`** | **Write to file** | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-02]` | `[CLI-01]` | [`featuregraph/formatters/json_formatter.py#L31-L33`](featuregraph/formatters/json_formatter.py#L31-L33) |
+| **`JSON_FORMATT-01`** | **Jsonformatter** | — | `[JSON_FORMATT-02]` | `[CLI-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L13-L113`](featuregraph/formatters/json_formatter.py#L13-L113) |
+| **`JSON_FORMATT-02`** | **Format** | — | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/json_formatter.py#L74-L84`](featuregraph/formatters/json_formatter.py#L74-L84) |
+| **`JSON_FORMATT-03`** | **Write to file** | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-02]` | `[CLI-01]` | [`featuregraph/formatters/json_formatter.py#L88-L91`](featuregraph/formatters/json_formatter.py#L88-L91) |
 | **`MARKDOWN_FOR-01`** | **Markdown formatter** | — | `[JSON_FORMATT-02]` | `[CLI-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/markdown_formatter.py#L5-L72`](featuregraph/formatters/markdown_formatter.py#L5-L72) |
 | **`MARKDOWN_FOR-02`** | **Format** | — | — | — | [`featuregraph/formatters/markdown_formatter.py#L10-L66`](featuregraph/formatters/markdown_formatter.py#L10-L66) |
 | **`MARKDOWN_FOR-03`** | **Write to file** | — | `[JSON_FORMATT-02]` `[MARKDOWN_FOR-01]` | — | [`featuregraph/formatters/markdown_formatter.py#L70-L72`](featuregraph/formatters/markdown_formatter.py#L70-L72) |

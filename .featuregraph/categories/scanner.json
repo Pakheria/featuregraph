@@ -1,0 +1,75 @@
+{
+  "SCANNER-01": {
+    "name": "Workspace scanner",
+    "depends_on": [
+      "DEP_RESOLVER-01",
+      "DEP_RESOLVER-02",
+      "DEP_RESOLVER-03",
+      "GRAPH-01",
+      "GRAPH-02",
+      "PARSER_GENERIC-01",
+      "PARSER_PY-01",
+      "PARSER_PY-02",
+      "PARSER_TS-01"
+    ],
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/scanner.py",
+        "lines": [
+          17,
+          104
+        ],
+        "symbol": "WorkspaceScanner",
+        "type": "class"
+      }
+    ]
+  },
+  "SCANNER-02": {
+    "name": "Detect subprojects",
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/scanner.py",
+        "lines": [
+          26,
+          36
+        ],
+        "symbol": "detect_subprojects",
+        "type": "function"
+      }
+    ]
+  },
+  "SCANNER-03": {
+    "name": "Scan",
+    "depends_on": [
+      "DEP_RESOLVER-01",
+      "DEP_RESOLVER-02",
+      "DEP_RESOLVER-03",
+      "GRAPH-01",
+      "GRAPH-02",
+      "PARSER_GENERIC-01",
+      "PARSER_PY-01",
+      "PARSER_PY-02",
+      "PARSER_TS-01"
+    ],
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/scanner.py",
+        "lines": [
+          52,
+          104
+        ],
+        "symbol": "scan",
+        "type": "function"
+      }
+    ]
+  }
+}

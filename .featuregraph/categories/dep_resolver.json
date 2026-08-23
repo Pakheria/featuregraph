@@ -1,0 +1,56 @@
+{
+  "DEP_RESOLVER-01": {
+    "name": "Dependency Resolver",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/dependency_resolver.py",
+        "lines": [
+          27,
+          128
+        ],
+        "symbol": "DependencyResolver",
+        "type": "class"
+      }
+    ]
+  },
+  "DEP_RESOLVER-02": {
+    "name": "Register symbols",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/dependency_resolver.py",
+        "lines": [
+          37,
+          43
+        ],
+        "symbol": "register_feature_symbols",
+        "type": "function"
+      }
+    ]
+  },
+  "DEP_RESOLVER-03": {
+    "name": "Resolve dependencies for file",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/dependency_resolver.py",
+        "lines": [
+          46,
+          69
+        ],
+        "symbol": "resolve_file_dependencies",
+        "type": "function"
+      }
+    ]
+  }
+}

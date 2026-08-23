@@ -1,0 +1,53 @@
+{
+  "GIT_HOOK-01": {
+    "name": "Git hook manager",
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/hooks/git_hook.py",
+        "lines": [
+          13,
+          35
+        ],
+        "symbol": "GitHookManager",
+        "type": "class"
+      }
+    ]
+  },
+  "GIT_HOOK-02": {
+    "name": "Install",
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/hooks/git_hook.py",
+        "lines": [
+          18,
+          26
+        ],
+        "symbol": "install",
+        "type": "function"
+      }
+    ]
+  },
+  "GIT_HOOK-03": {
+    "name": "Uninstall",
+    "called_by": [
+      "CLI-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/hooks/git_hook.py",
+        "lines": [
+          30,
+          35
+        ],
+        "symbol": "uninstall",
+        "type": "function"
+      }
+    ]
+  }
+}

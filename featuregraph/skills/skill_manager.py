@@ -14,10 +14,11 @@ description: >-
 
 # FeatureGraph Skill
 
-FeatureGraph is a CLI tool that AST-scans a codebase and generates:
-- `.featuregraph/index.json` — ultra-compact token-efficient feature map for AI agents
+FeatureGraph is a CLI tool that AST-scans a codebase and generates a 2-Tier Hierarchical topology index:
+- `.featuregraph/manifest.json` — Tier-1 ultra-compact directory (<100 tokens) of domains & feature summaries
+- `.featuregraph/categories/<category>.json` — Tier-2 exact line maps (#Lstart-Lend) per domain
 - `.featuregraph/graph.md` — markdown table + Mermaid dependency diagram
-- `AGENTS.md` — AI circuit-breaker directive (read index first, stop scanning)
+- `AGENTS.md` — AI circuit-breaker directive (read manifest first, stop scanning)
 - `.git/hooks/pre-commit` — auto-syncs index on every commit
 
 ---
@@ -27,7 +28,7 @@ FeatureGraph is a CLI tool that AST-scans a codebase and generates:
 **Before doing anything with the feature index — whether the user asked for it or not — check if it exists:**
 
 ```bash
-(test -f .featuregraph/index.json || test -f FEATURE_INDEX.json) && echo "EXISTS" || echo "MISSING"
+(test -f .featuregraph/manifest.json || test -f .featuregraph/index.json || test -f FEATURE_INDEX.json) && echo "EXISTS" || echo "MISSING"
 ```
 
 ### If MISSING → Auto-init without asking
@@ -38,11 +39,10 @@ Just do it, then continue with their original request.
 featuregraph init
 ```
 
-This covers the case where:
-- The user says "read feature index" on an uninitiated project
-- The user says "/ponytail review this" and no index exists yet
-- The user mentions any feature ID before the project has been scanned
-- Any AI-driven task requires feature context
+### If EXISTS → 2-Tier Inspection Workflow (Max Token Efficiency)
+1. **Turn 1:** Read `.featuregraph/manifest.json` (**< 100 tokens**) to find which category owns the target feature.
+2. **Turn 2:** Read only that domain's file: `.featuregraph/categories/<category>.json` (**< 300 tokens**).
+3. **Turn 3:** Read and edit **ONLY** the exact line spans (`#Lstart-Lend`). Never do full-file exploratory reads.
 
 ### If EXISTS → Check staleness
 If the last git commit is newer than the index, re-scan silently before reading:

@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "generator": "featuregraph",
+    "version": "0.1.0",
+    "total_features": 35,
+    "total_categories": 14,
+    "instruction": "Read this manifest (<100 tokens) to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
+  },
+  "categories": {
+    "annotator": {
+      "ANNOTATOR-01": "Suggestion",
+      "ANNOTATOR-02": "Suggest python",
+      "ANNOTATOR-03": "Suggest typescript",
+      "ANNOTATOR-04": "Apply suggestions",
+      "ANNOTATOR-05": "Collect suggestions"
+    },
+    "cli": {
+      "CLI-01": "Main"
+    },
+    "dep_resolver": {
+      "DEP_RESOLVER-01": "Dependency Resolver",
+      "DEP_RESOLVER-02": "Register symbols",
+      "DEP_RESOLVER-03": "Resolve dependencies for file"
+    },
+    "git_hook": {
+      "GIT_HOOK-01": "Git hook manager",
+      "GIT_HOOK-02": "Install",
+      "GIT_HOOK-03": "Uninstall"
+    },
+    "graph": {
+      "GRAPH-01": "Feature graph",
+      "GRAPH-02": "Add feature",
+      "GRAPH-03": "Get orphans",
+      "GRAPH-04": "To dict"
+    },
+    "html_visuali": {
+      "HTML_VISUALI-01": "Htmlvisualizer",
+      "HTML_VISUALI-02": "Generate"
+    },
+    "json_formatt": {
+      "JSON_FORMATT-01": "Jsonformatter",
+      "JSON_FORMATT-02": "Format",
+      "JSON_FORMATT-03": "Write to file"
+    },
+    "markdown_for": {
+      "MARKDOWN_FOR-01": "Markdown formatter",
+      "MARKDOWN_FOR-02": "Format",
+      "MARKDOWN_FOR-03": "Write to file"
+    },
+    "parser_generic": {
+      "PARSER_GENERIC-01": "Generic Feature Parser"
+    },
+    "parser_py": {
+      "PARSER_PY-01": "Python feature parser",
+      "PARSER_PY-02": "Parse file"
+    },
+    "parser_ts": {
+      "PARSER_TS-01": "Type script feature parser",
+      "PARSER_TS-02": "Parse file"
+    },
+    "scanner": {
+      "SCANNER-01": "Workspace scanner",
+      "SCANNER-02": "Detect subprojects",
+      "SCANNER-03": "Scan"
+    },
+    "skill": {
+      "SKILL-01": "Skill Manager"
+    },
+    "test_scanner": {
+      "TEST_SCANNER-01": "Test graph dependencies",
+      "TEST_SCANNER-02": "Test orphan detection"
+    }
+  }
+}

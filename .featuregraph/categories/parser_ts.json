@@ -1,0 +1,34 @@
+{
+  "PARSER_TS-01": {
+    "name": "Type script feature parser",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/parser_ts.py",
+        "lines": [
+          11,
+          62
+        ],
+        "symbol": "TypeScriptFeatureParser",
+        "type": "class"
+      }
+    ]
+  },
+  "PARSER_TS-02": {
+    "name": "Parse file",
+    "locations": [
+      {
+        "file": "featuregraph/core/parser_ts.py",
+        "lines": [
+          16,
+          62
+        ],
+        "symbol": "parse_file",
+        "type": "function"
+      }
+    ]
+  }
+}

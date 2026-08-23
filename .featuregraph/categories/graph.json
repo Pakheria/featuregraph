@@ -1,0 +1,77 @@
+{
+  "GRAPH-01": {
+    "name": "Feature graph",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03",
+      "TEST_SCANNER-01",
+      "TEST_SCANNER-02"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/graph.py",
+        "lines": [
+          4,
+          68
+        ],
+        "symbol": "FeatureGraph",
+        "type": "class"
+      }
+    ]
+  },
+  "GRAPH-02": {
+    "name": "Add feature",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03",
+      "TEST_SCANNER-01",
+      "TEST_SCANNER-02"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/graph.py",
+        "lines": [
+          13,
+          35
+        ],
+        "symbol": "add_feature",
+        "type": "function"
+      }
+    ]
+  },
+  "GRAPH-03": {
+    "name": "Get orphans",
+    "called_by": [
+      "TEST_SCANNER-02"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/graph.py",
+        "lines": [
+          38,
+          44
+        ],
+        "symbol": "get_orphans",
+        "type": "function"
+      }
+    ]
+  },
+  "GRAPH-04": {
+    "name": "To dict",
+    "called_by": [
+      "CLI-01",
+      "TEST_SCANNER-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/graph.py",
+        "lines": [
+          47,
+          68
+        ],
+        "symbol": "to_dict",
+        "type": "function"
+      }
+    ]
+  }
+}
