@@ -12,7 +12,11 @@ authors = [
     { name = "ProximaLink", email = "faizan@proximalink.pk" },
     { name = "Faizan Haroon", email = "faizanharoon@hotmail.com" }
 ]
-keywords = ["ai", "llm", "context-window", "ast", "feature-graph", "code-indexing", "token-optimization"]
+keywords = [
+    "ai", "llm", "context-window", "ast", "feature-graph",
+    "code-indexing", "token-optimization", "agentic-ai",
+    "antigravity", "claude-code", "cursor", "polyglot-ast"
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,6 +30,11 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Pakheria/featuregraph"
+Repository = "https://github.com/Pakheria/featuregraph.git"
+Issues = "https://github.com/Pakheria/featuregraph/issues"
 
 [project.scripts]
 featuregraph = "featuregraph.cli:main"
