@@ -42,9 +42,9 @@ AI Coding Agent / Developer
 
 | Dimension | Traditional Graph Tools (e.g. Graphify) | **FeatureGraph** |
 | :--- | :--- | :--- |
-| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 15KB (`FEATURE_INDEX.json`)** |
-| **Enterprise Repo Index Size (200–500+ endpoints)** | 10MB – 25MB+ | **50KB – 120KB (`FEATURE_INDEX.json`)** |
-| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **< 150 to 3,500 tokens (90%+ savings)** |
+| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`FEATURE_INDEX.json`)** |
+| **Enterprise Repo Index Size (200–500+ endpoints)** | 10MB – 25MB+ | **100KB – 350KB (`FEATURE_INDEX.json`)** |
+| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **< 150 to 4,500 tokens (95%+ savings)** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
 | **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
 | **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
