@@ -4,6 +4,7 @@ from typing import List
 
 from .parser_py import PythonFeatureParser
 from .parser_ts import TypeScriptFeatureParser
+from .parser_generic import GenericFeatureParser
 from .graph import FeatureGraph
 
 DEFAULT_IGNORE = {
@@ -65,6 +66,8 @@ class WorkspaceScanner:
                     parsed = PythonFeatureParser.parse_file(path)
                 elif path.suffix in [".ts", ".tsx", ".js", ".jsx"]:
                     parsed = TypeScriptFeatureParser.parse_file(path)
+                elif GenericFeatureParser.is_supported(path):
+                    parsed = GenericFeatureParser.parse_file(path)
                 else:
                     continue
 

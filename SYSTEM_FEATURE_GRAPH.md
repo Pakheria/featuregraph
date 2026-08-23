@@ -15,8 +15,8 @@
 | **`ANNOTATOR-01`** | **Suggestion** |  | — | — | [`annotator.py:38-45`](file:///home/proximalink/featuregraph/featuregraph/core/annotator.py#L38-L45) |
 | **`ANNOTATOR-02`** | **Suggest python** |  | — | — | [`annotator.py:105-149`](file:///home/proximalink/featuregraph/featuregraph/core/annotator.py#L105-L149) |
 | **`ANNOTATOR-03`** | **Suggest typescript** |  | — | — | [`annotator.py:165-201`](file:///home/proximalink/featuregraph/featuregraph/core/annotator.py#L165-L201) |
-| **`ANNOTATOR-04`** | **Apply suggestions** |  | — | — | [`annotator.py:213-249`](file:///home/proximalink/featuregraph/featuregraph/core/annotator.py#L213-L249) |
-| **`ANNOTATOR-05`** | **Collect suggestions** |  | — | — | [`annotator.py:263-297`](file:///home/proximalink/featuregraph/featuregraph/core/annotator.py#L263-L297) |
+| **`ANNOTATOR-04`** | **Apply suggestions** |  | — | — | [`annotator.py:268-304`](file:///home/proximalink/featuregraph/featuregraph/core/annotator.py#L268-L304) |
+| **`ANNOTATOR-05`** | **Collect suggestions** |  | — | — | [`annotator.py:318-357`](file:///home/proximalink/featuregraph/featuregraph/core/annotator.py#L318-L357) |
 | **`CLI-01`** | **Main** |  | — | — | [`cli.py:20-267`](file:///home/proximalink/featuregraph/featuregraph/cli.py#L20-L267) |
 | **`GIT_HOOK-01`** | **Git hook manager** |  | — | — | [`git_hook.py:13-35`](file:///home/proximalink/featuregraph/featuregraph/hooks/git_hook.py#L13-L35) |
 | **`GIT_HOOK-02`** | **Install** |  | — | — | [`git_hook.py:18-26`](file:///home/proximalink/featuregraph/featuregraph/hooks/git_hook.py#L18-L26) |
@@ -33,13 +33,14 @@
 | **`MARKDOWN_FOR-01`** | **Markdown formatter** |  | — | — | [`markdown_formatter.py:5-73`](file:///home/proximalink/featuregraph/featuregraph/formatters/markdown_formatter.py#L5-L73) |
 | **`MARKDOWN_FOR-02`** | **Format** |  | — | — | [`markdown_formatter.py:10-67`](file:///home/proximalink/featuregraph/featuregraph/formatters/markdown_formatter.py#L10-L67) |
 | **`MARKDOWN_FOR-03`** | **Write to file** |  | — | — | [`markdown_formatter.py:71-73`](file:///home/proximalink/featuregraph/featuregraph/formatters/markdown_formatter.py#L71-L73) |
+| **`PARSER_GENERIC-01`** | **Generic Feature Parser** |  | — | — | [`parser_generic.py:59-196`](file:///home/proximalink/featuregraph/featuregraph/core/parser_generic.py#L59-L196)<br>[`parser_generic.py:63-64`](file:///home/proximalink/featuregraph/featuregraph/core/parser_generic.py#L63-L64) |
 | **`PARSER_PY-01`** | **Python feature parser** |  | — | — | [`parser_py.py:10-82`](file:///home/proximalink/featuregraph/featuregraph/core/parser_py.py#L10-L82) |
 | **`PARSER_PY-02`** | **Parse file** |  | — | — | [`parser_py.py:15-82`](file:///home/proximalink/featuregraph/featuregraph/core/parser_py.py#L15-L82) |
 | **`PARSER_TS-01`** | **Type script feature parser** |  | — | — | [`parser_ts.py:11-62`](file:///home/proximalink/featuregraph/featuregraph/core/parser_ts.py#L11-L62) |
 | **`PARSER_TS-02`** | **Parse file** |  | — | — | [`parser_ts.py:16-62`](file:///home/proximalink/featuregraph/featuregraph/core/parser_ts.py#L16-L62) |
-| **`SCANNER-01`** | **Workspace scanner** |  | — | — | [`scanner.py:15-86`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L15-L86)<br>[`scanner.py:18-21`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L18-L21) |
-| **`SCANNER-02`** | **Detect subprojects** |  | — | — | [`scanner.py:24-34`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L24-L34) |
-| **`SCANNER-03`** | **Scan** |  | — | — | [`scanner.py:50-86`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L50-L86) |
+| **`SCANNER-01`** | **Workspace scanner** |  | — | — | [`scanner.py:16-89`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L16-L89)<br>[`scanner.py:19-22`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L19-L22) |
+| **`SCANNER-02`** | **Detect subprojects** |  | — | — | [`scanner.py:25-35`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L25-L35) |
+| **`SCANNER-03`** | **Scan** |  | — | — | [`scanner.py:51-89`](file:///home/proximalink/featuregraph/featuregraph/core/scanner.py#L51-L89) |
 | **`SKILL-01`** | **Skill Manager** |  | — | — | [`skill_manager.py:146-183`](file:///home/proximalink/featuregraph/featuregraph/skills/skill_manager.py#L146-L183)<br>[`skill_manager.py:150-151`](file:///home/proximalink/featuregraph/featuregraph/skills/skill_manager.py#L150-L151) |
 | **`TEST_SCANNER-01`** | **Test graph dependencies** |  | — | — | [`test_scanner.py:9-17`](file:///home/proximalink/featuregraph/tests/test_scanner.py#L9-L17) |
 | **`TEST_SCANNER-02`** | **Test orphan detection** |  | — | — | [`test_scanner.py:20-23`](file:///home/proximalink/featuregraph/tests/test_scanner.py#L20-L23) |

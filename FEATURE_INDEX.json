@@ -2,7 +2,7 @@
   "_meta": {
     "generator": "featuregraph",
     "version": "0.1.0",
-    "total_features": 31,
+    "total_features": 32,
     "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
   },
   "features": {
@@ -331,9 +331,9 @@
           "file": "featuregraph/core/annotator.py",
           "symbol": "apply_suggestions",
           "type": "function",
-          "start_line": 213,
-          "end_line": 249,
-          "ref": "featuregraph/core/annotator.py#L213-L249"
+          "start_line": 268,
+          "end_line": 304,
+          "ref": "featuregraph/core/annotator.py#L268-L304"
         }
       ]
     },
@@ -348,9 +348,9 @@
           "file": "featuregraph/core/annotator.py",
           "symbol": "collect_suggestions",
           "type": "function",
-          "start_line": 263,
-          "end_line": 297,
-          "ref": "featuregraph/core/annotator.py#L263-L297"
+          "start_line": 318,
+          "end_line": 357,
+          "ref": "featuregraph/core/annotator.py#L318-L357"
         }
       ]
     },
@@ -509,17 +509,17 @@
           "file": "featuregraph/core/scanner.py",
           "symbol": "WorkspaceScanner",
           "type": "class",
-          "start_line": 15,
-          "end_line": 86,
-          "ref": "featuregraph/core/scanner.py#L15-L86"
+          "start_line": 16,
+          "end_line": 89,
+          "ref": "featuregraph/core/scanner.py#L16-L89"
         },
         {
           "file": "featuregraph/core/scanner.py",
           "symbol": "__init__",
           "type": "function",
-          "start_line": 18,
-          "end_line": 21,
-          "ref": "featuregraph/core/scanner.py#L18-L21"
+          "start_line": 19,
+          "end_line": 22,
+          "ref": "featuregraph/core/scanner.py#L19-L22"
         }
       ]
     },
@@ -534,9 +534,9 @@
           "file": "featuregraph/core/scanner.py",
           "symbol": "detect_subprojects",
           "type": "function",
-          "start_line": 24,
-          "end_line": 34,
-          "ref": "featuregraph/core/scanner.py#L24-L34"
+          "start_line": 25,
+          "end_line": 35,
+          "ref": "featuregraph/core/scanner.py#L25-L35"
         }
       ]
     },
@@ -551,9 +551,34 @@
           "file": "featuregraph/core/scanner.py",
           "symbol": "scan",
           "type": "function",
-          "start_line": 50,
-          "end_line": 86,
-          "ref": "featuregraph/core/scanner.py#L50-L86"
+          "start_line": 51,
+          "end_line": 89,
+          "ref": "featuregraph/core/scanner.py#L51-L89"
+        }
+      ]
+    },
+    "PARSER_GENERIC-01": {
+      "name": "Generic Feature Parser",
+      "category": "General",
+      "description": "",
+      "depends_on": [],
+      "called_by": [],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_generic.py",
+          "symbol": "GenericFeatureParser",
+          "type": "class",
+          "start_line": 59,
+          "end_line": 196,
+          "ref": "featuregraph/core/parser_generic.py#L59-L196"
+        },
+        {
+          "file": "featuregraph/core/parser_generic.py",
+          "symbol": "is_supported",
+          "type": "function",
+          "start_line": 63,
+          "end_line": 64,
+          "ref": "featuregraph/core/parser_generic.py#L63-L64"
         }
       ]
     }

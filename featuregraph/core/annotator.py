@@ -202,11 +202,66 @@ def suggest_typescript(file_path: Path, root: Path, seq_map: Dict[str, int]) -> 
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Generic Multi-Language (Go, Rust, Java, C#, PHP, Ruby, Swift, Dart, Shell)
+# ──────────────────────────────────────────────────────────────────────────────
+
+_GENERIC_DECL_RE = re.compile(
+    r"^(?P<indent>\s*)(?:(?:public|private|protected|static|async|fn|func|function|def|class|struct|interface|impl|enum|type)\s+)+"
+    r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)",
+    re.MULTILINE,
+)
+
+
+def suggest_generic(file_path: Path, root: Path, seq_map: Dict[str, int]) -> List[Suggestion]:
+    """Return Suggestion objects for un-annotated Go, Rust, Java, C#, PHP, Ruby, etc. symbols."""
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="replace")
+    except (UnicodeDecodeError, OSError):
+        return []
+
+    lines = content.splitlines()
+    rel = file_path.relative_to(root)
+    results = []
+
+    ext = file_path.suffix.lower()
+    from .parser_generic import SUPPORTED_EXTENSIONS
+    lang = SUPPORTED_EXTENSIONS.get(ext, "generic")
+
+    for match in _GENERIC_DECL_RE.finditer(content):
+        lineno = content[: match.start()].count("\n") + 1
+        name = match.group("name")
+        indent = match.group("indent")
+
+        if _has_tag_above(lines, lineno, lookahead=4):
+            continue
+
+        cat = _category_from_path(rel)
+        seq_map[cat] = seq_map.get(cat, 0) + 1
+        feat_id = f"{cat}-{seq_map[cat]:02d}"
+        human = _human_name(name, rel)
+
+        results.append(Suggestion(
+            file=file_path,
+            line=lineno,
+            indent=indent,
+            feature_id=feat_id,
+            name=human,
+            symbol=name,
+            lang=lang,
+        ))
+
+    results.sort(key=lambda s: s.line, reverse=True)
+    return results
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Writer
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _comment_prefix(lang: str) -> str:
-    return "//" if lang == "typescript" else "#"
+    if lang in {"python", "ruby", "shell"}:
+        return "#"
+    return "//"
 
 
 # @feature [ANNOTATOR-04] Apply suggestions
@@ -286,12 +341,17 @@ def collect_suggestions(
 
         if path_obj.suffix == ".py":
             sug = suggest_python(path_obj, root, seq_map)
-            # Re-sort ascending for display
             sug.sort(key=lambda s: s.line)
             all_suggestions.extend(sug)
         elif path_obj.suffix in {".ts", ".tsx", ".js", ".jsx"}:
             sug = suggest_typescript(path_obj, root, seq_map)
             sug.sort(key=lambda s: s.line)
             all_suggestions.extend(sug)
+        else:
+            from .parser_generic import GenericFeatureParser
+            if GenericFeatureParser.is_supported(path_obj):
+                sug = suggest_generic(path_obj, root, seq_map)
+                sug.sort(key=lambda s: s.line)
+                all_suggestions.extend(sug)
 
     return all_suggestions

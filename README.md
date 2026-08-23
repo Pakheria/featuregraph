@@ -87,12 +87,28 @@ featuregraph skill --global
 
 ---
 
-## 🏷️ Annotating Your Code
+## 🌐 Multi-Language Support & Annotation
 
-FeatureGraph parses comments in **Python, TypeScript, JavaScript, and TSX** files.
+FeatureGraph supports **Python, TypeScript, JavaScript, Go, Rust, Java, Kotlin, C#, C/C++, PHP, Ruby, Swift, Dart, and Shell**.
+
+### Supported Language Matrix
+
+| Language | Extensions | Comment Style |
+| :--- | :--- | :--- |
+| **Python** | `.py` | `# @feature [ID] Name` |
+| **TypeScript / JavaScript** | `.ts`, `.tsx`, `.js`, `.jsx` | `// @feature [ID] Name` |
+| **Go** | `.go` | `// @feature [ID] Name` |
+| **Rust** | `.rs` | `// @feature [ID] Name` |
+| **Java / Kotlin** | `.java`, `.kt`, `.kts` | `// @feature [ID] Name` |
+| **C# / .NET** | `.cs` | `// @feature [ID] Name` |
+| **C / C++** | `.c`, `.cpp`, `.cc`, `.h`, `.hpp` | `// @feature [ID] Name` |
+| **PHP** | `.php` | `// @feature [ID] Name` |
+| **Ruby** | `.rb` | `# @feature [ID] Name` |
+| **Swift / Dart** | `.swift`, `.dart` | `// @feature [ID] Name` |
+| **Shell** | `.sh`, `.bash`, `.zsh` | `# @feature [ID] Name` |
 
 ### Auto-Annotating Existing Codebases
-If your project is un-annotated, let FeatureGraph suggest and insert tags automatically:
+If your project is un-annotated, let FeatureGraph suggest and insert tags automatically across any supported language:
 
 ```bash
 # Preview suggested tags without touching files (dry-run)
@@ -102,16 +118,34 @@ featuregraph annotate --dry-run
 featuregraph annotate --yes
 ```
 
-### Python Example
+### Polyglot Annotation Examples
+
+**Python:**
 ```python
 # @feature [AUTH-01] JWT Cookie Session Gate
 # @depends [FIREWALL-01], [RBAC-01]
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    """Validates user session token."""
     return await auth_service.validate(token)
 ```
 
-### TypeScript / React Example
+**Go:**
+```go
+// @feature [AUTH-01] JWT Auth Middleware
+// @depends [CONFIG-01]
+func AuthMiddleware(token string) bool {
+    return validateToken(token)
+}
+```
+
+**Rust:**
+```rust
+// @feature [CORE-01] Matrix Solver Engine
+pub fn solve_matrix(data: &[f64]) -> Vec<f64> {
+    data.to_vec()
+}
+```
+
+**TypeScript / React:**
 ```tsx
 // @feature [DASH-01] Executive Analytics Widget
 // @depends [AUTH-01], [API-METRICS]
