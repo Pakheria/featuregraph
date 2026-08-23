@@ -72,11 +72,13 @@ FeatureGraph does **not** require manual `@depends` comments to build a real dep
 
 ## 🚀 Installation & Quickstart
 
-### 1. Install via pip / uv
+### 1. Install via pip / uv (Direct from GitHub)
 ```bash
-pip install featuregraph
-# or with uv:
-uv tool install featuregraph
+# Install with pip:
+pip install git+https://github.com/Pakheria/featuregraph.git
+
+# Or install globally as an isolated CLI tool with uv:
+uv tool install git+https://github.com/Pakheria/featuregraph.git
 ```
 
 ### 2. Initialize in Your Repository
