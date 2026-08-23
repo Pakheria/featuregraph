@@ -15,8 +15,8 @@ description: >-
 # FeatureGraph Skill
 
 FeatureGraph is a CLI tool that AST-scans a codebase and generates:
-- `FEATURE_INDEX.json` — ultra-compact token-efficient feature map for AI agents
-- `SYSTEM_FEATURE_GRAPH.md` — markdown table + Mermaid dependency diagram
+- `.featuregraph/index.json` — ultra-compact token-efficient feature map for AI agents
+- `.featuregraph/graph.md` — markdown table + Mermaid dependency diagram
 - `AGENTS.md` — AI circuit-breaker directive (read index first, stop scanning)
 - `.git/hooks/pre-commit` — auto-syncs index on every commit
 
@@ -24,10 +24,10 @@ FeatureGraph is a CLI tool that AST-scans a codebase and generates:
 
 ## Step 0: Always Check First (MANDATORY)
 
-**Before doing anything with FEATURE_INDEX.json — whether the user asked for it or not — check if it exists:**
+**Before doing anything with the feature index — whether the user asked for it or not — check if it exists:**
 
 ```bash
-test -f FEATURE_INDEX.json && echo "EXISTS" || echo "MISSING"
+(test -f .featuregraph/index.json || test -f FEATURE_INDEX.json) && echo "EXISTS" || echo "MISSING"
 ```
 
 ### If MISSING → Auto-init without asking
@@ -39,13 +39,13 @@ featuregraph init
 ```
 
 This covers the case where:
-- The user says "read FEATURE_INDEX.json" on an uninitiated project
+- The user says "read feature index" on an uninitiated project
 - The user says "/ponytail review this" and no index exists yet
 - The user mentions any feature ID before the project has been scanned
 - Any AI-driven task requires feature context
 
 ### If EXISTS → Check staleness
-If the last git commit is newer than FEATURE_INDEX.json, re-scan silently before reading:
+If the last git commit is newer than the index, re-scan silently before reading:
 ```bash
 featuregraph scan --quiet
 ```

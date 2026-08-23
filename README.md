@@ -87,10 +87,12 @@ cd your-project
 featuregraph init
 ```
 *This command:*
-- Scans your codebase and generates `FEATURE_INDEX.json` & `SYSTEM_FEATURE_GRAPH.md`
+- Scans your codebase and generates `.featuregraph/index.json` & `.featuregraph/graph.md`
 - Creates the **`AGENTS.md` AI Circuit-Breaker Constitution**
 - Installs the workspace AI agent skill (`.agents/skills/featuregraph/SKILL.md`)
 - Installs the `.git/hooks/pre-commit` hook (if in a git repository)
+
+All artifacts are kept inside a clean `.featuregraph/` directory to prevent cluttering your repository root.
 
 ### 3. Install Global AI Agent Skills (Multi-IDE / Multi-CLI)
 ```bash

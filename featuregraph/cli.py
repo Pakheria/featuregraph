@@ -27,9 +27,9 @@ def main():
     # Command: scan
     scan_parser = subparsers.add_parser("scan", help="Scan codebase and generate feature graph files")
     scan_parser.add_argument("--dir", default=".", help="Root directory to scan (default: .)")
-    scan_parser.add_argument("--json", default="FEATURE_INDEX.json", help="Output JSON path")
-    scan_parser.add_argument("--md", default="SYSTEM_FEATURE_GRAPH.md", help="Output Markdown path")
-    scan_parser.add_argument("--html", default=None, help="Optional output interactive HTML path")
+    scan_parser.add_argument("--json", default=None, help="Output JSON path (default: .featuregraph/index.json)")
+    scan_parser.add_argument("--md", default=None, help="Output Markdown path (default: .featuregraph/graph.md)")
+    scan_parser.add_argument("--html", default=None, help="Optional output interactive HTML path (default: .featuregraph/graph.html)")
     scan_parser.add_argument("--quiet", action="store_true", help="Suppress console output")
 
     # Command: init
@@ -46,7 +46,7 @@ def main():
 
     # Command: visualize
     viz_parser = subparsers.add_parser("visualize", help="Generate an interactive HTML dependency graph")
-    viz_parser.add_argument("--out", default="featuregraph.html", help="HTML output path")
+    viz_parser.add_argument("--out", default=None, help="HTML output path (default: .featuregraph/graph.html)")
 
     # Command: annotate
     ann_parser = subparsers.add_parser(
@@ -97,20 +97,23 @@ def main():
         graph = scanner.scan()
         graph_dict = graph.to_dict()
 
-        json_out = root / getattr(args, "json", "FEATURE_INDEX.json")
-        md_out = root / getattr(args, "md", "SYSTEM_FEATURE_GRAPH.md")
+        fg_dir = root / ".featuregraph"
+        fg_dir.mkdir(parents=True, exist_ok=True)
+
+        json_out = root / args.json if getattr(args, "json", None) else fg_dir / "index.json"
+        md_out = root / args.md if getattr(args, "md", None) else fg_dir / "graph.md"
 
         JSONFormatter.write_to_file(graph_dict, json_out, root)
         MarkdownFormatter.write_to_file(graph_dict, md_out, root)
 
-        if getattr(args, "html", None):
-            html_out = root / args.html
+        if getattr(args, "html", None) is not None:
+            html_out = root / args.html if args.html else fg_dir / "graph.html"
             HTMLVisualizer.generate(graph_dict, html_out)
 
         if not quiet:
             print(f"✓ Mapped {len(graph_dict)} features.")
-            print(f"✓ Created compact index: {json_out.name}")
-            print(f"✓ Created markdown graph: {md_out.name}")
+            print(f"✓ Created compact index: {json_out.relative_to(root) if json_out.is_relative_to(root) else json_out}")
+            print(f"✓ Created markdown graph: {md_out.relative_to(root) if md_out.is_relative_to(root) else md_out}")
 
     elif args.command == "init":
         root = Path(".").resolve()
@@ -123,8 +126,14 @@ def main():
         scanner = WorkspaceScanner(root)
         graph = scanner.scan()
         graph_dict = graph.to_dict()
-        JSONFormatter.write_to_file(graph_dict, root / "FEATURE_INDEX.json", root)
-        MarkdownFormatter.write_to_file(graph_dict, root / "SYSTEM_FEATURE_GRAPH.md", root)
+
+        fg_dir = root / ".featuregraph"
+        fg_dir.mkdir(parents=True, exist_ok=True)
+        json_out = fg_dir / "index.json"
+        md_out = fg_dir / "graph.md"
+
+        JSONFormatter.write_to_file(graph_dict, json_out, root)
+        MarkdownFormatter.write_to_file(graph_dict, md_out, root)
 
         # Generate AGENTS.md Circuit-Breaker Directive
         agents_md = root / "AGENTS.md"
@@ -134,9 +143,9 @@ def main():
 
 > 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**
 > When asked about features, architecture, onboarding, or where code lives:
-> **READ `FEATURE_INDEX.json` AND STOP IMMEDIATELY.**
+> **READ `.featuregraph/index.json` AND STOP IMMEDIATELY.**
 > Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.
-> `FEATURE_INDEX.json` is the 100% complete, AST line-indexed single source of truth.
+> `.featuregraph/index.json` is the 100% complete, AST line-indexed single source of truth.
 """,
                 encoding="utf-8"
             )
@@ -150,9 +159,11 @@ def main():
 
     elif args.command == "query":
         import json
-        idx_file = Path("FEATURE_INDEX.json")
+        idx_file = Path(".featuregraph/index.json")
         if not idx_file.exists():
-            print("Error: FEATURE_INDEX.json not found. Run 'featuregraph scan' first.")
+            idx_file = Path("FEATURE_INDEX.json")
+        if not idx_file.exists():
+            print("Error: Feature index not found. Run 'featuregraph scan' first.")
             sys.exit(1)
         
         data = json.loads(idx_file.read_text(encoding="utf-8"))
@@ -187,9 +198,11 @@ def main():
         root = Path(".").resolve()
         scanner = WorkspaceScanner(root)
         graph = scanner.scan()
-        out_path = root / args.out
+        fg_dir = root / ".featuregraph"
+        fg_dir.mkdir(parents=True, exist_ok=True)
+        out_path = root / args.out if getattr(args, "out", None) else fg_dir / "graph.html"
         HTMLVisualizer.generate(graph.to_dict(), out_path)
-        print(f"✓ Generated interactive topology map: {out_path}")
+        print(f"✓ Generated interactive topology map: {out_path.relative_to(root) if out_path.is_relative_to(root) else out_path}")
 
     elif args.command == "annotate":
         root = Path(getattr(args, "dir", ".")).resolve()

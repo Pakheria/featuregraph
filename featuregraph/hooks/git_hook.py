@@ -5,7 +5,7 @@ HOOK_SCRIPT = """#!/usr/bin/env bash
 if command -v featuregraph >/dev/null 2>&1; then
     echo "⚡ [FeatureGraph] Auto-syncing Feature Graph & Line Index..."
     featuregraph scan --quiet
-    git add -f FEATURE_INDEX.json SYSTEM_FEATURE_GRAPH.md 2>/dev/null || true
+    git add -f .featuregraph/index.json .featuregraph/graph.md FEATURE_INDEX.json SYSTEM_FEATURE_GRAPH.md 2>/dev/null || true
 fi
 """
 
