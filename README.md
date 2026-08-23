@@ -1,6 +1,6 @@
 # FeatureGraph ⚡
 
-> **Token-efficient, AST-indexed feature topology maps and AI agent skills. Eliminates AI amnesia and slashes LLM context waste by 90%.**
+> **Token-efficient, AST-indexed feature topology maps with automated call-graph dependency resolution. Eliminates AI amnesia and slashes LLM context waste by 90%+.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue)](pyproject.toml)
@@ -8,29 +8,34 @@
 
 ---
 
-## 🎯 The Problem: Why AI Coding Fails on Large Codebases
+## 🎯 The Core Problem FeatureGraph Solves
 
-1. **AI Amnesia & Accidental Code Deletions**: When an AI coding agent (Antigravity, Claude Code, Gemini CLI, Cursor) scans a file, it cannot see cross-file callers. It assumes unreferenced helper functions or security middleware are "dead code" and deletes or refactors them.
-2. **Context Token Exhaustion**: Reading entire 1,000-line files on every turn burns tokens rapidly, drives up LLM costs, and degrades agent focus.
-3. **Traditional Graph Bloat**: Semantic code graphs dump massive AST trees (`graph.json` > 2MB – 25MB) that themselves exceed LLM token budgets and lack line-exact slice references.
+1. **AI Amnesia & Accidental Code Deletions:** AI coding assistants (Antigravity, Claude Code, Gemini CLI, Cursor) lack cross-file caller visibility. When editing a function, they frequently assume unreferenced helpers or security gates are "dead code" and break downstream callers.
+2. **Context Token Exhaustion:** Feeding entire 1,000-line files on every agent turn wastes tokens, slows turn latency, and degrades reasoning focus.
+3. **Traditional Graph Bloat:** Legacy semantic graph tools dump multi-megabyte AST trees (`graph.json` > 10MB – 25MB+) that exceed agent context windows and fail to provide exact line slices.
 
 ---
 
-## ⚡ The Solution: How FeatureGraph Works
+## ⚡ The Solution & Core KPIs
 
-FeatureGraph scans your codebase using **Abstract Syntax Trees (AST)** and builds an ultra-compact, line-indexed topology map and out-of-the-box AI agent skills:
+FeatureGraph is engineered around four core metrics:
+
+1. **Token Efficiency (Context Budget):** Replaces massive code dumps with a compact line-indexed map (`< 150` to `~3,500` tokens total — **90% to 95%+ savings**).
+2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function calls, type references, and component usages to wire `depends_on` and `called_by` with zero manual effort.
+3. **Line-Exact Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature.
+4. **Sub-Second to Fast Scan Speed:** Optimized single-pass line-interval AST mapping scans thousands of symbols in seconds.
 
 ```text
 AI Coding Agent / Developer
             │
             ▼
- [1. Reads FEATURE_INDEX.json] ───> Tiny ~3KB–100KB index (<150–3,500 tokens)
+ [1. Reads FEATURE_INDEX.json] ───> Compact Map (<150–3,500 tokens)
             │
             ▼
- [2. Finds Target Lines (#Lstart-Lend) & [depends_on] IDs]
+ [2. Finds Target Line Span & Automated [depends_on] Callers]
             │
             ▼
- [3. Slices Exact Code Only] ────> 85-92% Token Savings
+ [3. Slices Exact Code Only (#Lstart-Lend)] ──> 90-95% Token Savings
             │
             ▼
  [4. Commits Code] ───────────────> Git Hook Auto-Syncs Line Map
@@ -42,17 +47,26 @@ AI Coding Agent / Developer
 
 | Dimension | Traditional Graph Tools (e.g. Graphify) | **FeatureGraph** |
 | :--- | :--- | :--- |
+| **Dependency Resolution** | ❌ None or Manual only | **✅ Automated AST 2-Pass Call-Graph Inference** |
 | **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`FEATURE_INDEX.json`)** |
-| **Enterprise Repo Index Size (200–500+ endpoints)** | 10MB – 25MB+ | **100KB – 350KB (`FEATURE_INDEX.json`)** |
+| **Enterprise Repo Size (200–500+ features)** | 10MB – 25MB+ | **100KB – 350KB (`FEATURE_INDEX.json`)** |
 | **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **< 150 to 4,500 tokens (95%+ savings)** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
 | **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
 | **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
-| **Multi-Project Workspaces** | ❌ Flat scans only | **✅ Monorepo / Subproject Auto-Detection** |
+| **Multi-Language Support** | Limited | **✅ Python, TS/JS, Go, Rust, Java, C#, PHP, Ruby, etc.** |
 | **Zero-Config Git Auto-Sync**| ❌ Manual re-runs | **✅ Instant Pre-Commit Git Hook** |
-| **AI Anti-Amnesia Protection**| ❌ Passive graph | **✅ Invariant Contract (`[depends_on]`)** |
-| **Agent Constitution (`AGENTS.md`)**| ❌ None | **✅ Auto-generates Token Circuit-Breakers** |
 | **Interactive HTML Visualizer**| Basic | **✅ Interactive Standalone Canvas DAG** |
+
+---
+
+## 🧠 Automated AST Dependency Resolution
+
+FeatureGraph does **not** require manual `@depends` comments to build a real dependency graph:
+
+1. **Pass 1 (Symbol Indexing):** Scans all codebase files and maps defined functions, classes, and components to their Feature IDs.
+2. **Pass 2 (AST Call-Site Inference):** Analyzes call-sites, type references, and JSX usage inside each feature's line boundaries.
+3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges and generates interactive Mermaid DAGs in `SYSTEM_FEATURE_GRAPH.md`.
 
 ---
 
@@ -71,10 +85,10 @@ cd your-project
 featuregraph init
 ```
 *This command:*
-- Scans your code and generates `FEATURE_INDEX.json` & `SYSTEM_FEATURE_GRAPH.md`
+- Scans your codebase and generates `FEATURE_INDEX.json` & `SYSTEM_FEATURE_GRAPH.md`
 - Creates the **`AGENTS.md` AI Circuit-Breaker Constitution**
 - Installs the workspace AI agent skill (`.agents/skills/featuregraph/SKILL.md`)
-- Installs the `.git/hooks/pre-commit` hook (if git repository)
+- Installs the `.git/hooks/pre-commit` hook (if in a git repository)
 
 ### 3. Install Global AI Agent Skills (Multi-IDE / Multi-CLI)
 ```bash
@@ -87,7 +101,7 @@ featuregraph skill --global
 
 ---
 
-## 🌐 Multi-Language Support & Annotation
+## 🌐 Multi-Language Support & Auto-Annotation
 
 FeatureGraph supports **Python, TypeScript, JavaScript, Go, Rust, Java, Kotlin, C#, C/C++, PHP, Ruby, Swift, Dart, and Shell**.
 
@@ -108,7 +122,7 @@ FeatureGraph supports **Python, TypeScript, JavaScript, Go, Rust, Java, Kotlin, 
 | **Shell** | `.sh`, `.bash`, `.zsh` | `# @feature [ID] Name` |
 
 ### Auto-Annotating Existing Codebases
-If your project is un-annotated, let FeatureGraph suggest and insert tags automatically across any supported language:
+If your project is un-annotated, let FeatureGraph suggest and insert tags automatically:
 
 ```bash
 # Preview suggested tags without touching files (dry-run)
@@ -116,42 +130,6 @@ featuregraph annotate --dry-run
 
 # Write suggested @feature tags into source files
 featuregraph annotate --yes
-```
-
-### Polyglot Annotation Examples
-
-**Python:**
-```python
-# @feature [AUTH-01] JWT Cookie Session Gate
-# @depends [FIREWALL-01], [RBAC-01]
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    return await auth_service.validate(token)
-```
-
-**Go:**
-```go
-// @feature [AUTH-01] JWT Auth Middleware
-// @depends [CONFIG-01]
-func AuthMiddleware(token string) bool {
-    return validateToken(token)
-}
-```
-
-**Rust:**
-```rust
-// @feature [CORE-01] Matrix Solver Engine
-pub fn solve_matrix(data: &[f64]) -> Vec<f64> {
-    data.to_vec()
-}
-```
-
-**TypeScript / React:**
-```tsx
-// @feature [DASH-01] Executive Analytics Widget
-// @depends [AUTH-01], [API-METRICS]
-export const AnalyticsWidget = () => {
-  return <div>Metrics View</div>;
-};
 ```
 
 ---
@@ -170,7 +148,7 @@ featuregraph annotate --dry-run
 featuregraph annotate --yes
 featuregraph annotate --dir ./src --limit 50 --yes
 
-# Scan codebase and update graphs (supports custom directory & output paths)
+# Scan codebase, resolve AST call-graph dependencies & update graphs
 featuregraph scan
 featuregraph scan --dir ./my-project --json index.json --md GRAPH.md --quiet
 
