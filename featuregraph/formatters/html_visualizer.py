@@ -143,12 +143,15 @@ class HTMLVisualizer:
                 : '<span class="text-slate-500 italic">None</span>';
 
             const locsDiv = document.getElementById('feat-locs');
-            locsDiv.innerHTML = (f.locations || []).map(l => `
+            locsDiv.innerHTML = (f.locations || []).map(l => {{
+                const s = l.lines ? l.lines[0] : (l.start_line || 1);
+                const e = l.lines ? l.lines[1] : (l.end_line || s);
+                return `
                 <div class="p-2 bg-slate-900/60 border border-slate-800 rounded font-mono text-[11px] text-slate-300 flex justify-between">
                     <span class="truncate">${{l.file}}</span>
-                    <span class="text-blue-400 ml-2 font-bold shrink-0">L${{l.start_line}}-L${{l.end_line}}</span>
-                </div>
-            `).join('');
+                    <span class="text-blue-400 ml-2 font-bold shrink-0">L${{s}}-L${{e}}</span>
+                </div>`;
+            }}).join('');
         }}
     </script>
 </body>

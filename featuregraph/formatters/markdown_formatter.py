@@ -28,13 +28,12 @@ class MarkdownFormatter:
             loc_links = []
             for loc in locations[:4]:  # cap at 4 per feature to keep table scannable
                 file_rel = loc.get("file", "")
-                s_line = loc.get("start_line", 1)
-                e_line = loc.get("end_line", s_line + 10)
-                file_name = Path(file_rel).name
-                loc_links.append(f"[`{file_name}:{s_line}-{e_line}`](file://{root_dir / file_rel}#L{s_line}-L{e_line})")
+                lines = loc.get("lines") or [loc.get("start_line", 1), loc.get("end_line", 1)]
+                s_line, e_line = lines[0], lines[1]
+                loc_links.append(f"[`{file_rel}#L{s_line}-L{e_line}`]({file_rel}#L{s_line}-L{e_line})")
 
             loc_str = "<br>".join(loc_links) if loc_links else "—"
-            rows.append(f"| **`{feat_id}`** | **{name}** | {desc} | {dep_str} | {call_str} | {loc_str} |")
+            rows.append(f"| **`{feat_id}`** | **{name}** | {desc or '—'} | {dep_str} | {call_str} | {loc_str} |")
 
         mermaid_block = ""
         if mermaid_edges:

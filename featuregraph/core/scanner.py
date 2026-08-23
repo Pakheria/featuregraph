@@ -5,6 +5,7 @@ from typing import List
 from .parser_py import PythonFeatureParser
 from .parser_ts import TypeScriptFeatureParser
 from .parser_generic import GenericFeatureParser
+from .dependency_resolver import DependencyResolver
 from .graph import FeatureGraph
 
 DEFAULT_IGNORE = {
@@ -50,9 +51,12 @@ class WorkspaceScanner:
     # @feature [SCANNER-03] Scan
     def scan(self) -> FeatureGraph:
         graph = FeatureGraph()
+        resolver = DependencyResolver()
+
+        # Pass 1: Parse all files & index defined symbols
+        scanned_files = []
 
         for root, dirs, files in os.walk(self.root_dir, topdown=True):
-            # Prune ignored directories in-place so os.walk never enters them
             dirs[:] = [d for d in dirs if not self._should_ignore_dir(d)]
 
             for file in files:
@@ -71,20 +75,31 @@ class WorkspaceScanner:
                 else:
                     continue
 
-                for item in parsed:
-                    item_loc = [{
-                        "file": str(rel_path),
-                        "symbol": item["symbol"],
-                        "type": item["type"],
-                        "start_line": item["start_line"],
-                        "end_line": item["end_line"],
-                        "ref": f"{rel_path}#L{item['start_line']}-L{item['end_line']}"
-                    }]
-                    graph.add_feature(item["feature_id"], {
-                        "name": item["name"],
-                        "depends_on": item["depends_on"],
-                        "locations": item_loc
-                    })
+                if parsed:
+                    resolver.register_feature_symbols(parsed)
+                    scanned_files.append((path, rel_path, parsed))
+
+        # Pass 2: Infer cross-feature dependencies & populate graph
+        for path, rel_path, parsed in scanned_files:
+            inferred_deps = resolver.resolve_file_dependencies(path, parsed)
+
+            for item in parsed:
+                feat_id = item["feature_id"]
+                auto_deps = inferred_deps.get(feat_id, set())
+                manual_deps = set(item.get("depends_on", []))
+                all_deps = sorted(list(manual_deps | auto_deps))
+
+                item_loc = [{
+                    "file": str(rel_path),
+                    "lines": [item["start_line"], item["end_line"]],
+                    "symbol": item["symbol"],
+                    "type": item["type"],
+                }]
+                graph.add_feature(feat_id, {
+                    "name": item["name"],
+                    "depends_on": all_deps,
+                    "locations": item_loc
+                })
 
         return graph
 

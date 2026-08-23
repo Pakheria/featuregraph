@@ -47,12 +47,22 @@ class FeatureGraph:
     def to_dict(self) -> Dict[str, Any]:
         output = {}
         for feat_id, data in self.nodes.items():
-            output[feat_id] = {
+            entry: Dict[str, Any] = {
                 "name": data.get("name", feat_id),
-                "category": data.get("category", "General"),
-                "description": data.get("description", ""),
-                "depends_on": sorted(list(self.edges.get(feat_id, set()))),
-                "called_by": sorted(list(self.reverse_edges.get(feat_id, set()))),
-                "locations": data.get("locations", [])
             }
+            if data.get("category") and data.get("category") != "General":
+                entry["category"] = data.get("category")
+            if data.get("description"):
+                entry["description"] = data.get("description")
+
+            deps = sorted(list(self.edges.get(feat_id, set())))
+            if deps:
+                entry["depends_on"] = deps
+
+            callers = sorted(list(self.reverse_edges.get(feat_id, set())))
+            if callers:
+                entry["called_by"] = callers
+
+            entry["locations"] = data.get("locations", [])
+            output[feat_id] = entry
         return output

@@ -170,7 +170,8 @@ def main():
         print(f"Called By   : {', '.join(feat.get('called_by', [])) or 'None'}")
         print("\nExact Line Locations:")
         for loc in feat.get("locations", []):
-            print(f"  • {loc['file']} #L{loc['start_line']}-L{loc['end_line']} ({loc.get('symbol', 'module')})")
+            lines = loc.get("lines") or [loc.get("start_line", 1), loc.get("end_line", 1)]
+            print(f"  • {loc['file']} #L{lines[0]}-L{lines[1]} ({loc.get('symbol', 'module')})")
         print("=======================================================\n")
 
     elif args.command == "hook":

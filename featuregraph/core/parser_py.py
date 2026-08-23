@@ -33,11 +33,24 @@ class PythonFeatureParser:
                 start_line = node.lineno
                 end_line = node.end_lineno
                 
-                # Look in preceding 5 lines for comment tags
-                preceding_text = "\n".join(lines[max(0, start_line - 6):start_line])
-                
-                feat_match = FEATURE_TAG_REGEX.search(preceding_text) or FEATURE_TAG_REGEX.search(docstring)
-                dep_match = DEPENDS_TAG_REGEX.search(preceding_text) or DEPENDS_TAG_REGEX.search(docstring)
+                # Look upwards in preceding lines for comment tags (closest first)
+                feat_match = None
+                dep_match = None
+
+                for i in range(start_line - 2, max(-1, start_line - 8), -1):
+                    if i < len(lines):
+                        line_str = lines[i].strip()
+                        if not feat_match:
+                            feat_match = FEATURE_TAG_REGEX.search(line_str)
+                        if not dep_match:
+                            dep_match = DEPENDS_TAG_REGEX.search(line_str)
+                        if line_str and not line_str.startswith("#") and not line_str.startswith("@"):
+                            break
+
+                if not feat_match and docstring:
+                    feat_match = FEATURE_TAG_REGEX.search(docstring)
+                if not dep_match and docstring:
+                    dep_match = DEPENDS_TAG_REGEX.search(docstring)
 
                 node_name = getattr(node, "name", "")
                 deps = []

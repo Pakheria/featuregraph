@@ -35,8 +35,7 @@ pub fn solve_matrix(data: &[f64]) -> Vec<f64> {
             self.assertEqual(data["GO-AUTH-01"]["name"], "JWT Auth Middleware")
             self.assertIn("GO-CONFIG-01", data["GO-AUTH-01"]["depends_on"])
             self.assertEqual(data["GO-AUTH-01"]["locations"][0]["symbol"], "AuthMiddleware")
-            self.assertEqual(data["GO-AUTH-01"]["locations"][0]["start_line"], 5)
-            self.assertEqual(data["GO-AUTH-01"]["locations"][0]["end_line"], 10)
+            self.assertEqual(data["GO-AUTH-01"]["locations"][0]["lines"], [5, 10])
 
             self.assertIn("RUST-CORE-01", data)
             self.assertEqual(data["RUST-CORE-01"]["name"], "Matrix Solver Engine")
