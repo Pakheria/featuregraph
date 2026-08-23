@@ -7,10 +7,12 @@ DEPENDS_TAG_REGEX = re.compile(r"@depends\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORE
 COMPONENT_EXPORT_REGEX = re.compile(r"export\s+(?:const|function|class)\s+([A-Za-z0-9_]+)", re.MULTILINE)
 TS_END_LINE_LOOKAHEAD = 35  # max lines scanned forward as component end estimate
 
+# @feature [PARSER_TS-01] Type script feature parser
 class TypeScriptFeatureParser:
     """Parses TypeScript/React files to extract UI components, features, and line positions."""
 
     @staticmethod
+    # @feature [PARSER_TS-02] Parse file
     def parse_file(file_path: Path) -> List[Dict[str, Any]]:
         if not file_path.exists() or not file_path.is_file():
             return []

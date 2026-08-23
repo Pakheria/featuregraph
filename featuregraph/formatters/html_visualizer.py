@@ -2,10 +2,12 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 
+# @feature [HTML_VISUALI-01] Htmlvisualizer
 class HTMLVisualizer:
     """Generates an interactive, standalone HTML Canvas DAG with node search, dependency highlighting, and line inspection."""
 
     @staticmethod
+    # @feature [HTML_VISUALI-02] Generate
     def generate(graph_dict: Dict[str, Any], output_path: Path):
         data_json = json.dumps(graph_dict)
 

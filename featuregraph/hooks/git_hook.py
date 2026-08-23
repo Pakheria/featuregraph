@@ -9,10 +9,12 @@ if command -v featuregraph >/dev/null 2>&1; then
 fi
 """
 
+# @feature [GIT_HOOK-01] Git hook manager
 class GitHookManager:
     """Installs or removes the zero-config git pre-commit hook."""
 
     @staticmethod
+    # @feature [GIT_HOOK-02] Install
     def install(repo_root: Path) -> bool:
         hook_path = repo_root / ".git" / "hooks" / "pre-commit"
         if not (repo_root / ".git").exists():
@@ -24,6 +26,7 @@ class GitHookManager:
         return True
 
     @staticmethod
+    # @feature [GIT_HOOK-03] Uninstall
     def uninstall(repo_root: Path) -> bool:
         hook_path = repo_root / ".git" / "hooks" / "pre-commit"
         if hook_path.exists():

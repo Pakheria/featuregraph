@@ -11,6 +11,7 @@ DEFAULT_IGNORE = {
     "__pycache__", "logs", "coverage"
 }
 
+# @feature [SCANNER-01] Workspace scanner
 class WorkspaceScanner:
     """Recursively scans codebase directories and parses feature tags into a FeatureGraph."""
 
@@ -19,6 +20,7 @@ class WorkspaceScanner:
         self.ignore_patterns = set(DEFAULT_IGNORE)
         self._load_ignore_file()
 
+    # @feature [SCANNER-02] Detect subprojects
     def detect_subprojects(self) -> List[str]:
         """Detects if current root is a multi-project workspace containing multiple repositories."""
         subprojects = []
@@ -44,6 +46,7 @@ class WorkspaceScanner:
             return True
         return dir_name in self.ignore_patterns
 
+    # @feature [SCANNER-03] Scan
     def scan(self) -> FeatureGraph:
         graph = FeatureGraph()
 

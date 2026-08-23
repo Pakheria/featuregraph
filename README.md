@@ -1,6 +1,6 @@
 # FeatureGraph ⚡
 
-> **Token-efficient, AST-indexed feature topology maps for AI coding assistants. Eliminates AI amnesia and slashes context token waste by 90%.**
+> **Token-efficient, AST-indexed feature topology maps and AI agent skills. Eliminates AI amnesia and slashes LLM context waste by 90%.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue)](pyproject.toml)
@@ -10,21 +10,21 @@
 
 ## 🎯 The Problem: Why AI Coding Fails on Large Codebases
 
-1. **AI Amnesia & Accidental Code Deletions**: When an AI assistant (Antigravity, Claude, Gemini, Cursor) scans a file, it cannot see cross-file callers. It assumes unreferenced helper functions or security middleware are "dead code" and deletes or refactors them.
-2. **Context Token Exhaustion**: Reading entire 1,000-line files on every turn burns tokens rapidly, drives up LLM costs, and slows turn latency.
-3. **Graphify Limitations**: Traditional tools create multi-megabyte semantic graphs (`graph.json > 2MB`) that themselves blow past LLM context limits and lack precise line-range pointers.
+1. **AI Amnesia & Accidental Code Deletions**: When an AI coding agent (Antigravity, Claude Code, Gemini CLI, Cursor) scans a file, it cannot see cross-file callers. It assumes unreferenced helper functions or security middleware are "dead code" and deletes or refactors them.
+2. **Context Token Exhaustion**: Reading entire 1,000-line files on every turn burns tokens rapidly, drives up LLM costs, and degrades agent focus.
+3. **Traditional Graph Bloat**: Semantic code graphs dump massive AST trees (`graph.json` > 2MB – 25MB) that themselves exceed LLM token budgets and lack line-exact slice references.
 
 ---
 
 ## ⚡ The Solution: How FeatureGraph Works
 
-FeatureGraph scans your codebase using **Abstract Syntax Trees (AST)** and builds an ultra-compact, line-indexed topology map:
+FeatureGraph scans your codebase using **Abstract Syntax Trees (AST)** and builds an ultra-compact, line-indexed topology map and out-of-the-box AI agent skills:
 
 ```text
 AI Coding Agent / Developer
             │
             ▼
- [1. Reads FEATURE_INDEX.json] ───> Tiny ~3KB index (<150 tokens)
+ [1. Reads FEATURE_INDEX.json] ───> Tiny ~3KB–100KB index (<150–3,500 tokens)
             │
             ▼
  [2. Finds Target Lines (#Lstart-Lend) & [depends_on] IDs]
@@ -38,13 +38,16 @@ AI Coding Agent / Developer
 
 ---
 
-## 📊 FeatureGraph vs. Graphify
+## 📊 FeatureGraph vs. Traditional Graph Tools
 
-| Feature | Graphify | **FeatureGraph** |
+| Dimension | Traditional Graph Tools (e.g. Graphify) | **FeatureGraph** |
 | :--- | :--- | :--- |
-| **Index File Size** | 2MB – 15MB (`graph.json`) | **2KB – 5KB (`FEATURE_INDEX.json`)** |
-| **Token Cost to Read Index** | ~50,000+ tokens | **< 150 tokens** |
+| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 15KB (`FEATURE_INDEX.json`)** |
+| **Enterprise Repo Index Size (200–500+ endpoints)** | 10MB – 25MB+ | **50KB – 120KB (`FEATURE_INDEX.json`)** |
+| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **< 150 to 3,500 tokens (90%+ savings)** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
+| **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
+| **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
 | **Multi-Project Workspaces** | ❌ Flat scans only | **✅ Monorepo / Subproject Auto-Detection** |
 | **Zero-Config Git Auto-Sync**| ❌ Manual re-runs | **✅ Instant Pre-Commit Git Hook** |
 | **AI Anti-Amnesia Protection**| ❌ Passive graph | **✅ Invariant Contract (`[depends_on]`)** |
@@ -55,25 +58,49 @@ AI Coding Agent / Developer
 
 ## 🚀 Installation & Quickstart
 
-### Install via pip / uv
+### 1. Install via pip / uv
 ```bash
 pip install featuregraph
 # or with uv:
 uv tool install featuregraph
 ```
 
-### Initialize in Your Repository
+### 2. Initialize in Your Repository
 ```bash
 cd your-project
 featuregraph init
 ```
-*This scans your code, generates `FEATURE_INDEX.json`, `SYSTEM_FEATURE_GRAPH.md`, auto-configures the `AGENTS.md` AI circuit-breaker protocol, and installs the `.git/hooks/pre-commit` hook.*
+*This command:*
+- Scans your code and generates `FEATURE_INDEX.json` & `SYSTEM_FEATURE_GRAPH.md`
+- Creates the **`AGENTS.md` AI Circuit-Breaker Constitution**
+- Installs the workspace AI agent skill (`.agents/skills/featuregraph/SKILL.md`)
+- Installs the `.git/hooks/pre-commit` hook (if git repository)
+
+### 3. Install Global AI Agent Skills (Multi-IDE / Multi-CLI)
+```bash
+featuregraph skill --global
+```
+*Installs the `/featuregraph` skill out-of-the-box across your environment:*
+- **Google Antigravity & Gemini CLI** (`~/.gemini/config/skills/featuregraph/SKILL.md`)
+- **Anthropic Claude Code** (`~/.claude/skills/featuregraph/SKILL.md`)
+- **Cursor IDE** (`~/.cursor/skills/featuregraph/SKILL.md`)
 
 ---
 
 ## 🏷️ Annotating Your Code
 
 FeatureGraph parses comments in **Python, TypeScript, JavaScript, and TSX** files.
+
+### Auto-Annotating Existing Codebases
+If your project is un-annotated, let FeatureGraph suggest and insert tags automatically:
+
+```bash
+# Preview suggested tags without touching files (dry-run)
+featuregraph annotate --dry-run
+
+# Write suggested @feature tags into source files
+featuregraph annotate --yes
+```
 
 ### Python Example
 ```python
@@ -101,8 +128,13 @@ export const AnalyticsWidget = () => {
 # Show all commands and options
 featuregraph --help
 
-# Initialize repository, pre-commit hook & AGENTS.md constitution
+# Initialize repository, pre-commit hook, AGENTS.md constitution & workspace skill
 featuregraph init
+
+# Auto-suggest and write @feature tags for un-annotated symbols
+featuregraph annotate --dry-run
+featuregraph annotate --yes
+featuregraph annotate --dir ./src --limit 50 --yes
 
 # Scan codebase and update graphs (supports custom directory & output paths)
 featuregraph scan
@@ -110,6 +142,11 @@ featuregraph scan --dir ./my-project --json index.json --md GRAPH.md --quiet
 
 # Query exact lines and dependencies for a specific feature ID
 featuregraph query AUTH-01
+
+# Install or print AI agent skills
+featuregraph skill --install         # install workspace skill (.agents/skills/featuregraph)
+featuregraph skill --global          # install globally (~/.gemini, ~/.claude, ~/.cursor)
+featuregraph skill --show            # output SKILL.md definition
 
 # Generate an interactive visual HTML DAG
 featuregraph visualize --out graph.html
@@ -119,17 +156,15 @@ featuregraph hook --install
 featuregraph hook --uninstall
 ```
 
-> **Note:** Running `featuregraph` with no arguments prints help. Use `featuregraph scan` or `featuregraph init` explicitly.
-
 ---
 
 ## 🤖 AI Agent Integration Protocol
 
 When using FeatureGraph with AI coding agents (Antigravity, Claude Code, Gemini CLI, Cursor):
 
-1. FeatureGraph auto-generates an `AGENTS.md` directive at your workspace root.
-2. The AI reads `FEATURE_INDEX.json` on turn 1 to find the target feature ID and file `#Lstart-Lend`.
-3. The AI reads **only** those specific lines, preventing multi-file exploratory scans and accidental deletions of linked dependencies.
+1. **Auto-Discovery**: Agents discover the `/featuregraph` skill either from the repository (`.agents/skills/`) or their global configuration.
+2. **Circuit-Breaker Directive**: `AGENTS.md` instructs the agent to read `FEATURE_INDEX.json` on turn 1 rather than performing expensive recursive directory listings.
+3. **Exact Line Slicing**: The agent reads **only** the target feature's `#Lstart-Lend` span, preventing hallucinations and accidental deletion of cross-cutting invariants.
 
 ---
 

@@ -6,10 +6,12 @@ from typing import Dict, List, Any
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
 DEPENDS_TAG_REGEX = re.compile(r"@depends\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 
+# @feature [PARSER_PY-01] Python feature parser
 class PythonFeatureParser:
     """Parses Python source code with AST to extract feature tags, routes, classes, and exact line spans."""
 
     @staticmethod
+    # @feature [PARSER_PY-02] Parse file
     def parse_file(file_path: Path) -> List[Dict[str, Any]]:
         if not file_path.exists() or not file_path.is_file():
             return []

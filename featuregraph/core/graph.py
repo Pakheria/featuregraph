@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# @feature [GRAPH-01] Feature graph
 class FeatureGraph:
     """Manages the directed acyclic feature dependency graph, detects cycles and orphaned features."""
 
@@ -8,12 +9,15 @@ class FeatureGraph:
         self.edges: Dict[str, Set[str]] = {} # node -> set(dependencies)
         self.reverse_edges: Dict[str, Set[str]] = {} # node -> set(dependents)
 
+    # @feature [GRAPH-02] Add feature
     def add_feature(self, feature_id: str, data: Dict[str, Any]):
         feat_id = feature_id.upper()
         if feat_id not in self.nodes:
             self.nodes[feat_id] = data
-            self.edges[feat_id] = set()
-            self.reverse_edges[feat_id] = set()
+            if feat_id not in self.edges:
+                self.edges[feat_id] = set()
+            if feat_id not in self.reverse_edges:
+                self.reverse_edges[feat_id] = set()
         else:
             # Merge locations
             existing_locs = self.nodes[feat_id].get("locations", [])
@@ -30,6 +34,7 @@ class FeatureGraph:
                     self.reverse_edges[dep_clean] = set()
                 self.reverse_edges[dep_clean].add(feat_id)
 
+    # @feature [GRAPH-03] Get orphans
     def get_orphans(self) -> List[str]:
         """Returns features that have no callers/dependents and are not root features."""
         orphans = []
@@ -38,6 +43,7 @@ class FeatureGraph:
                 orphans.append(feat_id)
         return orphans
 
+    # @feature [GRAPH-04] To dict
     def to_dict(self) -> Dict[str, Any]:
         output = {}
         for feat_id, data in self.nodes.items():

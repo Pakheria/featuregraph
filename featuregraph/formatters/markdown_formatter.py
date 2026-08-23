@@ -1,10 +1,12 @@
 from pathlib import Path
 from typing import Dict, Any
 
+# @feature [MARKDOWN_FOR-01] Markdown formatter
 class MarkdownFormatter:
     """Formats feature graph into a rich Markdown table and Mermaid dependency diagram."""
 
     @staticmethod
+    # @feature [MARKDOWN_FOR-02] Format
     def format(graph_dict: Dict[str, Any], root_dir: Path) -> str:
         rows = []
         mermaid_edges = []
@@ -65,6 +67,7 @@ When working on any feature:
 """
 
     @staticmethod
+    # @feature [MARKDOWN_FOR-03] Write to file
     def write_to_file(graph_dict: Dict[str, Any], output_path: Path, root_dir: Path):
         content = MarkdownFormatter.format(graph_dict, root_dir)
         output_path.write_text(content, encoding="utf-8")
