@@ -9,8 +9,8 @@
       "GRAPH-02",
       "PARSER_GENERIC-01",
       "PARSER_PY-01",
-      "PARSER_PY-02",
-      "PARSER_TS-01"
+      "PARSER_TS-01",
+      "PARSER_TS-02"
     ],
     "called_by": [
       "CLI-01"
@@ -54,8 +54,8 @@
       "GRAPH-02",
       "PARSER_GENERIC-01",
       "PARSER_PY-01",
-      "PARSER_PY-02",
-      "PARSER_TS-01"
+      "PARSER_TS-01",
+      "PARSER_TS-02"
     ],
     "called_by": [
       "CLI-01"

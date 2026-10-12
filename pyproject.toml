@@ -41,3 +41,4 @@ featuregraph = "featuregraph.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["featuregraph"]
+artifacts = ["featuregraph/skills/featuregraph/SKILL.md"]

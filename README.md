@@ -70,6 +70,28 @@ FeatureGraph does **not** require manual `@depends` comments to build a real dep
 
 ---
 
+## 🚨 Skipped Files
+
+Files with syntax errors or no `@feature` tags print warnings to stderr:
+
+```bash
+⚠ Skipped broken.py: no parseable features (syntax error or no @feature tags)
+```
+
+---
+
+## ⚙️ JevRouter Model Override
+
+The `featuregraph search` command can use an OpenJev/Verdict model for semantic routing. Override the hardcoded default with `--jev-model` or the `FEATUREGRAPH_JEV_MODEL` env var:
+
+```bash
+featuregraph search "how is auth handled?" --jev-model /path/to/model
+# or
+FEATUREGRAPH_JEV_MODEL=/path/to/model featuregraph search "how is auth handled?"
+```
+
+---
+
 ## 🚀 Installation & Quickstart
 
 ### 1. Install via pip / uv (Direct from GitHub)

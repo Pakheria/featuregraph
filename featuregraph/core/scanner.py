@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from typing import List
 
@@ -78,6 +79,16 @@ class WorkspaceScanner:
                 if parsed:
                     resolver.register_feature_symbols(parsed)
                     scanned_files.append((path, rel_path, parsed))
+                else:
+                    try:
+                        content = path.read_text(encoding="utf-8", errors="replace")
+                        if content.strip():
+                            print(
+                                f"⚠ Skipped {rel_path}: no parseable features (syntax error or no @feature tags)",
+                                file=sys.stderr,
+                            )
+                    except OSError:
+                        pass
 
         # Pass 2: Infer cross-feature dependencies & populate graph
         for path, rel_path, parsed in scanned_files:
