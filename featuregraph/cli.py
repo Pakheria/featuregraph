@@ -1,6 +1,5 @@
 import sys
 import argparse
-import warnings
 from pathlib import Path
 
 # Support running as a standalone script or installed module
@@ -32,7 +31,6 @@ def main():
     scan_parser.add_argument("--md", default=None, help="Output Markdown path (default: .featuregraph/graph.md)")
     scan_parser.add_argument("--html", default=None, help="Optional output interactive HTML path (default: .featuregraph/graph.html)")
     scan_parser.add_argument("--quiet", action="store_true", help="Suppress console output")
-    scan_parser.add_argument("--warn", action="store_true", default=False, help="Warn on skipped files (syntax errors, empty)")
 
     # Command: init
     init_parser = subparsers.add_parser("init", help="Initialize FeatureGraph in current repository with pre-commit hook")
@@ -55,7 +53,6 @@ def main():
     viz_parser = subparsers.add_parser("visualize", help="Generate an interactive HTML dependency graph")
     viz_parser.add_argument("--out", default=None, help="HTML output path (default: .featuregraph/graph.html)")
     viz_parser.add_argument("--dir", default=".", help="Root directory to scan (default: .)")
-    viz_parser.add_argument("--warn", action="store_true", default=False, help="Warn on skipped files")
 
     # Command: annotate
     ann_parser = subparsers.add_parser(
@@ -94,10 +91,6 @@ def main():
     if args.command == "scan":
         root = Path(getattr(args, "dir", ".")).resolve()
         quiet = getattr(args, "quiet", False)
-        warn = getattr(args, "warn", False)
-
-        if warn:
-            warnings.filterwarnings("always", category=UserWarning)
 
         scanner = WorkspaceScanner(root)
 
@@ -107,12 +100,7 @@ def main():
                 print(f"⚡ [FeatureGraph] Multi-Project Workspace detected ({len(subprojects)} projects: {', '.join(subprojects)})")
             print(f"⚡ [FeatureGraph] Scanning codebase in {root}...")
 
-        # Capture warnings during scan
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            graph = scanner.scan()
-            scan_warnings = [str(x.message) for x in w]
-
+        graph = scanner.scan()
         graph_dict = graph.to_dict()
 
         fg_dir = root / ".featuregraph"
@@ -133,13 +121,6 @@ def main():
             HTMLVisualizer.generate(graph_dict, html_out)
 
         if not quiet:
-            if scan_warnings and warn:
-                print(f"\n  ⚠ {len(scan_warnings)} warning(s):")
-                for msg in scan_warnings[:10]:  # cap output
-                    print(f"    {msg}")
-                if len(scan_warnings) > 10:
-                    print(f"    ... and {len(scan_warnings) - 10} more")
-                print()
             categories = JSONFormatter.split_by_category(graph_dict)
             print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
             print(f"✓ Created 2-Tier Manifest: .featuregraph/manifest.json (<100 tokens)")
@@ -242,7 +223,7 @@ def main():
         # ponytail: JevRouter accepts optional --jev-model CLI flag to override hardcoded path
         jev_model = getattr(args, "jev_model", None)
         if jev_model:
-            JevRouter.MODEL_PATH = Path(jev_model)
+            JevRouter.set_model_path(Path(jev_model))
 
         routed_cat = JevRouter.route_query(query_text, categories)
 
@@ -286,20 +267,12 @@ def main():
 
     elif args.command == "visualize":
         root = Path(getattr(args, "dir", ".")).resolve()
-        warn = getattr(args, "warn", False)
-        if warn:
-            warnings.filterwarnings("always", category=UserWarning)
         scanner = WorkspaceScanner(root)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            graph = scanner.scan()
-            scan_warnings = [str(x.message) for x in w]
+        graph = scanner.scan()
         fg_dir = root / ".featuregraph"
         fg_dir.mkdir(parents=True, exist_ok=True)
         out_path = root / args.out if getattr(args, "out", None) else fg_dir / "graph.html"
         HTMLVisualizer.generate(graph.to_dict(), out_path)
-        if scan_warnings:
-            print(f"⚠ {len(scan_warnings)} warning(s) during scan (use --warn to suppress)")
         print(f"✓ Generated interactive topology map: {out_path.relative_to(root) if out_path.is_relative_to(root) else out_path}")
 
     elif args.command == "annotate":

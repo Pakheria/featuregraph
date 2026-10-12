@@ -19,6 +19,10 @@
   },
   "PARSER_TS-02": {
     "name": "Parse file",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03"
+    ],
     "locations": [
       {
         "file": "featuregraph/core/parser_ts.py",

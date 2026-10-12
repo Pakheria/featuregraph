@@ -70,43 +70,25 @@ FeatureGraph does **not** require manual `@depends` comments to build a real dep
 
 ---
 
-## ⚙️ Deterministic Feature IDs
+## 🚨 Skipped Files
 
-Since v0.1.0, FeatureGraph generates **deterministic** feature IDs from file path + symbol name. Two runs on the same codebase produce identical IDs:
-
-```
-path: featuregraph/core/scanner.py  symbol: WorkspaceScanner
-→ category "SCANNER"  slug "SCANNER_WorkspaceScanner"  → SCANNER_WORKSPACESCANNER-1
-```
-
-If the same slug appears twice (e.g. duplicate symbol names), a dedup counter increments: `SCANNER_WORKSPACESCANNER-01`, `SCANNER_WORKSPACESCANNER-02`.
-
-This means `featuregraph annotate` can be re-run safely — it won't change existing IDs.
-
----
-
-## 🚨 Warning on Skipped Files
-
-Run `featuregraph scan --warn` (or `featuregraph init` with verbose mode) to see warnings for files that were skipped during scanning due to syntax errors or other issues:
+Files with syntax errors or no `@feature` tags print warnings to stderr:
 
 ```bash
-featuregraph scan --warn
-# ⚠ Skipped broken.py: no parseable features (syntax error or no @feature tags)
+⚠ Skipped broken.py: no parseable features (syntax error or no @feature tags)
 ```
-
-This is especially useful in CI to catch code quality issues that prevent indexing.
 
 ---
 
-## 🧪 JevRouter Model Override
+## ⚙️ JevRouter Model Override
 
-The `featuregraph search` command can use an OpenJev/Verdict model for semantic routing. By default it uses a hardcoded path; override it with `--jev-model`:
+The `featuregraph search` command can use an OpenJev/Verdict model for semantic routing. Override the hardcoded default with `--jev-model` or the `FEATUREGRAPH_JEV_MODEL` env var:
 
 ```bash
 featuregraph search "how is auth handled?" --jev-model /path/to/model
+# or
+FEATUREGRAPH_JEV_MODEL=/path/to/model featuregraph search "how is auth handled?"
 ```
-
-This keeps the CLI portable — the default path only works on the author's machine.
 
 ---
 

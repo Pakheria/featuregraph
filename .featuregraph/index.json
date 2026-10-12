@@ -6,44 +6,6 @@
     "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
   },
   "features": {
-    "TEST_SCANNER-01": {
-      "name": "Test graph dependencies",
-      "depends_on": [
-        "GRAPH-01",
-        "GRAPH-02",
-        "GRAPH-04"
-      ],
-      "locations": [
-        {
-          "file": "tests/test_scanner.py",
-          "lines": [
-            9,
-            17
-          ],
-          "symbol": "test_graph_dependencies",
-          "type": "function"
-        }
-      ]
-    },
-    "TEST_SCANNER-02": {
-      "name": "Test orphan detection",
-      "depends_on": [
-        "GRAPH-01",
-        "GRAPH-02",
-        "GRAPH-03"
-      ],
-      "locations": [
-        {
-          "file": "tests/test_scanner.py",
-          "lines": [
-            20,
-            23
-          ],
-          "symbol": "test_orphan_detection",
-          "type": "function"
-        }
-      ]
-    },
     "CLI-01": {
       "name": "Main",
       "depends_on": [
@@ -56,8 +18,8 @@
         "HTML_VISUALI-01",
         "HTML_VISUALI-02",
         "JSON_FORMATT-01",
-        "JSON_FORMATT-03",
         "MARKDOWN_FOR-01",
+        "MARKDOWN_FOR-03",
         "SCANNER-01",
         "SCANNER-02",
         "SCANNER-03",
@@ -68,280 +30,9 @@
           "file": "featuregraph/cli.py",
           "lines": [
             20,
-            287
+            344
           ],
           "symbol": "main",
-          "type": "function"
-        }
-      ]
-    },
-    "GIT_HOOK-01": {
-      "name": "Git hook manager",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/hooks/git_hook.py",
-          "lines": [
-            13,
-            35
-          ],
-          "symbol": "GitHookManager",
-          "type": "class"
-        }
-      ]
-    },
-    "GIT_HOOK-02": {
-      "name": "Install",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/hooks/git_hook.py",
-          "lines": [
-            18,
-            26
-          ],
-          "symbol": "install",
-          "type": "function"
-        }
-      ]
-    },
-    "GIT_HOOK-03": {
-      "name": "Uninstall",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/hooks/git_hook.py",
-          "lines": [
-            30,
-            35
-          ],
-          "symbol": "uninstall",
-          "type": "function"
-        }
-      ]
-    },
-    "SKILL-01": {
-      "name": "Skill Manager",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/skills/skill_manager.py",
-          "lines": [
-            146,
-            183
-          ],
-          "symbol": "SkillManager",
-          "type": "class"
-        }
-      ]
-    },
-    "MARKDOWN_FOR-01": {
-      "name": "Markdown formatter",
-      "depends_on": [
-        "JSON_FORMATT-02"
-      ],
-      "called_by": [
-        "CLI-01",
-        "MARKDOWN_FOR-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/markdown_formatter.py",
-          "lines": [
-            5,
-            72
-          ],
-          "symbol": "MarkdownFormatter",
-          "type": "class"
-        }
-      ]
-    },
-    "MARKDOWN_FOR-02": {
-      "name": "Format",
-      "locations": [
-        {
-          "file": "featuregraph/formatters/markdown_formatter.py",
-          "lines": [
-            10,
-            66
-          ],
-          "symbol": "format",
-          "type": "function"
-        }
-      ]
-    },
-    "MARKDOWN_FOR-03": {
-      "name": "Write to file",
-      "depends_on": [
-        "JSON_FORMATT-02",
-        "MARKDOWN_FOR-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/markdown_formatter.py",
-          "lines": [
-            70,
-            72
-          ],
-          "symbol": "write_to_file",
-          "type": "function"
-        }
-      ]
-    },
-    "JSON_FORMATT-01": {
-      "name": "Jsonformatter",
-      "depends_on": [
-        "JSON_FORMATT-02"
-      ],
-      "called_by": [
-        "CLI-01",
-        "JSON_FORMATT-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/json_formatter.py",
-          "lines": [
-            13,
-            113
-          ],
-          "symbol": "JSONFormatter",
-          "type": "class"
-        }
-      ]
-    },
-    "JSON_FORMATT-02": {
-      "name": "Format",
-      "called_by": [
-        "JSON_FORMATT-01",
-        "JSON_FORMATT-03",
-        "MARKDOWN_FOR-01",
-        "MARKDOWN_FOR-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/json_formatter.py",
-          "lines": [
-            74,
-            84
-          ],
-          "symbol": "format",
-          "type": "function"
-        }
-      ]
-    },
-    "JSON_FORMATT-03": {
-      "name": "Write to file",
-      "depends_on": [
-        "JSON_FORMATT-01",
-        "JSON_FORMATT-02"
-      ],
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/json_formatter.py",
-          "lines": [
-            88,
-            91
-          ],
-          "symbol": "write_to_file",
-          "type": "function"
-        }
-      ]
-    },
-    "HTML_VISUALI-01": {
-      "name": "Htmlvisualizer",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/html_visualizer.py",
-          "lines": [
-            6,
-            159
-          ],
-          "symbol": "HTMLVisualizer",
-          "type": "class"
-        }
-      ]
-    },
-    "HTML_VISUALI-02": {
-      "name": "Generate",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/html_visualizer.py",
-          "lines": [
-            11,
-            159
-          ],
-          "symbol": "generate",
-          "type": "function"
-        }
-      ]
-    },
-    "DEP_RESOLVER-01": {
-      "name": "Dependency Resolver",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/dependency_resolver.py",
-          "lines": [
-            27,
-            128
-          ],
-          "symbol": "DependencyResolver",
-          "type": "class"
-        }
-      ]
-    },
-    "DEP_RESOLVER-02": {
-      "name": "Register symbols",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/dependency_resolver.py",
-          "lines": [
-            37,
-            43
-          ],
-          "symbol": "register_feature_symbols",
-          "type": "function"
-        }
-      ]
-    },
-    "DEP_RESOLVER-03": {
-      "name": "Resolve dependencies for file",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/dependency_resolver.py",
-          "lines": [
-            46,
-            69
-          ],
-          "symbol": "resolve_file_dependencies",
           "type": "function"
         }
       ]
@@ -449,34 +140,56 @@
         }
       ]
     },
-    "PARSER_TS-01": {
-      "name": "Type script feature parser",
+    "DEP_RESOLVER-01": {
+      "name": "Dependency Resolver",
       "called_by": [
         "SCANNER-01",
         "SCANNER-03"
       ],
       "locations": [
         {
-          "file": "featuregraph/core/parser_ts.py",
+          "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
-            11,
-            62
+            27,
+            128
           ],
-          "symbol": "TypeScriptFeatureParser",
+          "symbol": "DependencyResolver",
           "type": "class"
         }
       ]
     },
-    "PARSER_TS-02": {
-      "name": "Parse file",
+    "DEP_RESOLVER-02": {
+      "name": "Register symbols",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
       "locations": [
         {
-          "file": "featuregraph/core/parser_ts.py",
+          "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
-            16,
-            62
+            37,
+            43
           ],
-          "symbol": "parse_file",
+          "symbol": "register_feature_symbols",
+          "type": "function"
+        }
+      ]
+    },
+    "DEP_RESOLVER-03": {
+      "name": "Resolve dependencies for file",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/dependency_resolver.py",
+          "lines": [
+            46,
+            69
+          ],
+          "symbol": "resolve_file_dependencies",
           "type": "function"
         }
       ]
@@ -556,6 +269,25 @@
         }
       ]
     },
+    "PARSER_GENERIC-01": {
+      "name": "Generic Feature Parser",
+      "called_by": [
+        "ANNOTATOR-05",
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_generic.py",
+          "lines": [
+            59,
+            196
+          ],
+          "symbol": "GenericFeatureParser",
+          "type": "class"
+        }
+      ]
+    },
     "PARSER_PY-01": {
       "name": "Python feature parser",
       "called_by": [
@@ -576,16 +308,48 @@
     },
     "PARSER_PY-02": {
       "name": "Parse file",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
       "locations": [
         {
           "file": "featuregraph/core/parser_py.py",
           "lines": [
             15,
             95
+          ],
+          "symbol": "parse_file",
+          "type": "function"
+        }
+      ]
+    },
+    "PARSER_TS-01": {
+      "name": "Type script feature parser",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_ts.py",
+          "lines": [
+            11,
+            62
+          ],
+          "symbol": "TypeScriptFeatureParser",
+          "type": "class"
+        }
+      ]
+    },
+    "PARSER_TS-02": {
+      "name": "Parse file",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_ts.py",
+          "lines": [
+            16,
+            62
           ],
           "symbol": "parse_file",
           "type": "function"
@@ -602,8 +366,8 @@
         "GRAPH-02",
         "PARSER_GENERIC-01",
         "PARSER_PY-01",
-        "PARSER_PY-02",
-        "PARSER_TS-01"
+        "PARSER_TS-01",
+        "PARSER_TS-02"
       ],
       "called_by": [
         "CLI-01"
@@ -647,8 +411,8 @@
         "GRAPH-02",
         "PARSER_GENERIC-01",
         "PARSER_PY-01",
-        "PARSER_PY-02",
-        "PARSER_TS-01"
+        "PARSER_TS-01",
+        "PARSER_TS-02"
       ],
       "called_by": [
         "CLI-01"
@@ -665,22 +429,258 @@
         }
       ]
     },
-    "PARSER_GENERIC-01": {
-      "name": "Generic Feature Parser",
+    "HTML_VISUALI-01": {
+      "name": "Htmlvisualizer",
       "called_by": [
-        "ANNOTATOR-05",
-        "SCANNER-01",
-        "SCANNER-03"
+        "CLI-01"
       ],
       "locations": [
         {
-          "file": "featuregraph/core/parser_generic.py",
+          "file": "featuregraph/formatters/html_visualizer.py",
           "lines": [
-            59,
-            196
+            6,
+            159
           ],
-          "symbol": "GenericFeatureParser",
+          "symbol": "HTMLVisualizer",
           "type": "class"
+        }
+      ]
+    },
+    "HTML_VISUALI-02": {
+      "name": "Generate",
+      "called_by": [
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/formatters/html_visualizer.py",
+          "lines": [
+            11,
+            159
+          ],
+          "symbol": "generate",
+          "type": "function"
+        }
+      ]
+    },
+    "JSON_FORMATT-01": {
+      "name": "Jsonformatter",
+      "depends_on": [
+        "MARKDOWN_FOR-02"
+      ],
+      "called_by": [
+        "CLI-01",
+        "JSON_FORMATT-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/formatters/json_formatter.py",
+          "lines": [
+            13,
+            113
+          ],
+          "symbol": "JSONFormatter",
+          "type": "class"
+        }
+      ]
+    },
+    "JSON_FORMATT-02": {
+      "name": "Format",
+      "locations": [
+        {
+          "file": "featuregraph/formatters/json_formatter.py",
+          "lines": [
+            74,
+            84
+          ],
+          "symbol": "format",
+          "type": "function"
+        }
+      ]
+    },
+    "JSON_FORMATT-03": {
+      "name": "Write to file",
+      "depends_on": [
+        "JSON_FORMATT-01",
+        "MARKDOWN_FOR-02"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/formatters/json_formatter.py",
+          "lines": [
+            88,
+            91
+          ],
+          "symbol": "write_to_file",
+          "type": "function"
+        }
+      ]
+    },
+    "MARKDOWN_FOR-01": {
+      "name": "Markdown formatter",
+      "depends_on": [
+        "MARKDOWN_FOR-02"
+      ],
+      "called_by": [
+        "CLI-01",
+        "MARKDOWN_FOR-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/formatters/markdown_formatter.py",
+          "lines": [
+            5,
+            72
+          ],
+          "symbol": "MarkdownFormatter",
+          "type": "class"
+        }
+      ]
+    },
+    "MARKDOWN_FOR-02": {
+      "name": "Format",
+      "called_by": [
+        "JSON_FORMATT-01",
+        "JSON_FORMATT-03",
+        "MARKDOWN_FOR-01",
+        "MARKDOWN_FOR-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/formatters/markdown_formatter.py",
+          "lines": [
+            10,
+            66
+          ],
+          "symbol": "format",
+          "type": "function"
+        }
+      ]
+    },
+    "MARKDOWN_FOR-03": {
+      "name": "Write to file",
+      "depends_on": [
+        "MARKDOWN_FOR-01",
+        "MARKDOWN_FOR-02"
+      ],
+      "called_by": [
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/formatters/markdown_formatter.py",
+          "lines": [
+            70,
+            72
+          ],
+          "symbol": "write_to_file",
+          "type": "function"
+        }
+      ]
+    },
+    "GIT_HOOK-01": {
+      "name": "Git hook manager",
+      "called_by": [
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/hooks/git_hook.py",
+          "lines": [
+            13,
+            35
+          ],
+          "symbol": "GitHookManager",
+          "type": "class"
+        }
+      ]
+    },
+    "GIT_HOOK-02": {
+      "name": "Install",
+      "called_by": [
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/hooks/git_hook.py",
+          "lines": [
+            18,
+            26
+          ],
+          "symbol": "install",
+          "type": "function"
+        }
+      ]
+    },
+    "GIT_HOOK-03": {
+      "name": "Uninstall",
+      "called_by": [
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/hooks/git_hook.py",
+          "lines": [
+            30,
+            35
+          ],
+          "symbol": "uninstall",
+          "type": "function"
+        }
+      ]
+    },
+    "SKILL-01": {
+      "name": "Skill Manager",
+      "called_by": [
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/skills/skill_manager.py",
+          "lines": [
+            146,
+            183
+          ],
+          "symbol": "SkillManager",
+          "type": "class"
+        }
+      ]
+    },
+    "TEST_SCANNER-01": {
+      "name": "Test graph dependencies",
+      "depends_on": [
+        "GRAPH-01",
+        "GRAPH-02",
+        "GRAPH-04"
+      ],
+      "locations": [
+        {
+          "file": "tests/test_scanner.py",
+          "lines": [
+            9,
+            17
+          ],
+          "symbol": "test_graph_dependencies",
+          "type": "function"
+        }
+      ]
+    },
+    "TEST_SCANNER-02": {
+      "name": "Test orphan detection",
+      "depends_on": [
+        "GRAPH-01",
+        "GRAPH-02",
+        "GRAPH-03"
+      ],
+      "locations": [
+        {
+          "file": "tests/test_scanner.py",
+          "lines": [
+            20,
+            23
+          ],
+          "symbol": "test_orphan_detection",
+          "type": "function"
         }
       ]
     }

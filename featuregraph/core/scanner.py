@@ -1,5 +1,5 @@
 import os
-import warnings
+import sys
 from pathlib import Path
 from typing import List
 
@@ -80,12 +80,12 @@ class WorkspaceScanner:
                     resolver.register_feature_symbols(parsed)
                     scanned_files.append((path, rel_path, parsed))
                 else:
-                    # Parser returned empty — file had no @feature tags or was skipped
                     try:
                         content = path.read_text(encoding="utf-8", errors="replace")
                         if content.strip():
-                            warnings.warn(
-                                f"Skipped {rel_path}: no parseable features (syntax error or no @feature tags)"
+                            print(
+                                f"⚠ Skipped {rel_path}: no parseable features (syntax error or no @feature tags)",
+                                file=sys.stderr,
                             )
                     except OSError:
                         pass

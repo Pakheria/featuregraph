@@ -11,8 +11,8 @@
       "HTML_VISUALI-01",
       "HTML_VISUALI-02",
       "JSON_FORMATT-01",
-      "JSON_FORMATT-03",
       "MARKDOWN_FOR-01",
+      "MARKDOWN_FOR-03",
       "SCANNER-01",
       "SCANNER-02",
       "SCANNER-03",
@@ -23,7 +23,7 @@
         "file": "featuregraph/cli.py",
         "lines": [
           20,
-          287
+          344
         ],
         "symbol": "main",
         "type": "function"

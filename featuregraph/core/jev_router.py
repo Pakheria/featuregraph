@@ -1,6 +1,5 @@
 """Jev-powered semantic router for FeatureGraph using OpenJev/Verdict."""
 
-import json
 import os
 import subprocess
 from pathlib import Path
@@ -12,47 +11,28 @@ class JevRouter:
     to FeatureGraph categories in a single pass (<40ms).
 
     Model path resolution (highest to lowest priority):
-    1. --jev-model CLI flag (set via route_query call site)
+    1. --jev-model CLI flag (set via CLI layer)
     2. FEATUREGRAPH_JEV_MODEL env var
-    3. .featuregraph/jev.json config file
-    4. Hardcoded default (author's machine — may not work elsewhere)
+    3. Hardcoded default (author's machine — may not work elsewhere)
     """
 
     DEFAULT_MODEL_PATH = Path("/home/proxima/Verdict-open-jev/artifacts/v2")
-    CONFIG_FILE = Path(".featuregraph/jev.json")
 
     # Class-level override (set by CLI when --jev-model is passed)
     _override_model_path: Optional[Path] = None
 
     @classmethod
     def is_available(cls) -> bool:
-        model_path = cls._resolve_model_path()
-        return model_path is not None and model_path.exists()
+        return cls._resolve_model_path().exists()
 
     @classmethod
-    def _resolve_model_path(cls) -> Optional[Path]:
-        """Resolve model path with fallback chain."""
-        # 1. CLI override (already set by CLI layer)
+    def _resolve_model_path(cls) -> Path:
+        """Resolve model path: CLI flag > env var > hardcoded default."""
         if cls._override_model_path is not None:
             return cls._override_model_path
-
-        # 2. Environment variable
         env = os.environ.get("FEATUREGRAPH_JEV_MODEL")
         if env:
             return Path(env)
-
-        # 3. Config file
-        config_file = Path(cls.CONFIG_FILE)
-        if config_file.exists():
-            try:
-                config = json.loads(config_file.read_text(encoding="utf-8"))
-                model_path = Path(config.get("model_path", ""))
-                if model_path.exists():
-                    return model_path
-            except (json.JSONDecodeError, OSError):
-                pass
-
-        # 4. Hardcoded default
         return cls.DEFAULT_MODEL_PATH
 
     @classmethod
@@ -62,7 +42,7 @@ class JevRouter:
             return None
 
         model_path = cls._resolve_model_path()
-        if model_path is None or not model_path.exists():
+        if not model_path.exists():
             return None
 
         cat_keys = list(categories.keys())
