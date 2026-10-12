@@ -1,5 +1,6 @@
 import sys
 import argparse
+import warnings
 from pathlib import Path
 
 # Support running as a standalone script or installed module
@@ -31,6 +32,7 @@ def main():
     scan_parser.add_argument("--md", default=None, help="Output Markdown path (default: .featuregraph/graph.md)")
     scan_parser.add_argument("--html", default=None, help="Optional output interactive HTML path (default: .featuregraph/graph.html)")
     scan_parser.add_argument("--quiet", action="store_true", help="Suppress console output")
+    scan_parser.add_argument("--warn", action="store_true", default=False, help="Warn on skipped files (syntax errors, empty)")
 
     # Command: init
     init_parser = subparsers.add_parser("init", help="Initialize FeatureGraph in current repository with pre-commit hook")
@@ -38,6 +40,11 @@ def main():
     # Command: query
     query_parser = subparsers.add_parser("query", help="Query a specific feature ID and print its exact line ranges and dependencies")
     query_parser.add_argument("feature_id", help="Feature ID to query (e.g. AUTH-01)")
+
+    # Command: search (Jev semantic routing + keyword fallback)
+    search_parser = subparsers.add_parser("search", help="Semantic feature search using OpenJev decision engine")
+    search_parser.add_argument("query", help="Natural language query or intent (e.g. 'how is authentication handled?')")
+    search_parser.add_argument("--jev-model", default=None, help="Path to OpenJev model directory (overrides config)")
 
     # Command: hook
     hook_parser = subparsers.add_parser("hook", help="Install or remove git pre-commit hook")
@@ -47,6 +54,8 @@ def main():
     # Command: visualize
     viz_parser = subparsers.add_parser("visualize", help="Generate an interactive HTML dependency graph")
     viz_parser.add_argument("--out", default=None, help="HTML output path (default: .featuregraph/graph.html)")
+    viz_parser.add_argument("--dir", default=".", help="Root directory to scan (default: .)")
+    viz_parser.add_argument("--warn", action="store_true", default=False, help="Warn on skipped files")
 
     # Command: annotate
     ann_parser = subparsers.add_parser(
@@ -85,6 +94,10 @@ def main():
     if args.command == "scan":
         root = Path(getattr(args, "dir", ".")).resolve()
         quiet = getattr(args, "quiet", False)
+        warn = getattr(args, "warn", False)
+
+        if warn:
+            warnings.filterwarnings("always", category=UserWarning)
 
         scanner = WorkspaceScanner(root)
 
@@ -94,7 +107,12 @@ def main():
                 print(f"⚡ [FeatureGraph] Multi-Project Workspace detected ({len(subprojects)} projects: {', '.join(subprojects)})")
             print(f"⚡ [FeatureGraph] Scanning codebase in {root}...")
 
-        graph = scanner.scan()
+        # Capture warnings during scan
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            graph = scanner.scan()
+            scan_warnings = [str(x.message) for x in w]
+
         graph_dict = graph.to_dict()
 
         fg_dir = root / ".featuregraph"
@@ -115,6 +133,13 @@ def main():
             HTMLVisualizer.generate(graph_dict, html_out)
 
         if not quiet:
+            if scan_warnings and warn:
+                print(f"\n  ⚠ {len(scan_warnings)} warning(s):")
+                for msg in scan_warnings[:10]:  # cap output
+                    print(f"    {msg}")
+                if len(scan_warnings) > 10:
+                    print(f"    ... and {len(scan_warnings) - 10} more")
+                print()
             categories = JSONFormatter.split_by_category(graph_dict)
             print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
             print(f"✓ Created 2-Tier Manifest: .featuregraph/manifest.json (<100 tokens)")
@@ -171,7 +196,7 @@ def main():
         if not idx_file.exists():
             print("Error: Feature index not found. Run 'featuregraph scan' first.")
             sys.exit(1)
-        
+
         data = json.loads(idx_file.read_text(encoding="utf-8"))
         feat_id = args.feature_id.upper()
         feat = data.get("features", {}).get(feat_id)
@@ -191,6 +216,65 @@ def main():
             print(f"  • {loc['file']} #L{lines[0]}-L{lines[1]} ({loc.get('symbol', 'module')})")
         print("=======================================================\n")
 
+    elif args.command == "search":
+        import json
+        from featuregraph.core.jev_router import JevRouter
+
+        manifest_file = Path(".featuregraph/manifest.json")
+        idx_file = Path(".featuregraph/index.json")
+
+        categories = {}
+        if manifest_file.exists():
+            manifest_data = json.loads(manifest_file.read_text(encoding="utf-8"))
+            categories = manifest_data.get("categories", {})
+        elif idx_file.exists():
+            idx_data = json.loads(idx_file.read_text(encoding="utf-8"))
+            for fid, fmeta in idx_data.get("features", {}).items():
+                cat = fmeta.get("category", "core")
+                categories.setdefault(cat, []).append(fid)
+
+        if not categories:
+            print("Error: No .featuregraph index found. Run 'featuregraph scan' first.")
+            sys.exit(1)
+
+        query_text = args.query
+
+        # ponytail: JevRouter accepts optional --jev-model CLI flag to override hardcoded path
+        jev_model = getattr(args, "jev_model", None)
+        if jev_model:
+            JevRouter.MODEL_PATH = Path(jev_model)
+
+        routed_cat = JevRouter.route_query(query_text, categories)
+
+        if routed_cat:
+            print(f"\n⚡ [FeatureGraph + Jev] Intent matched category: '{routed_cat}'")
+            cat_file = Path(f".featuregraph/categories/{routed_cat}.json")
+            if cat_file.exists():
+                cat_data = json.loads(cat_file.read_text(encoding="utf-8"))
+                for fid, fmeta in cat_data.items():
+                    print(f"  [{fid}] {fmeta.get('name', '')} ({fmeta.get('description', '')})")
+                    for loc in fmeta.get("locations", []):
+                        lines = loc.get("lines") or [loc.get("start_line", 1), loc.get("end_line", 1)]
+                        print(f"    • {loc['file']} #L{lines[0]}-L{lines[1]} ({loc.get('symbol', 'module')})")
+            else:
+                for fid in categories.get(routed_cat, []):
+                    print(f"  • {fid}")
+            print()
+        else:
+            # Fallback: keyword matching
+            matched = []
+            q_lower = query_text.lower()
+            for cat, fids in categories.items():
+                if q_lower in cat.lower():
+                    matched.append((cat, fids))
+            if matched:
+                print(f"\n⚡ [FeatureGraph] Keyword match:")
+                for cat, fids in matched:
+                    print(f"  Category '{cat}': {', '.join(fids)}")
+                print()
+            else:
+                print(f"No high-confidence match for '{query_text}'. Try 'featuregraph scan' or inspect .featuregraph/manifest.json.")
+
     elif args.command == "hook":
         root = Path(".").resolve()
         if args.uninstall:
@@ -201,13 +285,21 @@ def main():
             print("✓ Git pre-commit hook installed.")
 
     elif args.command == "visualize":
-        root = Path(".").resolve()
+        root = Path(getattr(args, "dir", ".")).resolve()
+        warn = getattr(args, "warn", False)
+        if warn:
+            warnings.filterwarnings("always", category=UserWarning)
         scanner = WorkspaceScanner(root)
-        graph = scanner.scan()
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            graph = scanner.scan()
+            scan_warnings = [str(x.message) for x in w]
         fg_dir = root / ".featuregraph"
         fg_dir.mkdir(parents=True, exist_ok=True)
         out_path = root / args.out if getattr(args, "out", None) else fg_dir / "graph.html"
         HTMLVisualizer.generate(graph.to_dict(), out_path)
+        if scan_warnings:
+            print(f"⚠ {len(scan_warnings)} warning(s) during scan (use --warn to suppress)")
         print(f"✓ Generated interactive topology map: {out_path.relative_to(root) if out_path.is_relative_to(root) else out_path}")
 
     elif args.command == "annotate":

@@ -11,16 +11,21 @@ Strategy
 3. Derive a stable feature ID from the file path + symbol name.
 4. Optionally write the tag as the line immediately before the def/class/export.
 
-ID generation (Python)
-    path: featuregraph/core/scanner.py  symbol: WorkspaceScanner
-    -> category "SCANNER"  seq 01  -> SCANNER-01
+ID generation (deterministic)
+    Derives from file path + symbol name, NOT sequence order.
+    Two runs on the same codebase produce identical IDs.
 
-ID generation (TS/JS)
-    path: src/components/AuthButton.tsx  symbol: AuthButton
-    -> AUTHBUTTON-01   (truncated to 20 chars)
+    Python:
+        path: featuregraph/core/scanner.py  symbol: WorkspaceScanner
+        -> category "SCANNER"  slug "SCANNER_WorkspaceScanner"  -> SCANNER_WORKSPACESCANNER-1
 
-Sequence numbers are assigned per-category, monotonically incrementing
-across all files processed in one annotate run.
+    TypeScript/JS:
+        path: src/components/AuthButton.tsx  symbol: AuthButton
+        -> category "AUTHBUTTON"  slug "AUTHBUTTON"  -> AUTHBUTTON-1
+
+    Per-category dedup counter (SCHEMA-1, SCHEMA-2) increments only when the
+    same slug appears multiple times in the same category (same file, two
+    functions with identical names — rare but possible).
 """
 
 from __future__ import annotations
@@ -102,7 +107,16 @@ def _has_tag_above(lines: List[str], lineno: int, lookahead: int = 6) -> bool:
 
 
 # @feature [ANNOTATOR-02] Suggest python
-def suggest_python(file_path: Path, root: Path, seq_map: Dict[str, int]) -> List[Suggestion]:
+def _next_feat_id(used: Dict[str, int], cat: str, slug: str) -> str:
+    """Return a deterministic feature ID, incrementing a dedup counter if needed."""
+    counter = used.setdefault(f"{cat}:{slug}", 0) + 1
+    used[f"{cat}:{slug}"] = counter
+    if counter == 1:
+        return f"{cat.upper()}-{slug.upper()}"
+    return f"{cat.upper()}-{slug.upper()}-{counter - 1:02d}"
+
+
+def suggest_python(file_path: Path, root: Path, used_ids: Dict[str, int]) -> List[Suggestion]:
     """Return Suggestion objects for un-annotated Python symbols."""
     try:
         source = file_path.read_text(encoding="utf-8")
@@ -129,8 +143,8 @@ def suggest_python(file_path: Path, root: Path, seq_map: Dict[str, int]) -> List
             continue  # already tagged
 
         cat = _category_from_path(rel)
-        seq_map[cat] = seq_map.get(cat, 0) + 1
-        feat_id = f"{cat}-{seq_map[cat]:02d}"
+        slug = f"{cat}_{_to_slug(name)}"
+        feat_id = _next_feat_id(used_ids, cat, slug)
         human   = _human_name(name, rel)
         indent  = _leading_indent(lines, node.lineno)
 
@@ -162,7 +176,7 @@ _TS_EXPORT_RE = re.compile(
 
 
 # @feature [ANNOTATOR-03] Suggest typescript
-def suggest_typescript(file_path: Path, root: Path, seq_map: Dict[str, int]) -> List[Suggestion]:
+def suggest_typescript(file_path: Path, root: Path, used_ids: Dict[str, int]) -> List[Suggestion]:
     """Return Suggestion objects for un-annotated TypeScript/JS exports."""
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -183,8 +197,8 @@ def suggest_typescript(file_path: Path, root: Path, seq_map: Dict[str, int]) -> 
             continue
 
         cat = _category_from_path(rel)
-        seq_map[cat] = seq_map.get(cat, 0) + 1
-        feat_id = f"{cat}-{seq_map[cat]:02d}"
+        slug = f"{cat}_{_to_slug(name)}"
+        feat_id = _next_feat_id(used_ids, cat, slug)
         human   = _human_name(name, rel)
 
         results.append(Suggestion(
@@ -212,7 +226,7 @@ _GENERIC_DECL_RE = re.compile(
 )
 
 
-def suggest_generic(file_path: Path, root: Path, seq_map: Dict[str, int]) -> List[Suggestion]:
+def suggest_generic(file_path: Path, root: Path, used_ids: Dict[str, int]) -> List[Suggestion]:
     """Return Suggestion objects for un-annotated Go, Rust, Java, C#, PHP, Ruby, etc. symbols."""
     try:
         content = file_path.read_text(encoding="utf-8", errors="replace")
@@ -236,8 +250,8 @@ def suggest_generic(file_path: Path, root: Path, seq_map: Dict[str, int]) -> Lis
             continue
 
         cat = _category_from_path(rel)
-        seq_map[cat] = seq_map.get(cat, 0) + 1
-        feat_id = f"{cat}-{seq_map[cat]:02d}"
+        slug = f"{cat}_{_to_slug(name)}"
+        feat_id = _next_feat_id(used_ids, cat, slug)
         human = _human_name(name, rel)
 
         results.append(Suggestion(
@@ -322,11 +336,15 @@ def collect_suggestions(
     """
     Walk *root*, find all un-annotated Python/TS/JS symbols, return Suggestions.
 
+    IDs are derived deterministically from file path + symbol name so that two
+    runs on the same codebase produce the same IDs.  Per-category dedup counters
+    increment only when identical slugs collide.
+
     The returned list is ordered: Python files first, then TS/JS, both groups
     sorted by (file, line) ascending — ready for pretty printing.
     """
     ignore = DEFAULT_IGNORE | (extra_ignore or set())
-    seq_map: Dict[str, int] = {}
+    used_ids: Dict[str, int] = {}  # "cat:slug" -> count
     all_suggestions: List[Suggestion] = []
 
     for path_obj in sorted(root.rglob("*")):
@@ -340,17 +358,17 @@ def collect_suggestions(
             continue
 
         if path_obj.suffix == ".py":
-            sug = suggest_python(path_obj, root, seq_map)
+            sug = suggest_python(path_obj, root, used_ids)
             sug.sort(key=lambda s: s.line)
             all_suggestions.extend(sug)
         elif path_obj.suffix in {".ts", ".tsx", ".js", ".jsx"}:
-            sug = suggest_typescript(path_obj, root, seq_map)
+            sug = suggest_typescript(path_obj, root, used_ids)
             sug.sort(key=lambda s: s.line)
             all_suggestions.extend(sug)
         else:
             from .parser_generic import GenericFeatureParser
             if GenericFeatureParser.is_supported(path_obj):
-                sug = suggest_generic(path_obj, root, seq_map)
+                sug = suggest_generic(path_obj, root, used_ids)
                 sug.sort(key=lambda s: s.line)
                 all_suggestions.extend(sug)
 

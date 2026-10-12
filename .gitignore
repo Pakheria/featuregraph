@@ -21,3 +21,10 @@ wheels/
 .venv
 venv/
 .pytest_cache/
+
+# FeatureGraph generated artifacts (per-project, not in tool repo)
+.featuregraph/
+FEATURE_INDEX.json
+SYSTEM_FEATURE_GRAPH.md
+AGENTS.md
+.featureignore
