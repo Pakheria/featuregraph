@@ -12,7 +12,6 @@ from featuregraph.core.scanner import WorkspaceScanner
 from featuregraph.core.annotator import collect_suggestions, apply_suggestions, _comment_prefix
 from featuregraph.formatters.json_formatter import JSONFormatter
 from featuregraph.formatters.markdown_formatter import MarkdownFormatter
-from featuregraph.formatters.html_visualizer import HTMLVisualizer
 from featuregraph.hooks.git_hook import GitHookManager
 from featuregraph.skills.skill_manager import SkillManager
 
@@ -29,7 +28,6 @@ def main():
     scan_parser.add_argument("--dir", default=".", help="Root directory to scan (default: .)")
     scan_parser.add_argument("--json", default=None, help="Output JSON path (default: .featuregraph/index.json)")
     scan_parser.add_argument("--md", default=None, help="Output Markdown path (default: .featuregraph/graph.md)")
-    scan_parser.add_argument("--html", default=None, help="Optional output interactive HTML path (default: .featuregraph/graph.html)")
     scan_parser.add_argument("--quiet", action="store_true", help="Suppress console output")
 
     # Command: init
@@ -39,20 +37,14 @@ def main():
     query_parser = subparsers.add_parser("query", help="Query a specific feature ID and print its exact line ranges and dependencies")
     query_parser.add_argument("feature_id", help="Feature ID to query (e.g. AUTH-01)")
 
-    # Command: search (Jev semantic routing + keyword fallback)
-    search_parser = subparsers.add_parser("search", help="Semantic feature search using OpenJev decision engine")
-    search_parser.add_argument("query", help="Natural language query or intent (e.g. 'how is authentication handled?')")
-    search_parser.add_argument("--jev-model", default=None, help="Path to OpenJev model directory (overrides config)")
+    # Command: search
+    search_parser = subparsers.add_parser("search", help="Search features by symbol, name, or keyword")
+    search_parser.add_argument("query", help="Query terms or symbol name (e.g. 'parser', 'auth')")
 
     # Command: hook
     hook_parser = subparsers.add_parser("hook", help="Install or remove git pre-commit hook")
     hook_parser.add_argument("--install", action="store_true", help="Install git pre-commit hook")
     hook_parser.add_argument("--uninstall", action="store_true", help="Uninstall git pre-commit hook")
-
-    # Command: visualize
-    viz_parser = subparsers.add_parser("visualize", help="Generate an interactive HTML dependency graph")
-    viz_parser.add_argument("--out", default=None, help="HTML output path (default: .featuregraph/graph.html)")
-    viz_parser.add_argument("--dir", default=".", help="Root directory to scan (default: .)")
 
     # Command: annotate
     ann_parser = subparsers.add_parser(
@@ -116,10 +108,6 @@ def main():
         md_out = root / args.md if getattr(args, "md", None) else fg_dir / "graph.md"
         MarkdownFormatter.write_to_file(graph_dict, md_out, root)
 
-        if getattr(args, "html", None) is not None:
-            html_out = root / args.html if args.html else fg_dir / "graph.html"
-            HTMLVisualizer.generate(graph_dict, html_out)
-
         if not quiet:
             categories = JSONFormatter.split_by_category(graph_dict)
             print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
@@ -145,11 +133,9 @@ def main():
         md_out = fg_dir / "graph.md"
         MarkdownFormatter.write_to_file(graph_dict, md_out, root)
 
-        # Generate AGENTS.md Circuit-Breaker Directive
+        # Generate or append AGENTS.md Circuit-Breaker Directive
         agents_md = root / "AGENTS.md"
-        if not agents_md.exists():
-            agents_md.write_text(
-                """# AI AGENT SHORT-CIRCUIT CONSTITUTION
+        directive = """# AI AGENT SHORT-CIRCUIT CONSTITUTION
 
 > 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**
 > When asked about features, architecture, onboarding, or where code lives:
@@ -157,10 +143,14 @@ def main():
 > 2. **READ `.featuregraph/categories/<category>.json`** to get exact line spans (`#Lstart-Lend`).
 > 3. Read **ONLY** the specific lines required for the task.
 > Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.
-""",
-                encoding="utf-8"
-            )
+"""
+        if not agents_md.exists():
+            agents_md.write_text(directive, encoding="utf-8")
             print("✓ Generated AI Agent Constitution: AGENTS.md")
+        elif "SHORT-CIRCUIT DIRECTIVE" not in agents_md.read_text(encoding="utf-8", errors="ignore"):
+            with open(agents_md, "a", encoding="utf-8") as f:
+                f.write("\n" + directive)
+            print("✓ Appended Short-Circuit Directive to existing AGENTS.md")
 
         # Install workspace skill
         skill_file = SkillManager.install_workspace_skill(root)
@@ -199,62 +189,57 @@ def main():
 
     elif args.command == "search":
         import json
-        from featuregraph.core.jev_router import JevRouter
 
         manifest_file = Path(".featuregraph/manifest.json")
         idx_file = Path(".featuregraph/index.json")
 
-        categories = {}
-        if manifest_file.exists():
-            manifest_data = json.loads(manifest_file.read_text(encoding="utf-8"))
-            categories = manifest_data.get("categories", {})
-        elif idx_file.exists():
-            idx_data = json.loads(idx_file.read_text(encoding="utf-8"))
-            for fid, fmeta in idx_data.get("features", {}).items():
-                cat = fmeta.get("category", "core")
-                categories.setdefault(cat, []).append(fid)
-
-        if not categories:
+        if not manifest_file.exists() and not idx_file.exists():
             print("Error: No .featuregraph index found. Run 'featuregraph scan' first.")
             sys.exit(1)
 
         query_text = args.query
+        q_lower = query_text.lower()
+        q_words = set(q_lower.split())
 
-        # ponytail: JevRouter accepts optional --jev-model CLI flag to override hardcoded path
-        jev_model = getattr(args, "jev_model", None)
-        if jev_model:
-            JevRouter.set_model_path(Path(jev_model))
-
-        routed_cat = JevRouter.route_query(query_text, categories)
-
-        if routed_cat:
-            print(f"\n⚡ [FeatureGraph + Jev] Intent matched category: '{routed_cat}'")
-            cat_file = Path(f".featuregraph/categories/{routed_cat}.json")
-            if cat_file.exists():
-                cat_data = json.loads(cat_file.read_text(encoding="utf-8"))
+        matched_features = []
+        cats_dir = Path(".featuregraph/categories")
+        if cats_dir.is_dir():
+            for cat_json in cats_dir.glob("*.json"):
+                cat_name = cat_json.stem
+                cat_data = json.loads(cat_json.read_text(encoding="utf-8"))
                 for fid, fmeta in cat_data.items():
-                    print(f"  [{fid}] {fmeta.get('name', '')} ({fmeta.get('description', '')})")
+                    name = fmeta.get("name", "").lower()
+                    desc = fmeta.get("description", "").lower()
+                    locs = " ".join(loc.get("symbol", "").lower() for loc in fmeta.get("locations", []))
+                    text = f"{cat_name.lower()} {fid.lower()} {name} {desc} {locs}"
+                    if any(w in text for w in q_words) or q_lower in text:
+                        matched_features.append((cat_name, fid, fmeta))
+        elif idx_file.exists():
+            idx_data = json.loads(idx_file.read_text(encoding="utf-8"))
+            for fid, fmeta in idx_data.get("features", {}).items():
+                cat_name = fmeta.get("category", "core")
+                name = fmeta.get("name", "").lower()
+                desc = fmeta.get("description", "").lower()
+                locs = " ".join(loc.get("symbol", "").lower() for loc in fmeta.get("locations", []))
+                text = f"{cat_name.lower()} {fid.lower()} {name} {desc} {locs}"
+                if any(w in text for w in q_words) or q_lower in text:
+                    matched_features.append((cat_name, fid, fmeta))
+
+        if matched_features:
+            by_cat = {}
+            for cat, fid, fmeta in matched_features:
+                by_cat.setdefault(cat, []).append((fid, fmeta))
+            print(f"\n⚡ [FeatureGraph] Match for '{query_text}':")
+            for cat, feats in sorted(by_cat.items()):
+                print(f"  Category '{cat}':")
+                for fid, fmeta in feats:
+                    print(f"    [{fid}] {fmeta.get('name', '')} ({fmeta.get('description', '')})")
                     for loc in fmeta.get("locations", []):
                         lines = loc.get("lines") or [loc.get("start_line", 1), loc.get("end_line", 1)]
-                        print(f"    • {loc['file']} #L{lines[0]}-L{lines[1]} ({loc.get('symbol', 'module')})")
-            else:
-                for fid in categories.get(routed_cat, []):
-                    print(f"  • {fid}")
+                        print(f"      • {loc['file']} #L{lines[0]}-L{lines[1]} ({loc.get('symbol', 'module')})")
             print()
         else:
-            # Fallback: keyword matching
-            matched = []
-            q_lower = query_text.lower()
-            for cat, fids in categories.items():
-                if q_lower in cat.lower():
-                    matched.append((cat, fids))
-            if matched:
-                print(f"\n⚡ [FeatureGraph] Keyword match:")
-                for cat, fids in matched:
-                    print(f"  Category '{cat}': {', '.join(fids)}")
-                print()
-            else:
-                print(f"No high-confidence match for '{query_text}'. Try 'featuregraph scan' or inspect .featuregraph/manifest.json.")
+            print(f"No match for '{query_text}'. Try 'featuregraph scan' or inspect .featuregraph/graph.md.")
 
     elif args.command == "hook":
         root = Path(".").resolve()
@@ -264,16 +249,6 @@ def main():
         else:
             GitHookManager.install(root)
             print("✓ Git pre-commit hook installed.")
-
-    elif args.command == "visualize":
-        root = Path(getattr(args, "dir", ".")).resolve()
-        scanner = WorkspaceScanner(root)
-        graph = scanner.scan()
-        fg_dir = root / ".featuregraph"
-        fg_dir.mkdir(parents=True, exist_ok=True)
-        out_path = root / args.out if getattr(args, "out", None) else fg_dir / "graph.html"
-        HTMLVisualizer.generate(graph.to_dict(), out_path)
-        print(f"✓ Generated interactive topology map: {out_path.relative_to(root) if out_path.is_relative_to(root) else out_path}")
 
     elif args.command == "annotate":
         root = Path(getattr(args, "dir", ".")).resolve()

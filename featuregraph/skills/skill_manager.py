@@ -32,6 +32,7 @@ class SkillManager:
         home = Path.home()
 
         targets = [
+            home / ".agents" / "skills" / "featuregraph" / "SKILL.md",
             home / ".gemini" / "config" / "skills" / "featuregraph" / "SKILL.md",
             home / ".claude" / "skills" / "featuregraph" / "SKILL.md",
             home / ".cursor" / "skills" / "featuregraph" / "SKILL.md",

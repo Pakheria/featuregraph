@@ -60,7 +60,7 @@ class MarkdownFormatter:
 ## 3. Token-Efficient Reading Protocol
 
 When working on any feature:
-1. Lookup `FEATURE_INDEX.json` to get the exact line slice (`#Lstart-Lend`).
+1. Lookup `.featuregraph/manifest.json` (<100 tokens) to find category and exact line slice (`#Lstart-Lend`).
 2. Read **only** those lines with your editor tool.
 3. Check `[Depends On]` features before committing changes.
 """

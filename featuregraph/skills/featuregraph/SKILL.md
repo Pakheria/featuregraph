@@ -103,11 +103,6 @@ featuregraph annotate --dir ./src --yes --limit 50
 featuregraph query AUTH-01
 ```
 
-### Visual HTML DAG
-```bash
-featuregraph visualize --out graph.html
-```
-
 ### Hook management
 ```bash
 featuregraph hook --install

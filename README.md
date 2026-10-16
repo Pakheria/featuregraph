@@ -56,7 +56,7 @@ AI Coding Agent / Developer
 | **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
 | **Multi-Language Support** | Limited | **✅ Python, TS/JS, Go, Rust, Java, C#, PHP, Ruby, etc.** |
 | **Zero-Config Git Auto-Sync**| ❌ Manual re-runs | **✅ Instant Pre-Commit Git Hook** |
-| **Interactive HTML Visualizer**| Basic | **✅ Interactive Standalone Canvas DAG** |
+| **Visual Architecture DAG**  | Basic | **✅ Native Mermaid Dependency Graph (`graph.md`)** |
 
 ---
 
@@ -80,14 +80,14 @@ Files with syntax errors or no `@feature` tags print warnings to stderr:
 
 ---
 
-## ⚙️ JevRouter Model Override
+## ⚡ Fast AST Feature Search
 
-The `featuregraph search` command can use an OpenJev/Verdict model for semantic routing. Override the hardcoded default with `--jev-model` or the `FEATUREGRAPH_JEV_MODEL` env var:
+Search symbols and line ranges in <50ms without bloating your context window:
 
 ```bash
-featuregraph search "how is auth handled?" --jev-model /path/to/model
-# or
-FEATUREGRAPH_JEV_MODEL=/path/to/model featuregraph search "how is auth handled?"
+featuregraph search "parser"
+# Output gives exact file paths and surgical #Lstart-Lend ranges:
+# • featuregraph/core/parser_py.py #L10-L95 (PythonFeatureParser)
 ```
 
 ---
@@ -186,9 +186,6 @@ featuregraph skill --install         # install workspace skill (.agents/skills/f
 featuregraph skill --global          # install globally (~/.gemini, ~/.claude, ~/.cursor)
 featuregraph skill --show            # output SKILL.md definition
 
-# Generate an interactive visual HTML DAG
-featuregraph visualize --out graph.html
-
 # Manage automated pre-commit hook
 featuregraph hook --install
 featuregraph hook --uninstall
@@ -201,7 +198,7 @@ featuregraph hook --uninstall
 When using FeatureGraph with AI coding agents (Antigravity, Claude Code, Gemini CLI, Cursor):
 
 1. **Auto-Discovery**: Agents discover the `/featuregraph` skill either from the repository (`.agents/skills/`) or their global configuration.
-2. **Circuit-Breaker Directive**: `AGENTS.md` instructs the agent to read `FEATURE_INDEX.json` on turn 1 rather than performing expensive recursive directory listings.
+2. **Circuit-Breaker Directive**: `AGENTS.md` instructs the agent to read `.featuregraph/manifest.json` on turn 1 rather than performing expensive recursive directory listings.
 3. **Exact Line Slicing**: The agent reads **only** the target feature's `#Lstart-Lend` span, preventing hallucinations and accidental deletion of cross-cutting invariants.
 
 ---

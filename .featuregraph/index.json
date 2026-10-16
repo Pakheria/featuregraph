@@ -2,7 +2,7 @@
   "_meta": {
     "generator": "featuregraph",
     "version": "0.1.0",
-    "total_features": 35,
+    "total_features": 34,
     "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
   },
   "features": {
@@ -15,8 +15,6 @@
         "GIT_HOOK-02",
         "GIT_HOOK-03",
         "GRAPH-04",
-        "HTML_VISUALI-01",
-        "HTML_VISUALI-02",
         "JSON_FORMATT-01",
         "MARKDOWN_FOR-01",
         "MARKDOWN_FOR-03",
@@ -29,113 +27,10 @@
         {
           "file": "featuregraph/cli.py",
           "lines": [
-            20,
-            344
+            19,
+            327
           ],
           "symbol": "main",
-          "type": "function"
-        }
-      ]
-    },
-    "ANNOTATOR-01": {
-      "name": "Suggestion",
-      "called_by": [
-        "ANNOTATOR-02",
-        "ANNOTATOR-03",
-        "ANNOTATOR-04",
-        "ANNOTATOR-05"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/annotator.py",
-          "lines": [
-            38,
-            45
-          ],
-          "symbol": "Suggestion",
-          "type": "class"
-        }
-      ]
-    },
-    "ANNOTATOR-02": {
-      "name": "Suggest python",
-      "depends_on": [
-        "ANNOTATOR-01"
-      ],
-      "called_by": [
-        "ANNOTATOR-05"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/annotator.py",
-          "lines": [
-            105,
-            149
-          ],
-          "symbol": "suggest_python",
-          "type": "function"
-        }
-      ]
-    },
-    "ANNOTATOR-03": {
-      "name": "Suggest typescript",
-      "depends_on": [
-        "ANNOTATOR-01"
-      ],
-      "called_by": [
-        "ANNOTATOR-05"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/annotator.py",
-          "lines": [
-            165,
-            201
-          ],
-          "symbol": "suggest_typescript",
-          "type": "function"
-        }
-      ]
-    },
-    "ANNOTATOR-04": {
-      "name": "Apply suggestions",
-      "depends_on": [
-        "ANNOTATOR-01"
-      ],
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/annotator.py",
-          "lines": [
-            268,
-            304
-          ],
-          "symbol": "apply_suggestions",
-          "type": "function"
-        }
-      ]
-    },
-    "ANNOTATOR-05": {
-      "name": "Collect suggestions",
-      "depends_on": [
-        "ANNOTATOR-01",
-        "ANNOTATOR-02",
-        "ANNOTATOR-03",
-        "PARSER_GENERIC-01"
-      ],
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/annotator.py",
-          "lines": [
-            318,
-            357
-          ],
-          "symbol": "collect_suggestions",
           "type": "function"
         }
       ]
@@ -356,6 +251,106 @@
         }
       ]
     },
+    "ANNOTATOR-01": {
+      "name": "Suggestion",
+      "called_by": [
+        "ANNOTATOR-03",
+        "ANNOTATOR-04",
+        "ANNOTATOR-05"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/annotator.py",
+          "lines": [
+            43,
+            50
+          ],
+          "symbol": "Suggestion",
+          "type": "class"
+        }
+      ]
+    },
+    "ANNOTATOR-02": {
+      "name": "Suggest python",
+      "called_by": [
+        "ANNOTATOR-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/annotator.py",
+          "lines": [
+            110,
+            116
+          ],
+          "symbol": "_next_feat_id",
+          "type": "function"
+        }
+      ]
+    },
+    "ANNOTATOR-03": {
+      "name": "Suggest typescript",
+      "depends_on": [
+        "ANNOTATOR-01",
+        "ANNOTATOR-02"
+      ],
+      "called_by": [
+        "ANNOTATOR-05"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/annotator.py",
+          "lines": [
+            179,
+            215
+          ],
+          "symbol": "suggest_typescript",
+          "type": "function"
+        }
+      ]
+    },
+    "ANNOTATOR-04": {
+      "name": "Apply suggestions",
+      "depends_on": [
+        "ANNOTATOR-01"
+      ],
+      "called_by": [
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/annotator.py",
+          "lines": [
+            282,
+            318
+          ],
+          "symbol": "apply_suggestions",
+          "type": "function"
+        }
+      ]
+    },
+    "ANNOTATOR-05": {
+      "name": "Collect suggestions",
+      "depends_on": [
+        "ANNOTATOR-01",
+        "ANNOTATOR-03",
+        "PARSER_GENERIC-01"
+      ],
+      "called_by": [
+        "CALC-CALC_ADD",
+        "CLI-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/annotator.py",
+          "lines": [
+            332,
+            375
+          ],
+          "symbol": "collect_suggestions",
+          "type": "function"
+        }
+      ]
+    },
     "SCANNER-01": {
       "name": "Workspace scanner",
       "depends_on": [
@@ -376,8 +371,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            17,
-            104
+            18,
+            115
           ],
           "symbol": "WorkspaceScanner",
           "type": "class"
@@ -393,8 +388,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            26,
-            36
+            27,
+            37
           ],
           "symbol": "detect_subprojects",
           "type": "function"
@@ -421,44 +416,10 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            52,
-            104
+            53,
+            115
           ],
           "symbol": "scan",
-          "type": "function"
-        }
-      ]
-    },
-    "HTML_VISUALI-01": {
-      "name": "Htmlvisualizer",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/html_visualizer.py",
-          "lines": [
-            6,
-            159
-          ],
-          "symbol": "HTMLVisualizer",
-          "type": "class"
-        }
-      ]
-    },
-    "HTML_VISUALI-02": {
-      "name": "Generate",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/html_visualizer.py",
-          "lines": [
-            11,
-            159
-          ],
-          "symbol": "generate",
           "type": "function"
         }
       ]
@@ -638,8 +599,8 @@
         {
           "file": "featuregraph/skills/skill_manager.py",
           "lines": [
-            146,
-            183
+            9,
+            51
           ],
           "symbol": "SkillManager",
           "type": "class"
@@ -680,6 +641,23 @@
             23
           ],
           "symbol": "test_orphan_detection",
+          "type": "function"
+        }
+      ]
+    },
+    "CALC-CALC_ADD": {
+      "name": "Add\", py_file.read_text())",
+      "depends_on": [
+        "ANNOTATOR-05"
+      ],
+      "locations": [
+        {
+          "file": "tests/test_annotator.py",
+          "lines": [
+            22,
+            35
+          ],
+          "symbol": "test_deterministic_ids_same_output",
           "type": "function"
         }
       ]

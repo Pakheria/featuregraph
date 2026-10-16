@@ -8,8 +8,6 @@
       "GIT_HOOK-02",
       "GIT_HOOK-03",
       "GRAPH-04",
-      "HTML_VISUALI-01",
-      "HTML_VISUALI-02",
       "JSON_FORMATT-01",
       "MARKDOWN_FOR-01",
       "MARKDOWN_FOR-03",
@@ -22,8 +20,8 @@
       {
         "file": "featuregraph/cli.py",
         "lines": [
-          20,
-          344
+          19,
+          327
         ],
         "symbol": "main",
         "type": "function"
