@@ -28,3 +28,7 @@ FEATURE_INDEX.json
 SYSTEM_FEATURE_GRAPH.md
 AGENTS.md
 .featureignore
+
+# Local artifacts (scratch graphs, demo recordings)
+graphify-out/
+demo/

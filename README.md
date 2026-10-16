@@ -20,7 +20,7 @@
 
 FeatureGraph is engineered around four core metrics:
 
-1. **2-Tier Hierarchical Token Budget:** Ultra-compact `manifest.json` (<80 tokens) allows agents to pinpoint domain categories and read only domain files `categories/<domain>.json` (<300 tokens — **99%+ token savings**).
+1. **2-Tier Hierarchical Token Budget:** Compact `manifest.json` (one line per feature — ~0.5 kB per 10 features) lets agents pinpoint domain categories, then read only that domain's file `categories/<domain>.json` (typically 150–2,000 bytes) before slicing exact lines.
 2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function calls, type references, and component usages to wire `depends_on` and `called_by` with zero manual effort.
 3. **Line-Exact Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature.
 4. **Sub-Second to Fast Scan Speed:** Optimized single-pass line-interval AST mapping scans thousands of symbols in seconds.
@@ -29,13 +29,13 @@ FeatureGraph is engineered around four core metrics:
 AI Coding Agent / Developer
             │
             ▼
- [1. Reads .featuregraph/manifest.json] ───> Ultra-tiny directory (<80 tokens)
+ [1. Reads .featuregraph/manifest.json] ───> Tier-1 directory (1 line per feature)
             │
             ▼
- [2. Reads .featuregraph/categories/<domain>.json] ──> Exact domain map (<300 tokens)
+ [2. Reads .featuregraph/categories/<domain>.json] ──> Exact domain map
             │
             ▼
- [3. Slices Exact Code Only (#Lstart-Lend)] ────────> 95-99% Token Savings
+ [3. Slices Exact Code Only (#Lstart-Lend)] ────────> Fraction of full-file token cost
             │
             ▼
  [4. Commits Code] ─────────────────────────────────> Git Hook Auto-Syncs Line Map
@@ -48,8 +48,8 @@ AI Coding Agent / Developer
 | Dimension | Traditional Graph Tools (e.g. Graphify) | **FeatureGraph** |
 | :--- | :--- | :--- |
 | **Dependency Resolution** | ❌ None or Manual only | **✅ Automated AST 2-Pass Call-Graph Inference** |
-| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`FEATURE_INDEX.json`)** |
-| **Enterprise Repo Size (200–500+ features)** | 10MB – 25MB+ | **100KB – 350KB (`FEATURE_INDEX.json`)** |
+| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`.featuregraph/index.json`)** |
+| **Enterprise Repo Size (200–500+ features)** | 10MB – 25MB+ | **100KB – 350KB (`.featuregraph/index.json`)** |
 | **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **< 150 to 4,500 tokens (95%+ savings)** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
 | **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
@@ -66,16 +66,16 @@ FeatureGraph does **not** require manual `@depends` comments to build a real dep
 
 1. **Pass 1 (Symbol Indexing):** Scans all codebase files and maps defined functions, classes, and components to their Feature IDs.
 2. **Pass 2 (AST Call-Site Inference):** Analyzes call-sites, type references, and JSX usage inside each feature's line boundaries.
-3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges and generates interactive Mermaid DAGs in `SYSTEM_FEATURE_GRAPH.md`.
+3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges and generates Mermaid DAGs in `.featuregraph/graph.md`.
 
 ---
 
 ## 🚨 Skipped Files
 
-Files with syntax errors or no `@feature` tags print warnings to stderr:
+Files with syntax errors or no `@feature` tags are summarized in a single stderr warning per scan:
 
 ```bash
-⚠ Skipped broken.py: no parseable features (syntax error or no @feature tags)
+⚠ 6 file(s) with no parseable features (untagged or syntax error): src/legacy.py, … (+3 more)
 ```
 
 ---
@@ -180,6 +180,8 @@ featuregraph scan --dir ./my-project --json index.json --md GRAPH.md --quiet
 
 # Query exact lines and dependencies for a specific feature ID
 featuregraph query AUTH-01
+featuregraph query AUTH-01 --json            # machine-readable output (agents / CI)
+featuregraph search "parser" --dir ./app --json
 
 # Install or print AI agent skills
 featuregraph skill --install         # install workspace skill (.agents/skills/featuregraph)

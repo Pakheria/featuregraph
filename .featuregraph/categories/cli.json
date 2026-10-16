@@ -9,6 +9,7 @@
       "GIT_HOOK-03",
       "GRAPH-04",
       "JSON_FORMATT-01",
+      "JSON_FORMATT-03",
       "MARKDOWN_FOR-01",
       "MARKDOWN_FOR-03",
       "SCANNER-01",
@@ -21,7 +22,7 @@
         "file": "featuregraph/cli.py",
         "lines": [
           19,
-          327
+          350
         ],
         "symbol": "main",
         "type": "function"

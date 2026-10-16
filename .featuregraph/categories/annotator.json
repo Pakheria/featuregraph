@@ -10,8 +10,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          43,
-          50
+          45,
+          52
         ],
         "symbol": "Suggestion",
         "type": "class"
@@ -27,8 +27,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          110,
-          116
+          112,
+          118
         ],
         "symbol": "_next_feat_id",
         "type": "function"
@@ -48,8 +48,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          179,
-          215
+          181,
+          217
         ],
         "symbol": "suggest_typescript",
         "type": "function"
@@ -68,8 +68,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          282,
-          318
+          284,
+          320
         ],
         "symbol": "apply_suggestions",
         "type": "function"
@@ -81,18 +81,18 @@
     "depends_on": [
       "ANNOTATOR-01",
       "ANNOTATOR-03",
-      "PARSER_GENERIC-01"
+      "PARSER_GENERIC-01",
+      "SCANNER-01"
     ],
     "called_by": [
-      "CALC-CALC_ADD",
       "CLI-01"
     ],
     "locations": [
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          332,
-          375
+          328,
+          366
         ],
         "symbol": "collect_suggestions",
         "type": "function"

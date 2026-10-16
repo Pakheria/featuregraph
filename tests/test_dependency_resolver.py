@@ -1,3 +1,4 @@
+import json
 import unittest
 import tempfile
 from pathlib import Path
@@ -77,6 +78,73 @@ export const ProfilePage = () => {
 
             avatar_callers = data["UI-AVATAR"].get("called_by", [])
             self.assertIn("PAGE-PROFILE", avatar_callers)
+
+    def test_same_named_methods_resolved_by_qualname(self):
+        """Two features sharing a method name: only the qualified match gets the edge."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            (tmp_path / "a.py").write_text("""# @feature [A-CLASS] Alpha Service
+class Alpha:
+    # @feature [A-METHOD] Alpha parse
+    def parse_file(self, x):
+        return x
+""")
+            (tmp_path / "b.py").write_text("""# @feature [B-CLASS] Beta Service
+class Beta:
+    # @feature [B-METHOD] Beta parse
+    def parse_file(self, x):
+        return x
+""")
+            (tmp_path / "user.py").write_text("""# @feature [USER-01] User flow
+def run(alpha):
+    return Alpha.parse_file(alpha, 1)
+""")
+
+            data = WorkspaceScanner(tmp_path).scan().to_dict()
+            user_deps = data["USER-01"].get("depends_on", [])
+            self.assertIn("A-METHOD", user_deps)
+            self.assertIn("A-CLASS", user_deps)
+            self.assertNotIn("B-METHOD", user_deps)
+
+    def test_bare_ambiguous_name_skipped(self):
+        """A bare call to a name defined by multiple features produces no guessed edge."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            (tmp_path / "a.py").write_text("""# @feature [A-METHOD] Alpha parse
+def parse_file(x):
+    return x
+""")
+            (tmp_path / "b.py").write_text("""# @feature [B-METHOD] Beta parse
+def parse_file(x):
+    return x
+""")
+            (tmp_path / "caller.py").write_text("""# @feature [CALLER-01] Caller
+def invoke(x):
+    return parse_file(x)
+""")
+
+            data = WorkspaceScanner(tmp_path).scan().to_dict()
+            self.assertEqual(data["CALLER-01"].get("depends_on", []), [])
+
+    def test_scan_is_deterministic(self):
+        """Two scans of the same tree produce byte-identical graph data."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            (tmp_path / "z.py").write_text("# @feature [Z-01] Z\ndef z(): pass\n")
+            (tmp_path / "a.py").write_text("""# @feature [A-01] A
+def a():
+    return z()
+""")
+            (tmp_path / "m.py").write_text("""# @feature [M-01] M
+class M:
+    # @feature [M-02] M call
+    def go(self):
+        return a()
+""")
+
+            first = json.dumps(WorkspaceScanner(tmp_path).scan().to_dict(), sort_keys=True)
+            second = json.dumps(WorkspaceScanner(tmp_path).scan().to_dict(), sort_keys=True)
+            self.assertEqual(first, second)
 
 if __name__ == "__main__":
     unittest.main()

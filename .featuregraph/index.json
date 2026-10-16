@@ -1,7 +1,7 @@
 {
   "_meta": {
     "generator": "featuregraph",
-    "version": "0.1.0",
+    "version": "unknown",
     "total_features": 34,
     "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
   },
@@ -16,6 +16,7 @@
         "GIT_HOOK-03",
         "GRAPH-04",
         "JSON_FORMATT-01",
+        "JSON_FORMATT-03",
         "MARKDOWN_FOR-01",
         "MARKDOWN_FOR-03",
         "SCANNER-01",
@@ -28,225 +29,9 @@
           "file": "featuregraph/cli.py",
           "lines": [
             19,
-            327
+            350
           ],
           "symbol": "main",
-          "type": "function"
-        }
-      ]
-    },
-    "DEP_RESOLVER-01": {
-      "name": "Dependency Resolver",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/dependency_resolver.py",
-          "lines": [
-            27,
-            128
-          ],
-          "symbol": "DependencyResolver",
-          "type": "class"
-        }
-      ]
-    },
-    "DEP_RESOLVER-02": {
-      "name": "Register symbols",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/dependency_resolver.py",
-          "lines": [
-            37,
-            43
-          ],
-          "symbol": "register_feature_symbols",
-          "type": "function"
-        }
-      ]
-    },
-    "DEP_RESOLVER-03": {
-      "name": "Resolve dependencies for file",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/dependency_resolver.py",
-          "lines": [
-            46,
-            69
-          ],
-          "symbol": "resolve_file_dependencies",
-          "type": "function"
-        }
-      ]
-    },
-    "GRAPH-01": {
-      "name": "Feature graph",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03",
-        "TEST_SCANNER-01",
-        "TEST_SCANNER-02"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/graph.py",
-          "lines": [
-            4,
-            68
-          ],
-          "symbol": "FeatureGraph",
-          "type": "class"
-        }
-      ]
-    },
-    "GRAPH-02": {
-      "name": "Add feature",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03",
-        "TEST_SCANNER-01",
-        "TEST_SCANNER-02"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/graph.py",
-          "lines": [
-            13,
-            35
-          ],
-          "symbol": "add_feature",
-          "type": "function"
-        }
-      ]
-    },
-    "GRAPH-03": {
-      "name": "Get orphans",
-      "called_by": [
-        "TEST_SCANNER-02"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/graph.py",
-          "lines": [
-            38,
-            44
-          ],
-          "symbol": "get_orphans",
-          "type": "function"
-        }
-      ]
-    },
-    "GRAPH-04": {
-      "name": "To dict",
-      "called_by": [
-        "CLI-01",
-        "TEST_SCANNER-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/graph.py",
-          "lines": [
-            47,
-            68
-          ],
-          "symbol": "to_dict",
-          "type": "function"
-        }
-      ]
-    },
-    "PARSER_GENERIC-01": {
-      "name": "Generic Feature Parser",
-      "called_by": [
-        "ANNOTATOR-05",
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/parser_generic.py",
-          "lines": [
-            59,
-            196
-          ],
-          "symbol": "GenericFeatureParser",
-          "type": "class"
-        }
-      ]
-    },
-    "PARSER_PY-01": {
-      "name": "Python feature parser",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/parser_py.py",
-          "lines": [
-            10,
-            95
-          ],
-          "symbol": "PythonFeatureParser",
-          "type": "class"
-        }
-      ]
-    },
-    "PARSER_PY-02": {
-      "name": "Parse file",
-      "locations": [
-        {
-          "file": "featuregraph/core/parser_py.py",
-          "lines": [
-            15,
-            95
-          ],
-          "symbol": "parse_file",
-          "type": "function"
-        }
-      ]
-    },
-    "PARSER_TS-01": {
-      "name": "Type script feature parser",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/parser_ts.py",
-          "lines": [
-            11,
-            62
-          ],
-          "symbol": "TypeScriptFeatureParser",
-          "type": "class"
-        }
-      ]
-    },
-    "PARSER_TS-02": {
-      "name": "Parse file",
-      "called_by": [
-        "SCANNER-01",
-        "SCANNER-03"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/core/parser_ts.py",
-          "lines": [
-            16,
-            62
-          ],
-          "symbol": "parse_file",
           "type": "function"
         }
       ]
@@ -262,8 +47,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            43,
-            50
+            45,
+            52
           ],
           "symbol": "Suggestion",
           "type": "class"
@@ -279,8 +64,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            110,
-            116
+            112,
+            118
           ],
           "symbol": "_next_feat_id",
           "type": "function"
@@ -300,8 +85,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            179,
-            215
+            181,
+            217
           ],
           "symbol": "suggest_typescript",
           "type": "function"
@@ -320,8 +105,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            282,
-            318
+            284,
+            320
           ],
           "symbol": "apply_suggestions",
           "type": "function"
@@ -333,20 +118,242 @@
       "depends_on": [
         "ANNOTATOR-01",
         "ANNOTATOR-03",
-        "PARSER_GENERIC-01"
+        "PARSER_GENERIC-01",
+        "SCANNER-01"
       ],
       "called_by": [
-        "CALC-CALC_ADD",
         "CLI-01"
       ],
       "locations": [
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            332,
-            375
+            328,
+            366
           ],
           "symbol": "collect_suggestions",
+          "type": "function"
+        }
+      ]
+    },
+    "DEP_RESOLVER-01": {
+      "name": "Dependency Resolver",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/dependency_resolver.py",
+          "lines": [
+            27,
+            155
+          ],
+          "symbol": "DependencyResolver",
+          "type": "class"
+        }
+      ]
+    },
+    "DEP_RESOLVER-02": {
+      "name": "Register symbols",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/dependency_resolver.py",
+          "lines": [
+            39,
+            48
+          ],
+          "symbol": "register_feature_symbols",
+          "type": "function"
+        }
+      ]
+    },
+    "DEP_RESOLVER-03": {
+      "name": "Resolve dependencies for file",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/dependency_resolver.py",
+          "lines": [
+            72,
+            95
+          ],
+          "symbol": "resolve_file_dependencies",
+          "type": "function"
+        }
+      ]
+    },
+    "GRAPH-01": {
+      "name": "Feature graph",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03",
+        "TEST_SCANNER-01",
+        "TEST_SCANNER-02",
+        "TEST_SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/graph.py",
+          "lines": [
+            10,
+            82
+          ],
+          "symbol": "FeatureGraph",
+          "type": "class"
+        }
+      ]
+    },
+    "GRAPH-02": {
+      "name": "Add feature",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03",
+        "TEST_SCANNER-01",
+        "TEST_SCANNER-02",
+        "TEST_SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/graph.py",
+          "lines": [
+            19,
+            49
+          ],
+          "symbol": "add_feature",
+          "type": "function"
+        }
+      ]
+    },
+    "GRAPH-03": {
+      "name": "Get orphans",
+      "called_by": [
+        "TEST_SCANNER-02"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/graph.py",
+          "lines": [
+            52,
+            58
+          ],
+          "symbol": "get_orphans",
+          "type": "function"
+        }
+      ]
+    },
+    "GRAPH-04": {
+      "name": "To dict",
+      "called_by": [
+        "CLI-01",
+        "TEST_SCANNER-01"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/graph.py",
+          "lines": [
+            61,
+            82
+          ],
+          "symbol": "to_dict",
+          "type": "function"
+        }
+      ]
+    },
+    "PARSER_GENERIC-01": {
+      "name": "Generic Feature Parser",
+      "called_by": [
+        "ANNOTATOR-05",
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_generic.py",
+          "lines": [
+            61,
+            198
+          ],
+          "symbol": "GenericFeatureParser",
+          "type": "class"
+        }
+      ]
+    },
+    "PARSER_PY-01": {
+      "name": "Python feature parser",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_py.py",
+          "lines": [
+            10,
+            116
+          ],
+          "symbol": "PythonFeatureParser",
+          "type": "class"
+        }
+      ]
+    },
+    "PARSER_PY-02": {
+      "name": "Parse file",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_py.py",
+          "lines": [
+            15,
+            116
+          ],
+          "symbol": "parse_file",
+          "type": "function"
+        }
+      ]
+    },
+    "PARSER_TS-01": {
+      "name": "Type script feature parser",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_ts.py",
+          "lines": [
+            13,
+            66
+          ],
+          "symbol": "TypeScriptFeatureParser",
+          "type": "class"
+        }
+      ]
+    },
+    "PARSER_TS-02": {
+      "name": "Parse file",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
+      "locations": [
+        {
+          "file": "featuregraph/core/parser_ts.py",
+          "lines": [
+            18,
+            66
+          ],
+          "symbol": "parse_file",
           "type": "function"
         }
       ]
@@ -361,18 +368,20 @@
         "GRAPH-02",
         "PARSER_GENERIC-01",
         "PARSER_PY-01",
+        "PARSER_PY-02",
         "PARSER_TS-01",
         "PARSER_TS-02"
       ],
       "called_by": [
+        "ANNOTATOR-05",
         "CLI-01"
       ],
       "locations": [
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            18,
-            115
+            19,
+            164
           ],
           "symbol": "WorkspaceScanner",
           "type": "class"
@@ -388,8 +397,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            27,
-            37
+            28,
+            38
           ],
           "symbol": "detect_subprojects",
           "type": "function"
@@ -406,6 +415,7 @@
         "GRAPH-02",
         "PARSER_GENERIC-01",
         "PARSER_PY-01",
+        "PARSER_PY-02",
         "PARSER_TS-01",
         "PARSER_TS-02"
       ],
@@ -416,8 +426,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            53,
-            115
+            93,
+            164
           ],
           "symbol": "scan",
           "type": "function"
@@ -427,7 +437,7 @@
     "JSON_FORMATT-01": {
       "name": "Jsonformatter",
       "depends_on": [
-        "MARKDOWN_FOR-02"
+        "JSON_FORMATT-02"
       ],
       "called_by": [
         "CLI-01",
@@ -447,6 +457,10 @@
     },
     "JSON_FORMATT-02": {
       "name": "Format",
+      "called_by": [
+        "JSON_FORMATT-01",
+        "JSON_FORMATT-03"
+      ],
       "locations": [
         {
           "file": "featuregraph/formatters/json_formatter.py",
@@ -463,7 +477,10 @@
       "name": "Write to file",
       "depends_on": [
         "JSON_FORMATT-01",
-        "MARKDOWN_FOR-02"
+        "JSON_FORMATT-02"
+      ],
+      "called_by": [
+        "CLI-01"
       ],
       "locations": [
         {
@@ -501,8 +518,6 @@
     "MARKDOWN_FOR-02": {
       "name": "Format",
       "called_by": [
-        "JSON_FORMATT-01",
-        "JSON_FORMATT-03",
         "MARKDOWN_FOR-01",
         "MARKDOWN_FOR-03"
       ],
@@ -548,8 +563,8 @@
         {
           "file": "featuregraph/hooks/git_hook.py",
           "lines": [
-            13,
-            35
+            16,
+            44
           ],
           "symbol": "GitHookManager",
           "type": "class"
@@ -565,8 +580,8 @@
         {
           "file": "featuregraph/hooks/git_hook.py",
           "lines": [
-            18,
-            26
+            21,
+            34
           ],
           "symbol": "install",
           "type": "function"
@@ -582,8 +597,8 @@
         {
           "file": "featuregraph/hooks/git_hook.py",
           "lines": [
-            30,
-            35
+            38,
+            44
           ],
           "symbol": "uninstall",
           "type": "function"
@@ -618,8 +633,8 @@
         {
           "file": "tests/test_scanner.py",
           "lines": [
-            9,
-            17
+            11,
+            19
           ],
           "symbol": "test_graph_dependencies",
           "type": "function"
@@ -637,27 +652,28 @@
         {
           "file": "tests/test_scanner.py",
           "lines": [
-            20,
-            23
+            22,
+            25
           ],
           "symbol": "test_orphan_detection",
           "type": "function"
         }
       ]
     },
-    "CALC-CALC_ADD": {
-      "name": "Add\", py_file.read_text())",
+    "TEST_SCANNER-03": {
+      "name": "Test duplicate ID warning",
       "depends_on": [
-        "ANNOTATOR-05"
+        "GRAPH-01",
+        "GRAPH-02"
       ],
       "locations": [
         {
-          "file": "tests/test_annotator.py",
+          "file": "tests/test_scanner.py",
           "lines": [
-            22,
-            35
+            28,
+            47
           ],
-          "symbol": "test_deterministic_ids_same_output",
+          "symbol": "test_same_id_across_files_warns_and_merges",
           "type": "function"
         }
       ]

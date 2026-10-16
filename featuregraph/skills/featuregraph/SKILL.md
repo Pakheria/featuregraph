@@ -10,7 +10,7 @@ license: MIT
 # FeatureGraph Skill
 
 FeatureGraph is a CLI tool that AST-scans a codebase and generates a 2-Tier Hierarchical topology index:
-- `.featuregraph/manifest.json` — Tier-1 ultra-compact directory (<100 tokens) of domains & feature summaries
+- `.featuregraph/manifest.json` — Tier-1 directory (one line per feature) of domains & feature summaries
 - `.featuregraph/categories/<category>.json` — Tier-2 exact line maps (#Lstart-Lend) per domain
 - `.featuregraph/graph.md` — markdown table + Mermaid dependency diagram
 - `AGENTS.md` — AI circuit-breaker directive (read manifest first, stop scanning)
@@ -35,8 +35,8 @@ featuregraph init
 ```
 
 ### If EXISTS → 2-Tier Inspection Workflow (Max Token Efficiency)
-1. **Turn 1:** Read `.featuregraph/manifest.json` (**< 100 tokens**) to find which category owns the target feature.
-2. **Turn 2:** Read only that domain's file: `.featuregraph/categories/<category>.json` (**< 300 tokens**).
+1. **Turn 1:** Read `.featuregraph/manifest.json` to find which category owns the target feature.
+2. **Turn 2:** Read only that domain's file: `.featuregraph/categories/<category>.json`.
 3. **Turn 3:** Read and edit **ONLY** the exact line spans (`#Lstart-Lend`). Never do full-file exploratory reads.
 
 ### If EXISTS → Check staleness

@@ -67,6 +67,28 @@ class TestScannerWarnings(unittest.TestCase):
             self.assertNotIn("⚠ Skipped", stderr_output)
             self.assertIn("APP-01", graph.nodes)
 
+    def test_warnings_are_aggregated_into_one_line(self):
+        """Many untagged files produce a single summary warning, not one line per file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            for i in range(5):
+                (tmp_path / f"f{i}.py").write_text(f"def helper_{i}(): pass\n")
+            (tmp_path / "empty.py").write_text("")
+
+            stderr_capture = io.StringIO()
+            old_stderr = sys.stderr
+            sys.stderr = stderr_capture
+
+            try:
+                WorkspaceScanner(tmp_path).scan()
+            finally:
+                sys.stderr = old_stderr
+
+            stderr_output = stderr_capture.getvalue()
+            self.assertEqual(stderr_output.count("⚠"), 1)
+            self.assertIn("5 file(s)", stderr_output)
+            self.assertIn("(+2 more)", stderr_output)
+
 
 if __name__ == "__main__":
     unittest.main()

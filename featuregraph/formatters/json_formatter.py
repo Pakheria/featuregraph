@@ -50,8 +50,8 @@ class JSONFormatter:
     @staticmethod
     def format_manifest(graph_dict: Dict[str, Any]) -> str:
         """
-        Generates an ultra-compact Tier-1 manifest (< 100 tokens for small repos, < 500 for enterprise).
-        Only lists categories and their feature IDs -> summary names.
+        Generates the Tier-1 manifest: one line per feature, grouped by category.
+        Size scales linearly with feature count (~0.5 kB per 10 features).
         """
         categories = JSONFormatter.split_by_category(graph_dict)
         manifest_data = {
@@ -60,7 +60,7 @@ class JSONFormatter:
                 "version": _VERSION,
                 "total_features": len(graph_dict),
                 "total_categories": len(categories),
-                "instruction": "Read this manifest (<100 tokens) to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
+                "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
             },
             "categories": {
                 cat: {fid: fdata.get("name", fid) for fid, fdata in sorted(features.items())}

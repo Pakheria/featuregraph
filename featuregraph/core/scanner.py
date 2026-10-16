@@ -1,7 +1,8 @@
 import os
+import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import Iterator, List, Optional
 
 from .parser_py import PythonFeatureParser
 from .parser_ts import TypeScriptFeatureParser
@@ -49,6 +50,45 @@ class WorkspaceScanner:
             return True
         return dir_name in self.ignore_patterns
 
+    def _git_file_list(self) -> Optional[List[str]]:
+        """Tracked + untracked-but-not-ignored files via git, or None when git is unavailable."""
+        try:
+            proc = subprocess.run(
+                ["git", "-C", str(self.root_dir), "ls-files", "-z",
+                 "--cached", "--others", "--exclude-standard"],
+                capture_output=True, text=True, timeout=30,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if proc.returncode != 0:
+            return None
+        return [p for p in proc.stdout.split("\0") if p]
+
+    def iter_files(self) -> Iterator[Path]:
+        """
+        Yields candidate source files. Inside a git repo uses git's file list so
+        .gitignore'd trees (vendor, target, .next, …) are never scanned; falls back
+        to a filtered os.walk elsewhere. Always honours .featureignore and hidden dirs.
+        """
+        git_files = self._git_file_list()
+        if git_files is not None:
+            for rel in sorted(git_files):
+                parts = Path(rel).parts
+                if any(p.startswith(".") or p in self.ignore_patterns for p in parts[:-1]):
+                    continue
+                if parts[-1].startswith("."):
+                    continue
+                path = self.root_dir / rel
+                if path.is_file():
+                    yield path
+            return
+
+        for root, dirs, files in os.walk(self.root_dir, topdown=True):
+            dirs[:] = sorted(d for d in dirs if not self._should_ignore_dir(d))
+            for file in sorted(files):
+                if not file.startswith("."):
+                    yield Path(root) / file
+
     # @feature [SCANNER-03] Scan
     def scan(self) -> FeatureGraph:
         graph = FeatureGraph()
@@ -56,41 +96,50 @@ class WorkspaceScanner:
 
         # Pass 1: Parse all files & index defined symbols
         scanned_files = []
+        unparsed: List[str] = []
 
-        for root, dirs, files in os.walk(self.root_dir, topdown=True):
-            dirs[:] = [d for d in dirs if not self._should_ignore_dir(d)]
+        for path in self.iter_files():
+            rel_path = path.relative_to(self.root_dir)
 
-            for file in files:
-                if file.startswith("."):
-                    continue
+            try:
+                if path.stat().st_size == 0:
+                    continue  # empty files (e.g. __init__.py) are not "unparsed"
+            except OSError:
+                continue
 
-                path = Path(root) / file
-                rel_path = path.relative_to(self.root_dir)
+            if path.suffix == ".py":
+                parsed = PythonFeatureParser.parse_file(path)
+            elif path.suffix in [".ts", ".tsx", ".js", ".jsx"]:
+                parsed = TypeScriptFeatureParser.parse_file(path)
+            elif GenericFeatureParser.is_supported(path):
+                parsed = GenericFeatureParser.parse_file(path)
+            else:
+                continue
 
-                if path.suffix == ".py":
-                    parsed = PythonFeatureParser.parse_file(path)
-                elif path.suffix in [".ts", ".tsx", ".js", ".jsx"]:
-                    parsed = TypeScriptFeatureParser.parse_file(path)
-                elif GenericFeatureParser.is_supported(path):
-                    parsed = GenericFeatureParser.parse_file(path)
-                else:
-                    continue
+            if parsed:
+                resolver.register_feature_symbols(parsed)
+                scanned_files.append((path, rel_path, parsed))
+            else:
+                unparsed.append(str(rel_path))
 
-                if parsed:
-                    resolver.register_feature_symbols(parsed)
-                    scanned_files.append((path, rel_path, parsed))
-                else:
-                    try:
-                        content = path.read_text(encoding="utf-8", errors="replace")
-                        if content.strip():
-                            print(
-                                f"⚠ Skipped {rel_path}: no parseable features (syntax error or no @feature tags)",
-                                file=sys.stderr,
-                            )
-                    except OSError:
-                        pass
+        if unparsed:
+            sample = ", ".join(unparsed[:3])
+            suffix = f" (+{len(unparsed) - 3} more)" if len(unparsed) > 3 else ""
+            print(
+                f"⚠ {len(unparsed)} file(s) with no parseable features (untagged or syntax error): {sample}{suffix}",
+                file=sys.stderr,
+            )
 
         # Pass 2: Infer cross-feature dependencies & populate graph
+        if resolver.ambiguous_symbols:
+            sample = ", ".join(sorted(resolver.ambiguous_symbols)[:5])
+            suffix = "…" if len(resolver.ambiguous_symbols) > 5 else ""
+            print(
+                f"⚠ {len(resolver.ambiguous_symbols)} symbol name(s) defined by multiple features — "
+                f"bare-name edges skipped, qualified calls still resolved: {sample}{suffix}",
+                file=sys.stderr,
+            )
+
         for path, rel_path, parsed in scanned_files:
             inferred_deps = resolver.resolve_file_dependencies(path, parsed)
 

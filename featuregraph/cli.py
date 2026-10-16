@@ -36,10 +36,14 @@ def main():
     # Command: query
     query_parser = subparsers.add_parser("query", help="Query a specific feature ID and print its exact line ranges and dependencies")
     query_parser.add_argument("feature_id", help="Feature ID to query (e.g. AUTH-01)")
+    query_parser.add_argument("--dir", default=".", help="Project root containing .featuregraph/ (default: .)")
+    query_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output (for agents/CI)")
 
     # Command: search
     search_parser = subparsers.add_parser("search", help="Search features by symbol, name, or keyword")
     search_parser.add_argument("query", help="Query terms or symbol name (e.g. 'parser', 'auth')")
+    search_parser.add_argument("--dir", default=".", help="Project root containing .featuregraph/ (default: .)")
+    search_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output (for agents/CI)")
 
     # Command: hook
     hook_parser = subparsers.add_parser("hook", help="Install or remove git pre-commit hook")
@@ -111,15 +115,17 @@ def main():
         if not quiet:
             categories = JSONFormatter.split_by_category(graph_dict)
             print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
-            print(f"✓ Created 2-Tier Manifest: .featuregraph/manifest.json (<100 tokens)")
+            print(f"✓ Created 2-Tier Manifest: .featuregraph/manifest.json")
             print(f"✓ Created Category Chunks: .featuregraph/categories/ ({len(categories)} files)")
             print(f"✓ Created markdown graph:  {md_out.relative_to(root) if md_out.is_relative_to(root) else md_out}")
 
     elif args.command == "init":
         root = Path(".").resolve()
-        hook_installed = GitHookManager.install(root)
-        if hook_installed:
+        hook_status = GitHookManager.install(root)
+        if hook_status == "installed":
             print("✓ Installed git pre-commit hook.")
+        elif hook_status == "foreign-hook":
+            print("ℹ Skipped git hook: existing pre-commit hook found (not overwritten).")
         else:
             print("ℹ Skipped git hook (no .git directory found).")
 
@@ -139,7 +145,7 @@ def main():
 
 > 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**
 > When asked about features, architecture, onboarding, or where code lives:
-> 1. **READ `.featuregraph/manifest.json` (< 100 tokens)** to identify the domain category and feature IDs.
+> 1. **READ `.featuregraph/manifest.json`** to identify the domain category and feature IDs.
 > 2. **READ `.featuregraph/categories/<category>.json`** to get exact line spans (`#Lstart-Lend`).
 > 3. Read **ONLY** the specific lines required for the task.
 > Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.
@@ -161,11 +167,12 @@ def main():
 
     elif args.command == "query":
         import json
-        idx_file = Path(".featuregraph/index.json")
+        root = Path(args.dir).resolve()
+        idx_file = root / ".featuregraph" / "index.json"
         if not idx_file.exists():
-            idx_file = Path("FEATURE_INDEX.json")
+            idx_file = root / "FEATURE_INDEX.json"
         if not idx_file.exists():
-            print("Error: Feature index not found. Run 'featuregraph scan' first.")
+            print(f"Error: Feature index not found under {root}. Run 'featuregraph scan' first.")
             sys.exit(1)
 
         data = json.loads(idx_file.read_text(encoding="utf-8"))
@@ -175,26 +182,30 @@ def main():
             print(f"Feature '{feat_id}' not found in index.")
             sys.exit(1)
 
-        print(f"\n=======================================================")
-        print(f"  FEATURE: [{feat_id}] {feat.get('name', '')}")
-        print(f"=======================================================")
-        print(f"Description : {feat.get('description', 'N/A')}")
-        print(f"Depends On  : {', '.join(feat.get('depends_on', [])) or 'None'}")
-        print(f"Called By   : {', '.join(feat.get('called_by', [])) or 'None'}")
-        print("\nExact Line Locations:")
-        for loc in feat.get("locations", []):
-            lines = loc.get("lines") or [loc.get("start_line", 1), loc.get("end_line", 1)]
-            print(f"  • {loc['file']} #L{lines[0]}-L{lines[1]} ({loc.get('symbol', 'module')})")
-        print("=======================================================\n")
+        if args.json:
+            print(json.dumps({"id": feat_id, **feat}, indent=2))
+        else:
+            print(f"\n=======================================================")
+            print(f"  FEATURE: [{feat_id}] {feat.get('name', '')}")
+            print(f"=======================================================")
+            print(f"Description : {feat.get('description', 'N/A')}")
+            print(f"Depends On  : {', '.join(feat.get('depends_on', [])) or 'None'}")
+            print(f"Called By   : {', '.join(feat.get('called_by', [])) or 'None'}")
+            print("\nExact Line Locations:")
+            for loc in feat.get("locations", []):
+                lines = loc.get("lines") or [loc.get("start_line", 1), loc.get("end_line", 1)]
+                print(f"  • {loc['file']} #L{lines[0]}-L{lines[1]} ({loc.get('symbol', 'module')})")
+            print("=======================================================\n")
 
     elif args.command == "search":
         import json
 
-        manifest_file = Path(".featuregraph/manifest.json")
-        idx_file = Path(".featuregraph/index.json")
+        root = Path(args.dir).resolve()
+        manifest_file = root / ".featuregraph" / "manifest.json"
+        idx_file = root / ".featuregraph" / "index.json"
 
         if not manifest_file.exists() and not idx_file.exists():
-            print("Error: No .featuregraph index found. Run 'featuregraph scan' first.")
+            print(f"Error: No .featuregraph index found under {root}. Run 'featuregraph scan' first.")
             sys.exit(1)
 
         query_text = args.query
@@ -202,7 +213,7 @@ def main():
         q_words = set(q_lower.split())
 
         matched_features = []
-        cats_dir = Path(".featuregraph/categories")
+        cats_dir = root / ".featuregraph" / "categories"
         if cats_dir.is_dir():
             for cat_json in cats_dir.glob("*.json"):
                 cat_name = cat_json.stem
@@ -225,7 +236,12 @@ def main():
                 if any(w in text for w in q_words) or q_lower in text:
                     matched_features.append((cat_name, fid, fmeta))
 
-        if matched_features:
+        if args.json:
+            print(json.dumps(
+                [{"id": fid, "category": cat, **fmeta} for cat, fid, fmeta in matched_features],
+                indent=2,
+            ))
+        elif matched_features:
             by_cat = {}
             for cat, fid, fmeta in matched_features:
                 by_cat.setdefault(cat, []).append((fid, fmeta))
@@ -244,11 +260,18 @@ def main():
     elif args.command == "hook":
         root = Path(".").resolve()
         if args.uninstall:
-            GitHookManager.uninstall(root)
-            print("✓ Git pre-commit hook uninstalled.")
+            if GitHookManager.uninstall(root):
+                print("✓ Git pre-commit hook uninstalled.")
+            else:
+                print("ℹ No featuregraph-managed pre-commit hook found.")
         else:
-            GitHookManager.install(root)
-            print("✓ Git pre-commit hook installed.")
+            status = GitHookManager.install(root)
+            if status == "installed":
+                print("✓ Git pre-commit hook installed.")
+            elif status == "foreign-hook":
+                print("ℹ Existing pre-commit hook found — not overwritten.")
+            else:
+                print("ℹ No .git directory found.")
 
     elif args.command == "annotate":
         root = Path(getattr(args, "dir", ".")).resolve()
