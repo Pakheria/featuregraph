@@ -35,6 +35,14 @@ class MarkdownFormatter:
             loc_str = "<br>".join(loc_links) if loc_links else "—"
             rows.append(f"| **`{feat_id}`** | **{name}** | {desc or '—'} | {dep_str} | {call_str} | {loc_str} |")
 
+        isolated = [fid for fid, d in sorted(graph_dict.items())
+                    if not d.get("depends_on") and not d.get("called_by")]
+        isolated_line = ""
+        if isolated:
+            sample = ", ".join(f"`{f}`" for f in isolated[:10])
+            more = f" (+{len(isolated) - 10} more)" if len(isolated) > 10 else ""
+            isolated_line = f"\n**Isolated features** (no dependencies, no dependents — verify intent): {sample}{more}"
+
         mermaid_block = ""
         if mermaid_edges:
             mermaid_block = "```mermaid\ngraph TD\n" + "\n".join(mermaid_edges[:40]) + "\n```\n\n---\n"  # cap at 40 edges for readable Mermaid output
@@ -53,7 +61,7 @@ class MarkdownFormatter:
 
 | Feature ID | Feature Name | Description | Depends On | Called By | Exact Line References |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-""" + "\n".join(rows) + """
+""" + "\n".join(rows) + isolated_line + """
 
 ---
 

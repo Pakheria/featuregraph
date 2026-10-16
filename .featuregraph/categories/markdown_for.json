@@ -13,7 +13,7 @@
         "file": "featuregraph/formatters/markdown_formatter.py",
         "lines": [
           5,
-          72
+          80
         ],
         "symbol": "MarkdownFormatter",
         "type": "class"
@@ -31,7 +31,7 @@
         "file": "featuregraph/formatters/markdown_formatter.py",
         "lines": [
           10,
-          66
+          74
         ],
         "symbol": "format",
         "type": "function"
@@ -51,8 +51,8 @@
       {
         "file": "featuregraph/formatters/markdown_formatter.py",
         "lines": [
-          70,
-          72
+          78,
+          80
         ],
         "symbol": "write_to_file",
         "type": "function"

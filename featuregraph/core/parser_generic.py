@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
-DEPENDS_TAG_REGEX = re.compile(r"@depends\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
+DEPENDS_TAG_REGEX = re.compile(r"@depends(?:_on)?\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 # Tags are only honoured on real comment lines — strings must not create features
 COMMENT_LINE_REGEX = re.compile(r"^\s*(?://|/\*|\*|#)")
 

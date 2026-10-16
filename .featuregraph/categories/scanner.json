@@ -22,7 +22,7 @@
         "file": "featuregraph/core/scanner.py",
         "lines": [
           19,
-          164
+          180
         ],
         "symbol": "WorkspaceScanner",
         "type": "class"
@@ -68,7 +68,7 @@
         "file": "featuregraph/core/scanner.py",
         "lines": [
           93,
-          164
+          180
         ],
         "symbol": "scan",
         "type": "function"

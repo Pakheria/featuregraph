@@ -3,10 +3,13 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
-DEPENDS_TAG_REGEX = re.compile(r"@depends\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
+DEPENDS_TAG_REGEX = re.compile(r"@depends(?:_on)?\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 # Tags are only honoured on real comment lines — strings must not create features
 COMMENT_LINE_REGEX = re.compile(r"^\s*(?://|/\*|\*|#)")
 COMPONENT_EXPORT_REGEX = re.compile(r"export\s+(?:const|function|class)\s+([A-Za-z0-9_]+)", re.MULTILINE)
+# ponytail: fixed-window end estimate — overshoots into the next component and clips long ones, which
+# bleeds token-derived deps across components. Exact JS/TS ranges need tree-sitter; brace heuristics
+# break on JSX/template/regex literals. Add the dep only if slicing precision ever matters.
 TS_END_LINE_LOOKAHEAD = 35  # max lines scanned forward as component end estimate
 
 # @feature [PARSER_TS-01] Type script feature parser

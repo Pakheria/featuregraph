@@ -161,5 +161,21 @@ class WorkspaceScanner:
                     "locations": item_loc
                 })
 
+        # Explicit @depends tags may point at features that do not exist (typo, rename, deletion).
+        # Inferred deps can't dangle — the resolver only knows registered feature IDs.
+        unresolved = sorted({
+            (feat_id, dep)
+            for feat_id, deps in graph.edges.items()
+            for dep in deps
+            if dep not in graph.nodes
+        })
+        if unresolved:
+            sample = ", ".join(f"{feat} → {dep}" for feat, dep in unresolved[:3])
+            suffix = "…" if len(unresolved) > 3 else ""
+            print(
+                f"⚠ {len(unresolved)} unresolved @depends reference(s) — no such feature: {sample}{suffix}",
+                file=sys.stderr,
+            )
+
         return graph
 
