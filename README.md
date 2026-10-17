@@ -23,7 +23,7 @@ FeatureGraph is engineered around four core metrics:
 1. **2-Tier Hierarchical Token Budget:** Compact `manifest.json` (one line per feature — ~0.5 kB per 10 features) lets agents pinpoint domain categories, then read only that domain's file `categories/<domain>.json` (typically 150–2,000 bytes) before slicing exact lines.
 2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function calls, type references, and component usages to wire `depends_on` and `called_by` with zero manual effort.
 3. **Line-Exact Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature.
-4. **Sub-Second to Fast Scan Speed:** Optimized single-pass line-interval AST mapping scans thousands of symbols in seconds.
+4. **Sub-Second Scan Speed:** Optimized two-pass AST mapping — 1,000 files scanned in ~0.1 s (measured).
 
 ```text
 AI Coding Agent / Developer
@@ -50,7 +50,7 @@ AI Coding Agent / Developer
 | **Dependency Resolution** | ❌ None or Manual only | **✅ Automated AST 2-Pass Call-Graph Inference** |
 | **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`.featuregraph/index.json`)** |
 | **Enterprise Repo Size (200–500+ features)** | 10MB – 25MB+ | **100KB – 350KB (`.featuregraph/index.json`)** |
-| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **< 150 to 4,500 tokens (95%+ savings)** |
+| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **≈500 – 8,000 tokens (manifest + one domain chunk)** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
 | **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
 | **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
@@ -66,17 +66,21 @@ FeatureGraph does **not** require manual `@depends` comments to build a real dep
 
 1. **Pass 1 (Symbol Indexing):** Scans all codebase files and maps defined functions, classes, and components to their Feature IDs.
 2. **Pass 2 (AST Call-Site Inference):** Analyzes call-sites, type references, and JSX usage inside each feature's line boundaries.
-3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges and generates Mermaid DAGs in `.featuregraph/graph.md`.
+3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges, generates Mermaid DAGs in `.featuregraph/graph.md`, and lists isolated features (no deps, no callers) for dead-code review.
+4. **Manual Overrides & Trust Checks:** `@depends` (or `@depends_on`) tags add explicit edges; dangling references and names defined by multiple features are warned about at scan time instead of being silently guessed.
 
 ---
 
-## 🚨 Skipped Files
+## 🚨 Scan Warnings
 
-Files with syntax errors or no `@feature` tags are summarized in a single stderr warning per scan:
+Warnings are aggregated to one line each per scan:
 
 ```bash
 ⚠ 6 file(s) with no parseable features (untagged or syntax error): src/legacy.py, … (+3 more)
+⚠ 1 unresolved @depends reference(s) — no such feature: DANGLE-01 → GHOST-77
 ```
+
+Ambiguous symbols (one name defined by multiple features) are reported the same way; bare-name edges for those are skipped rather than guessed.
 
 ---
 
@@ -124,6 +128,8 @@ featuregraph skill --global
 - **Google Antigravity & Gemini CLI** (`~/.gemini/config/skills/featuregraph/SKILL.md`)
 - **Anthropic Claude Code** (`~/.claude/skills/featuregraph/SKILL.md`)
 - **Cursor IDE** (`~/.cursor/skills/featuregraph/SKILL.md`)
+- **OpenCode** (`~/.config/opencode/skills/featuregraph/SKILL.md`)
+- **Shared agent config** (`~/.agents/skills/featuregraph/SKILL.md`)
 
 ---
 
@@ -185,7 +191,7 @@ featuregraph search "parser" --dir ./app --json
 
 # Install or print AI agent skills
 featuregraph skill --install         # install workspace skill (.agents/skills/featuregraph)
-featuregraph skill --global          # install globally (~/.gemini, ~/.claude, ~/.cursor)
+featuregraph skill --global          # install globally (~/.agents, ~/.gemini, ~/.claude, ~/.cursor, ~/.config/opencode)
 featuregraph skill --show            # output SKILL.md definition
 
 # Manage automated pre-commit hook
