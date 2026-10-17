@@ -20,7 +20,7 @@
 
 FeatureGraph is engineered around four core metrics:
 
-1. **2-Tier Hierarchical Token Budget:** Compact `manifest.json` (one line per feature — ~0.5 kB per 10 features) lets agents pinpoint domain categories, then read only that domain's file `categories/<domain>.json` (typically 150–2,000 bytes) before slicing exact lines.
+1. **2-Tier Hierarchical Token Budget:** Compact `manifest.json` (one line per feature — 30–75 bytes per feature, measured) lets agents pinpoint domain categories, then read only that domain's file `categories/<domain>.json` (typically 150–2,000 bytes) before slicing exact lines.
 2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function calls, type references, and component usages to wire `depends_on` and `called_by` with zero manual effort.
 3. **Line-Exact Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature.
 4. **Sub-Second Scan Speed:** Optimized two-pass AST mapping — 1,000 files scanned in ~0.1 s (measured).
@@ -48,15 +48,25 @@ AI Coding Agent / Developer
 | Dimension | Traditional Graph Tools (e.g. Graphify) | **FeatureGraph** |
 | :--- | :--- | :--- |
 | **Dependency Resolution** | ❌ None or Manual only | **✅ Automated AST 2-Pass Call-Graph Inference** |
-| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`.featuregraph/index.json`)** |
-| **Enterprise Repo Size (200–500+ features)** | 10MB – 25MB+ | **100KB – 350KB (`.featuregraph/index.json`)** |
-| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **≈500 – 8,000 tokens (manifest + one domain chunk)** |
+| **Small Repo Index Size (20–50 features)** | 1MB – 5MB dense `graph.json` | **5KB – 20KB (`.featuregraph/index.json`)** |
+| **Enterprise Repo Index Size (500–5,000+ features)** | 10MB – 25MB+ | **125KB – 2MB (≈0.25–0.4 KB/feature, measured)** |
+| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **Manifest + one category chunk ≈ 0.03–0.16 KB/feature (measured) — full index never read** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
 | **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
 | **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
 | **Multi-Language Support** | Limited | **✅ Python, TS/JS, Go, Rust, Java, C#, PHP, Ruby, etc.** |
 | **Zero-Config Git Auto-Sync**| ❌ Manual re-runs | **✅ Instant Pre-Commit Git Hook** |
 | **Visual Architecture DAG**  | Basic | **✅ Native Mermaid Dependency Graph (`graph.md`)** |
+
+### 📏 Index Sizing Across Project Sizes (measured)
+
+| Project | Features | Manifest (Tier 1) | Full index | One category chunk | Scan |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Small mixed test fixture (py/ts/go) | 12 | 0.9 KB | 4 KB | ~0.4 KB | 0.08 s |
+| This repository | 34 | 2 KB | 14 KB | ~1 KB (14 categories) | 0.1 s |
+| Synthetic 1,000-file repo | 1,000 | 31 KB | 254 KB | 127 KB (only 2 categories) | 0.1 s |
+
+Scaling is linear in feature count: **manifest ≈ 30–75 bytes/feature**, **full index ≈ 0.25–0.4 KB/feature**, **scan ≈ 0.1 s per 1,000 files**. Agents read the manifest plus the single category chunk they need — the full index never enters context. Uniform tags in the synthetic repo concentrate 500 features per category (a worst case); real projects spread features across more domains, shrinking chunks.
 
 ---
 
