@@ -1,7 +1,7 @@
 {
   "_meta": {
     "generator": "featuregraph",
-    "version": "unknown",
+    "version": "0.1.0",
     "total_features": 34,
     "total_categories": 13,
     "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."

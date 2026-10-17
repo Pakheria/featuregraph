@@ -3,11 +3,8 @@ import re
 from pathlib import Path
 from typing import Dict, Any
 
-try:
-    from importlib.metadata import version as _pkg_version
-    _VERSION = _pkg_version("featuregraph")
-except Exception:
-    _VERSION = "unknown"
+# Single source of truth so index output is identical whether run as a script or installed
+from featuregraph import __version__ as _VERSION
 
 # @feature [JSON_FORMATT-01] Jsonformatter
 class JSONFormatter:

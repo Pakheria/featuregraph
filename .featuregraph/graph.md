@@ -73,9 +73,9 @@ graph TD
 | **`GRAPH-02`** | **Add feature** | — | — | `[SCANNER-01]` `[SCANNER-03]` `[TEST_SCANNER-01]` `[TEST_SCANNER-02]` `[TEST_SCANNER-03]` | [`featuregraph/core/graph.py#L19-L49`](featuregraph/core/graph.py#L19-L49) |
 | **`GRAPH-03`** | **Get orphans** | — | — | `[TEST_SCANNER-02]` | [`featuregraph/core/graph.py#L52-L58`](featuregraph/core/graph.py#L52-L58) |
 | **`GRAPH-04`** | **To dict** | — | — | `[CLI-01]` `[TEST_SCANNER-01]` | [`featuregraph/core/graph.py#L61-L82`](featuregraph/core/graph.py#L61-L82) |
-| **`JSON_FORMATT-01`** | **Jsonformatter** | — | `[JSON_FORMATT-02]` | `[CLI-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L13-L113`](featuregraph/formatters/json_formatter.py#L13-L113) |
-| **`JSON_FORMATT-02`** | **Format** | — | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L74-L84`](featuregraph/formatters/json_formatter.py#L74-L84) |
-| **`JSON_FORMATT-03`** | **Write to file** | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-02]` | `[CLI-01]` | [`featuregraph/formatters/json_formatter.py#L88-L91`](featuregraph/formatters/json_formatter.py#L88-L91) |
+| **`JSON_FORMATT-01`** | **Jsonformatter** | — | `[JSON_FORMATT-02]` | `[CLI-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L10-L110`](featuregraph/formatters/json_formatter.py#L10-L110) |
+| **`JSON_FORMATT-02`** | **Format** | — | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L71-L81`](featuregraph/formatters/json_formatter.py#L71-L81) |
+| **`JSON_FORMATT-03`** | **Write to file** | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-02]` | `[CLI-01]` | [`featuregraph/formatters/json_formatter.py#L85-L88`](featuregraph/formatters/json_formatter.py#L85-L88) |
 | **`MARKDOWN_FOR-01`** | **Markdown formatter** | — | `[MARKDOWN_FOR-02]` | `[CLI-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/markdown_formatter.py#L5-L80`](featuregraph/formatters/markdown_formatter.py#L5-L80) |
 | **`MARKDOWN_FOR-02`** | **Format** | — | — | `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/markdown_formatter.py#L10-L74`](featuregraph/formatters/markdown_formatter.py#L10-L74) |
 | **`MARKDOWN_FOR-03`** | **Write to file** | — | `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-02]` | `[CLI-01]` | [`featuregraph/formatters/markdown_formatter.py#L78-L80`](featuregraph/formatters/markdown_formatter.py#L78-L80) |
