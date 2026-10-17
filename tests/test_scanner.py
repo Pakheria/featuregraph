@@ -1,3 +1,5 @@
+import io
+import sys
 import unittest
 from pathlib import Path
 from featuregraph.core.parser_py import PythonFeatureParser
@@ -21,6 +23,40 @@ class TestFeatureGraph(unittest.TestCase):
         g = FeatureGraph()
         g.add_feature("ORPHAN-01", {"name": "Dead Feature", "depends_on": []})
         self.assertIn("ORPHAN-01", g.get_orphans())
+
+    # @feature [TEST_SCANNER-03] Test duplicate ID warning
+    def test_same_id_across_files_warns_and_merges(self):
+        g = FeatureGraph()
+        g.add_feature("DUP-01", {
+            "name": "One", "depends_on": [],
+            "locations": [{"file": "a.py", "lines": [1, 2], "symbol": "one"}],
+        })
+        captured = io.StringIO()
+        old_stderr = sys.stderr
+        sys.stderr = captured
+        try:
+            g.add_feature("DUP-01", {
+                "name": "Two", "depends_on": [],
+                "locations": [{"file": "b.py", "lines": [3, 4], "symbol": "two"}],
+            })
+        finally:
+            sys.stderr = old_stderr
+
+        self.assertIn("DUP-01", captured.getvalue())
+        self.assertIn("b.py", captured.getvalue())
+        self.assertEqual(len(g.nodes["DUP-01"]["locations"]), 2)
+
+    def test_identical_location_merge_is_silent(self):
+        g = FeatureGraph()
+        g.add_feature("ONE-01", {"name": "One", "locations": [{"file": "a.py", "lines": [1, 2], "symbol": "one"}]})
+        captured = io.StringIO()
+        old_stderr = sys.stderr
+        sys.stderr = captured
+        try:
+            g.add_feature("ONE-01", {"name": "One", "locations": [{"file": "a.py", "lines": [1, 2], "symbol": "one"}]})
+        finally:
+            sys.stderr = old_stderr
+        self.assertEqual(captured.getvalue(), "")
 
 if __name__ == "__main__":
     unittest.main()

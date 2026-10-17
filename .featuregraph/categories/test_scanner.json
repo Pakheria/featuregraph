@@ -10,8 +10,8 @@
       {
         "file": "tests/test_scanner.py",
         "lines": [
-          9,
-          17
+          11,
+          19
         ],
         "symbol": "test_graph_dependencies",
         "type": "function"
@@ -29,10 +29,28 @@
       {
         "file": "tests/test_scanner.py",
         "lines": [
-          20,
-          23
+          22,
+          25
         ],
         "symbol": "test_orphan_detection",
+        "type": "function"
+      }
+    ]
+  },
+  "TEST_SCANNER-03": {
+    "name": "Test duplicate ID warning",
+    "depends_on": [
+      "GRAPH-01",
+      "GRAPH-02"
+    ],
+    "locations": [
+      {
+        "file": "tests/test_scanner.py",
+        "lines": [
+          28,
+          47
+        ],
+        "symbol": "test_same_id_across_files_warns_and_merges",
         "type": "function"
       }
     ]

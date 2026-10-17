@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
-DEPENDS_TAG_REGEX = re.compile(r"@depends\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
+DEPENDS_TAG_REGEX = re.compile(r"@depends(?:_on)?\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 
 # @feature [PARSER_PY-01] Python feature parser
 class PythonFeatureParser:
@@ -21,6 +21,22 @@ class PythonFeatureParser:
             source = file_path.read_text(encoding="utf-8")
             tree = ast.parse(source, filename=str(file_path))
             lines = source.splitlines()
+
+            # Map method nodes to their enclosing class path (for qualified symbol resolution)
+            parent_class: Dict[int, str] = {}
+
+            def visit(node, prefix: str):
+                for child in ast.iter_child_nodes(node):
+                    if isinstance(child, ast.ClassDef):
+                        visit(child, f"{prefix}{child.name}.")
+                    elif isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        if prefix:
+                            parent_class[id(child)] = prefix.rstrip(".")
+                        visit(child, "")  # nested defs inside methods are not methods
+                    else:
+                        visit(child, prefix)
+
+            visit(tree, "")
 
             # 1. AST Node Traversal
             for node in ast.walk(tree):
@@ -40,10 +56,12 @@ class PythonFeatureParser:
                 for i in range(start_line - 2, max(-1, start_line - 8), -1):
                     if i < len(lines):
                         line_str = lines[i].strip()
-                        if not feat_match:
-                            feat_match = FEATURE_TAG_REGEX.search(line_str)
-                        if not dep_match:
-                            dep_match = DEPENDS_TAG_REGEX.search(line_str)
+                        # Only real comment lines count — string literals must not create features
+                        if line_str.startswith("#"):
+                            if not feat_match:
+                                feat_match = FEATURE_TAG_REGEX.search(line_str)
+                            if not dep_match:
+                                dep_match = DEPENDS_TAG_REGEX.search(line_str)
                         if line_str and not line_str.startswith("#") and not line_str.startswith("@"):
                             break
 
@@ -53,6 +71,7 @@ class PythonFeatureParser:
                     dep_match = DEPENDS_TAG_REGEX.search(docstring)
 
                 node_name = getattr(node, "name", "")
+                node_qual = f"{parent_class[id(node)]}.{node_name}" if id(node) in parent_class else node_name
                 deps = []
                 if dep_match:
                     raw_deps = dep_match.group(1).split(",")
@@ -66,6 +85,7 @@ class PythonFeatureParser:
                         "feature_id": feat_id,
                         "name": desc,
                         "symbol": node_name,
+                        "qualname": node_qual,
                         "type": "class" if isinstance(node, ast.ClassDef) else "function",
                         "start_line": start_line,
                         "end_line": end_line,
@@ -81,6 +101,7 @@ class PythonFeatureParser:
                                 "feature_id": f"ROUTE-{node_name.upper()}",
                                 "name": f"API Endpoint `{node_name}` ({dec_src})",
                                 "symbol": node_name,
+                                "qualname": node_qual,
                                 "type": "endpoint",
                                 "start_line": start_line,
                                 "end_line": end_line,

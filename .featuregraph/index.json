@@ -2,7 +2,7 @@
   "_meta": {
     "generator": "featuregraph",
     "version": "0.1.0",
-    "total_features": 35,
+    "total_features": 34,
     "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
   },
   "features": {
@@ -15,9 +15,8 @@
         "GIT_HOOK-02",
         "GIT_HOOK-03",
         "GRAPH-04",
-        "HTML_VISUALI-01",
-        "HTML_VISUALI-02",
         "JSON_FORMATT-01",
+        "JSON_FORMATT-03",
         "MARKDOWN_FOR-01",
         "MARKDOWN_FOR-03",
         "SCANNER-01",
@@ -29,8 +28,8 @@
         {
           "file": "featuregraph/cli.py",
           "lines": [
-            20,
-            344
+            19,
+            350
           ],
           "symbol": "main",
           "type": "function"
@@ -40,7 +39,6 @@
     "ANNOTATOR-01": {
       "name": "Suggestion",
       "called_by": [
-        "ANNOTATOR-02",
         "ANNOTATOR-03",
         "ANNOTATOR-04",
         "ANNOTATOR-05"
@@ -49,8 +47,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            38,
-            45
+            45,
+            52
           ],
           "symbol": "Suggestion",
           "type": "class"
@@ -59,20 +57,17 @@
     },
     "ANNOTATOR-02": {
       "name": "Suggest python",
-      "depends_on": [
-        "ANNOTATOR-01"
-      ],
       "called_by": [
-        "ANNOTATOR-05"
+        "ANNOTATOR-03"
       ],
       "locations": [
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            105,
-            149
+            112,
+            118
           ],
-          "symbol": "suggest_python",
+          "symbol": "_next_feat_id",
           "type": "function"
         }
       ]
@@ -80,7 +75,8 @@
     "ANNOTATOR-03": {
       "name": "Suggest typescript",
       "depends_on": [
-        "ANNOTATOR-01"
+        "ANNOTATOR-01",
+        "ANNOTATOR-02"
       ],
       "called_by": [
         "ANNOTATOR-05"
@@ -89,8 +85,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            165,
-            201
+            181,
+            217
           ],
           "symbol": "suggest_typescript",
           "type": "function"
@@ -109,8 +105,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            268,
-            304
+            284,
+            320
           ],
           "symbol": "apply_suggestions",
           "type": "function"
@@ -121,9 +117,9 @@
       "name": "Collect suggestions",
       "depends_on": [
         "ANNOTATOR-01",
-        "ANNOTATOR-02",
         "ANNOTATOR-03",
-        "PARSER_GENERIC-01"
+        "PARSER_GENERIC-01",
+        "SCANNER-01"
       ],
       "called_by": [
         "CLI-01"
@@ -132,8 +128,8 @@
         {
           "file": "featuregraph/core/annotator.py",
           "lines": [
-            318,
-            357
+            328,
+            366
           ],
           "symbol": "collect_suggestions",
           "type": "function"
@@ -151,7 +147,7 @@
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
             27,
-            128
+            155
           ],
           "symbol": "DependencyResolver",
           "type": "class"
@@ -168,8 +164,8 @@
         {
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
-            37,
-            43
+            39,
+            48
           ],
           "symbol": "register_feature_symbols",
           "type": "function"
@@ -186,8 +182,8 @@
         {
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
-            46,
-            69
+            72,
+            95
           ],
           "symbol": "resolve_file_dependencies",
           "type": "function"
@@ -200,14 +196,15 @@
         "SCANNER-01",
         "SCANNER-03",
         "TEST_SCANNER-01",
-        "TEST_SCANNER-02"
+        "TEST_SCANNER-02",
+        "TEST_SCANNER-03"
       ],
       "locations": [
         {
           "file": "featuregraph/core/graph.py",
           "lines": [
-            4,
-            68
+            10,
+            82
           ],
           "symbol": "FeatureGraph",
           "type": "class"
@@ -220,14 +217,15 @@
         "SCANNER-01",
         "SCANNER-03",
         "TEST_SCANNER-01",
-        "TEST_SCANNER-02"
+        "TEST_SCANNER-02",
+        "TEST_SCANNER-03"
       ],
       "locations": [
         {
           "file": "featuregraph/core/graph.py",
           "lines": [
-            13,
-            35
+            19,
+            49
           ],
           "symbol": "add_feature",
           "type": "function"
@@ -243,8 +241,8 @@
         {
           "file": "featuregraph/core/graph.py",
           "lines": [
-            38,
-            44
+            52,
+            58
           ],
           "symbol": "get_orphans",
           "type": "function"
@@ -261,8 +259,8 @@
         {
           "file": "featuregraph/core/graph.py",
           "lines": [
-            47,
-            68
+            61,
+            82
           ],
           "symbol": "to_dict",
           "type": "function"
@@ -280,8 +278,8 @@
         {
           "file": "featuregraph/core/parser_generic.py",
           "lines": [
-            59,
-            196
+            61,
+            198
           ],
           "symbol": "GenericFeatureParser",
           "type": "class"
@@ -299,7 +297,7 @@
           "file": "featuregraph/core/parser_py.py",
           "lines": [
             10,
-            95
+            116
           ],
           "symbol": "PythonFeatureParser",
           "type": "class"
@@ -308,12 +306,16 @@
     },
     "PARSER_PY-02": {
       "name": "Parse file",
+      "called_by": [
+        "SCANNER-01",
+        "SCANNER-03"
+      ],
       "locations": [
         {
           "file": "featuregraph/core/parser_py.py",
           "lines": [
             15,
-            95
+            116
           ],
           "symbol": "parse_file",
           "type": "function"
@@ -330,8 +332,8 @@
         {
           "file": "featuregraph/core/parser_ts.py",
           "lines": [
-            11,
-            62
+            16,
+            69
           ],
           "symbol": "TypeScriptFeatureParser",
           "type": "class"
@@ -348,8 +350,8 @@
         {
           "file": "featuregraph/core/parser_ts.py",
           "lines": [
-            16,
-            62
+            21,
+            69
           ],
           "symbol": "parse_file",
           "type": "function"
@@ -366,18 +368,20 @@
         "GRAPH-02",
         "PARSER_GENERIC-01",
         "PARSER_PY-01",
+        "PARSER_PY-02",
         "PARSER_TS-01",
         "PARSER_TS-02"
       ],
       "called_by": [
+        "ANNOTATOR-05",
         "CLI-01"
       ],
       "locations": [
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            17,
-            104
+            19,
+            180
           ],
           "symbol": "WorkspaceScanner",
           "type": "class"
@@ -393,8 +397,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            26,
-            36
+            28,
+            38
           ],
           "symbol": "detect_subprojects",
           "type": "function"
@@ -411,6 +415,7 @@
         "GRAPH-02",
         "PARSER_GENERIC-01",
         "PARSER_PY-01",
+        "PARSER_PY-02",
         "PARSER_TS-01",
         "PARSER_TS-02"
       ],
@@ -421,44 +426,10 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            52,
-            104
+            93,
+            180
           ],
           "symbol": "scan",
-          "type": "function"
-        }
-      ]
-    },
-    "HTML_VISUALI-01": {
-      "name": "Htmlvisualizer",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/html_visualizer.py",
-          "lines": [
-            6,
-            159
-          ],
-          "symbol": "HTMLVisualizer",
-          "type": "class"
-        }
-      ]
-    },
-    "HTML_VISUALI-02": {
-      "name": "Generate",
-      "called_by": [
-        "CLI-01"
-      ],
-      "locations": [
-        {
-          "file": "featuregraph/formatters/html_visualizer.py",
-          "lines": [
-            11,
-            159
-          ],
-          "symbol": "generate",
           "type": "function"
         }
       ]
@@ -466,7 +437,7 @@
     "JSON_FORMATT-01": {
       "name": "Jsonformatter",
       "depends_on": [
-        "MARKDOWN_FOR-02"
+        "JSON_FORMATT-02"
       ],
       "called_by": [
         "CLI-01",
@@ -476,8 +447,8 @@
         {
           "file": "featuregraph/formatters/json_formatter.py",
           "lines": [
-            13,
-            113
+            10,
+            110
           ],
           "symbol": "JSONFormatter",
           "type": "class"
@@ -486,12 +457,16 @@
     },
     "JSON_FORMATT-02": {
       "name": "Format",
+      "called_by": [
+        "JSON_FORMATT-01",
+        "JSON_FORMATT-03"
+      ],
       "locations": [
         {
           "file": "featuregraph/formatters/json_formatter.py",
           "lines": [
-            74,
-            84
+            71,
+            81
           ],
           "symbol": "format",
           "type": "function"
@@ -502,14 +477,17 @@
       "name": "Write to file",
       "depends_on": [
         "JSON_FORMATT-01",
-        "MARKDOWN_FOR-02"
+        "JSON_FORMATT-02"
+      ],
+      "called_by": [
+        "CLI-01"
       ],
       "locations": [
         {
           "file": "featuregraph/formatters/json_formatter.py",
           "lines": [
-            88,
-            91
+            85,
+            88
           ],
           "symbol": "write_to_file",
           "type": "function"
@@ -530,7 +508,7 @@
           "file": "featuregraph/formatters/markdown_formatter.py",
           "lines": [
             5,
-            72
+            80
           ],
           "symbol": "MarkdownFormatter",
           "type": "class"
@@ -540,8 +518,6 @@
     "MARKDOWN_FOR-02": {
       "name": "Format",
       "called_by": [
-        "JSON_FORMATT-01",
-        "JSON_FORMATT-03",
         "MARKDOWN_FOR-01",
         "MARKDOWN_FOR-03"
       ],
@@ -550,7 +526,7 @@
           "file": "featuregraph/formatters/markdown_formatter.py",
           "lines": [
             10,
-            66
+            74
           ],
           "symbol": "format",
           "type": "function"
@@ -570,8 +546,8 @@
         {
           "file": "featuregraph/formatters/markdown_formatter.py",
           "lines": [
-            70,
-            72
+            78,
+            80
           ],
           "symbol": "write_to_file",
           "type": "function"
@@ -587,8 +563,8 @@
         {
           "file": "featuregraph/hooks/git_hook.py",
           "lines": [
-            13,
-            35
+            16,
+            44
           ],
           "symbol": "GitHookManager",
           "type": "class"
@@ -604,8 +580,8 @@
         {
           "file": "featuregraph/hooks/git_hook.py",
           "lines": [
-            18,
-            26
+            21,
+            34
           ],
           "symbol": "install",
           "type": "function"
@@ -621,8 +597,8 @@
         {
           "file": "featuregraph/hooks/git_hook.py",
           "lines": [
-            30,
-            35
+            38,
+            44
           ],
           "symbol": "uninstall",
           "type": "function"
@@ -638,8 +614,8 @@
         {
           "file": "featuregraph/skills/skill_manager.py",
           "lines": [
-            146,
-            183
+            9,
+            51
           ],
           "symbol": "SkillManager",
           "type": "class"
@@ -657,8 +633,8 @@
         {
           "file": "tests/test_scanner.py",
           "lines": [
-            9,
-            17
+            11,
+            19
           ],
           "symbol": "test_graph_dependencies",
           "type": "function"
@@ -676,10 +652,28 @@
         {
           "file": "tests/test_scanner.py",
           "lines": [
-            20,
-            23
+            22,
+            25
           ],
           "symbol": "test_orphan_detection",
+          "type": "function"
+        }
+      ]
+    },
+    "TEST_SCANNER-03": {
+      "name": "Test duplicate ID warning",
+      "depends_on": [
+        "GRAPH-01",
+        "GRAPH-02"
+      ],
+      "locations": [
+        {
+          "file": "tests/test_scanner.py",
+          "lines": [
+            28,
+            47
+          ],
+          "symbol": "test_same_id_across_files_warns_and_merges",
           "type": "function"
         }
       ]

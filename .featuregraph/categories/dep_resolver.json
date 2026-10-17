@@ -10,7 +10,7 @@
         "file": "featuregraph/core/dependency_resolver.py",
         "lines": [
           27,
-          128
+          155
         ],
         "symbol": "DependencyResolver",
         "type": "class"
@@ -27,8 +27,8 @@
       {
         "file": "featuregraph/core/dependency_resolver.py",
         "lines": [
-          37,
-          43
+          39,
+          48
         ],
         "symbol": "register_feature_symbols",
         "type": "function"
@@ -45,8 +45,8 @@
       {
         "file": "featuregraph/core/dependency_resolver.py",
         "lines": [
-          46,
-          69
+          72,
+          95
         ],
         "symbol": "resolve_file_dependencies",
         "type": "function"

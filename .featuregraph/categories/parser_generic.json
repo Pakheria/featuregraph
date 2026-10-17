@@ -10,8 +10,8 @@
       {
         "file": "featuregraph/core/parser_generic.py",
         "lines": [
-          59,
-          196
+          61,
+          198
         ],
         "symbol": "GenericFeatureParser",
         "type": "class"

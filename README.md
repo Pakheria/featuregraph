@@ -20,22 +20,22 @@
 
 FeatureGraph is engineered around four core metrics:
 
-1. **2-Tier Hierarchical Token Budget:** Ultra-compact `manifest.json` (<80 tokens) allows agents to pinpoint domain categories and read only domain files `categories/<domain>.json` (<300 tokens — **99%+ token savings**).
+1. **2-Tier Hierarchical Token Budget:** Compact `manifest.json` (one line per feature — ~0.5 kB per 10 features) lets agents pinpoint domain categories, then read only that domain's file `categories/<domain>.json` (typically 150–2,000 bytes) before slicing exact lines.
 2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function calls, type references, and component usages to wire `depends_on` and `called_by` with zero manual effort.
 3. **Line-Exact Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature.
-4. **Sub-Second to Fast Scan Speed:** Optimized single-pass line-interval AST mapping scans thousands of symbols in seconds.
+4. **Sub-Second Scan Speed:** Optimized two-pass AST mapping — 1,000 files scanned in ~0.1 s (measured).
 
 ```text
 AI Coding Agent / Developer
             │
             ▼
- [1. Reads .featuregraph/manifest.json] ───> Ultra-tiny directory (<80 tokens)
+ [1. Reads .featuregraph/manifest.json] ───> Tier-1 directory (1 line per feature)
             │
             ▼
- [2. Reads .featuregraph/categories/<domain>.json] ──> Exact domain map (<300 tokens)
+ [2. Reads .featuregraph/categories/<domain>.json] ──> Exact domain map
             │
             ▼
- [3. Slices Exact Code Only (#Lstart-Lend)] ────────> 95-99% Token Savings
+ [3. Slices Exact Code Only (#Lstart-Lend)] ────────> Fraction of full-file token cost
             │
             ▼
  [4. Commits Code] ─────────────────────────────────> Git Hook Auto-Syncs Line Map
@@ -48,15 +48,15 @@ AI Coding Agent / Developer
 | Dimension | Traditional Graph Tools (e.g. Graphify) | **FeatureGraph** |
 | :--- | :--- | :--- |
 | **Dependency Resolution** | ❌ None or Manual only | **✅ Automated AST 2-Pass Call-Graph Inference** |
-| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`FEATURE_INDEX.json`)** |
-| **Enterprise Repo Size (200–500+ features)** | 10MB – 25MB+ | **100KB – 350KB (`FEATURE_INDEX.json`)** |
-| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **< 150 to 4,500 tokens (95%+ savings)** |
+| **Small Repo Index Size (20–50 features)** | 2MB – 5MB (`graph.json`) | **2KB – 25KB (`.featuregraph/index.json`)** |
+| **Enterprise Repo Size (200–500+ features)** | 10MB – 25MB+ | **100KB – 350KB (`.featuregraph/index.json`)** |
+| **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **≈500 – 8,000 tokens (manifest + one domain chunk)** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
 | **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
 | **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
 | **Multi-Language Support** | Limited | **✅ Python, TS/JS, Go, Rust, Java, C#, PHP, Ruby, etc.** |
 | **Zero-Config Git Auto-Sync**| ❌ Manual re-runs | **✅ Instant Pre-Commit Git Hook** |
-| **Interactive HTML Visualizer**| Basic | **✅ Interactive Standalone Canvas DAG** |
+| **Visual Architecture DAG**  | Basic | **✅ Native Mermaid Dependency Graph (`graph.md`)** |
 
 ---
 
@@ -66,28 +66,32 @@ FeatureGraph does **not** require manual `@depends` comments to build a real dep
 
 1. **Pass 1 (Symbol Indexing):** Scans all codebase files and maps defined functions, classes, and components to their Feature IDs.
 2. **Pass 2 (AST Call-Site Inference):** Analyzes call-sites, type references, and JSX usage inside each feature's line boundaries.
-3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges and generates interactive Mermaid DAGs in `SYSTEM_FEATURE_GRAPH.md`.
+3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges, generates Mermaid DAGs in `.featuregraph/graph.md`, and lists isolated features (no deps, no callers) for dead-code review.
+4. **Manual Overrides & Trust Checks:** `@depends` (or `@depends_on`) tags add explicit edges; dangling references and names defined by multiple features are warned about at scan time instead of being silently guessed.
 
 ---
 
-## 🚨 Skipped Files
+## 🚨 Scan Warnings
 
-Files with syntax errors or no `@feature` tags print warnings to stderr:
+Warnings are aggregated to one line each per scan:
 
 ```bash
-⚠ Skipped broken.py: no parseable features (syntax error or no @feature tags)
+⚠ 6 file(s) with no parseable features (untagged or syntax error): src/legacy.py, … (+3 more)
+⚠ 1 unresolved @depends reference(s) — no such feature: DANGLE-01 → GHOST-77
 ```
 
+Ambiguous symbols (one name defined by multiple features) are reported the same way; bare-name edges for those are skipped rather than guessed.
+
 ---
 
-## ⚙️ JevRouter Model Override
+## ⚡ Fast AST Feature Search
 
-The `featuregraph search` command can use an OpenJev/Verdict model for semantic routing. Override the hardcoded default with `--jev-model` or the `FEATUREGRAPH_JEV_MODEL` env var:
+Search symbols and line ranges in <50ms without bloating your context window:
 
 ```bash
-featuregraph search "how is auth handled?" --jev-model /path/to/model
-# or
-FEATUREGRAPH_JEV_MODEL=/path/to/model featuregraph search "how is auth handled?"
+featuregraph search "parser"
+# Output gives exact file paths and surgical #Lstart-Lend ranges:
+# • featuregraph/core/parser_py.py #L10-L95 (PythonFeatureParser)
 ```
 
 ---
@@ -124,6 +128,8 @@ featuregraph skill --global
 - **Google Antigravity & Gemini CLI** (`~/.gemini/config/skills/featuregraph/SKILL.md`)
 - **Anthropic Claude Code** (`~/.claude/skills/featuregraph/SKILL.md`)
 - **Cursor IDE** (`~/.cursor/skills/featuregraph/SKILL.md`)
+- **OpenCode** (`~/.config/opencode/skills/featuregraph/SKILL.md`)
+- **Shared agent config** (`~/.agents/skills/featuregraph/SKILL.md`)
 
 ---
 
@@ -180,14 +186,13 @@ featuregraph scan --dir ./my-project --json index.json --md GRAPH.md --quiet
 
 # Query exact lines and dependencies for a specific feature ID
 featuregraph query AUTH-01
+featuregraph query AUTH-01 --json            # machine-readable output (agents / CI)
+featuregraph search "parser" --dir ./app --json
 
 # Install or print AI agent skills
 featuregraph skill --install         # install workspace skill (.agents/skills/featuregraph)
-featuregraph skill --global          # install globally (~/.gemini, ~/.claude, ~/.cursor)
+featuregraph skill --global          # install globally (~/.agents, ~/.gemini, ~/.claude, ~/.cursor, ~/.config/opencode)
 featuregraph skill --show            # output SKILL.md definition
-
-# Generate an interactive visual HTML DAG
-featuregraph visualize --out graph.html
 
 # Manage automated pre-commit hook
 featuregraph hook --install
@@ -201,7 +206,7 @@ featuregraph hook --uninstall
 When using FeatureGraph with AI coding agents (Antigravity, Claude Code, Gemini CLI, Cursor):
 
 1. **Auto-Discovery**: Agents discover the `/featuregraph` skill either from the repository (`.agents/skills/`) or their global configuration.
-2. **Circuit-Breaker Directive**: `AGENTS.md` instructs the agent to read `FEATURE_INDEX.json` on turn 1 rather than performing expensive recursive directory listings.
+2. **Circuit-Breaker Directive**: `AGENTS.md` instructs the agent to read `.featuregraph/manifest.json` on turn 1 rather than performing expensive recursive directory listings.
 3. **Exact Line Slicing**: The agent reads **only** the target feature's `#Lstart-Lend` span, preventing hallucinations and accidental deletion of cross-cutting invariants.
 
 ---

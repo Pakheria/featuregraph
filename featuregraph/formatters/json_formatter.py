@@ -3,11 +3,8 @@ import re
 from pathlib import Path
 from typing import Dict, Any
 
-try:
-    from importlib.metadata import version as _pkg_version
-    _VERSION = _pkg_version("featuregraph")
-except Exception:
-    _VERSION = "unknown"
+# Single source of truth so index output is identical whether run as a script or installed
+from featuregraph import __version__ as _VERSION
 
 # @feature [JSON_FORMATT-01] Jsonformatter
 class JSONFormatter:
@@ -50,8 +47,8 @@ class JSONFormatter:
     @staticmethod
     def format_manifest(graph_dict: Dict[str, Any]) -> str:
         """
-        Generates an ultra-compact Tier-1 manifest (< 100 tokens for small repos, < 500 for enterprise).
-        Only lists categories and their feature IDs -> summary names.
+        Generates the Tier-1 manifest: one line per feature, grouped by category.
+        Size scales linearly with feature count (~0.5 kB per 10 features).
         """
         categories = JSONFormatter.split_by_category(graph_dict)
         manifest_data = {
@@ -60,7 +57,7 @@ class JSONFormatter:
                 "version": _VERSION,
                 "total_features": len(graph_dict),
                 "total_categories": len(categories),
-                "instruction": "Read this manifest (<100 tokens) to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
+                "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
             },
             "categories": {
                 cat: {fid: fdata.get("name", fid) for fid, fdata in sorted(features.items())}

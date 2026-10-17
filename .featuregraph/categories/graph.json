@@ -5,14 +5,15 @@
       "SCANNER-01",
       "SCANNER-03",
       "TEST_SCANNER-01",
-      "TEST_SCANNER-02"
+      "TEST_SCANNER-02",
+      "TEST_SCANNER-03"
     ],
     "locations": [
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          4,
-          68
+          10,
+          82
         ],
         "symbol": "FeatureGraph",
         "type": "class"
@@ -25,14 +26,15 @@
       "SCANNER-01",
       "SCANNER-03",
       "TEST_SCANNER-01",
-      "TEST_SCANNER-02"
+      "TEST_SCANNER-02",
+      "TEST_SCANNER-03"
     ],
     "locations": [
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          13,
-          35
+          19,
+          49
         ],
         "symbol": "add_feature",
         "type": "function"
@@ -48,8 +50,8 @@
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          38,
-          44
+          52,
+          58
         ],
         "symbol": "get_orphans",
         "type": "function"
@@ -66,8 +68,8 @@
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          47,
-          68
+          61,
+          82
         ],
         "symbol": "to_dict",
         "type": "function"

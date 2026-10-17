@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import sys
+
+
+def _loc_key(loc: dict):
+    return (loc.get("file"), tuple(loc.get("lines") or [loc.get("start_line", 1), loc.get("end_line", 1)]), loc.get("symbol"))
+
 # @feature [GRAPH-01] Feature graph
 class FeatureGraph:
-    """Manages the directed acyclic feature dependency graph, detects cycles and orphaned features."""
+    """Manages the feature dependency graph, reverse edges, and orphan detection."""
 
     def __init__(self):
         self.nodes: Dict[str, Dict[str, Any]] = {}
@@ -19,9 +25,17 @@ class FeatureGraph:
             if feat_id not in self.reverse_edges:
                 self.reverse_edges[feat_id] = set()
         else:
-            # Merge locations
+            # Merge locations, but never silently: a reused ID across files is almost always a mistake
             existing_locs = self.nodes[feat_id].get("locations", [])
             new_locs = data.get("locations", [])
+            existing_keys = {_loc_key(loc) for loc in existing_locs}
+            for loc in new_locs:
+                if _loc_key(loc) not in existing_keys:
+                    print(
+                        f"⚠ Feature ID [{feat_id}] defined in multiple locations — merging: "
+                        f"{loc.get('file')} (symbol: {loc.get('symbol')})",
+                        file=sys.stderr,
+                    )
             self.nodes[feat_id]["locations"] = existing_locs + new_locs
             if not self.nodes[feat_id].get("name") and data.get("name"):
                 self.nodes[feat_id]["name"] = data.get("name")

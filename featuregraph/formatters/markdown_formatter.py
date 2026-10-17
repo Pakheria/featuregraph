@@ -35,6 +35,14 @@ class MarkdownFormatter:
             loc_str = "<br>".join(loc_links) if loc_links else "—"
             rows.append(f"| **`{feat_id}`** | **{name}** | {desc or '—'} | {dep_str} | {call_str} | {loc_str} |")
 
+        isolated = [fid for fid, d in sorted(graph_dict.items())
+                    if not d.get("depends_on") and not d.get("called_by")]
+        isolated_line = ""
+        if isolated:
+            sample = ", ".join(f"`{f}`" for f in isolated[:10])
+            more = f" (+{len(isolated) - 10} more)" if len(isolated) > 10 else ""
+            isolated_line = f"\n**Isolated features** (no dependencies, no dependents — verify intent): {sample}{more}"
+
         mermaid_block = ""
         if mermaid_edges:
             mermaid_block = "```mermaid\ngraph TD\n" + "\n".join(mermaid_edges[:40]) + "\n```\n\n---\n"  # cap at 40 edges for readable Mermaid output
@@ -53,14 +61,14 @@ class MarkdownFormatter:
 
 | Feature ID | Feature Name | Description | Depends On | Called By | Exact Line References |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-""" + "\n".join(rows) + """
+""" + "\n".join(rows) + isolated_line + """
 
 ---
 
 ## 3. Token-Efficient Reading Protocol
 
 When working on any feature:
-1. Lookup `FEATURE_INDEX.json` to get the exact line slice (`#Lstart-Lend`).
+1. Lookup `.featuregraph/manifest.json` to find category and exact line slice (`#Lstart-Lend`).
 2. Read **only** those lines with your editor tool.
 3. Check `[Depends On]` features before committing changes.
 """

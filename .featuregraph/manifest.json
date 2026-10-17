@@ -2,9 +2,9 @@
   "_meta": {
     "generator": "featuregraph",
     "version": "0.1.0",
-    "total_features": 35,
-    "total_categories": 14,
-    "instruction": "Read this manifest (<100 tokens) to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
+    "total_features": 34,
+    "total_categories": 13,
+    "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
   },
   "categories": {
     "annotator": {
@@ -32,10 +32,6 @@
       "GRAPH-02": "Add feature",
       "GRAPH-03": "Get orphans",
       "GRAPH-04": "To dict"
-    },
-    "html_visuali": {
-      "HTML_VISUALI-01": "Htmlvisualizer",
-      "HTML_VISUALI-02": "Generate"
     },
     "json_formatt": {
       "JSON_FORMATT-01": "Jsonformatter",
@@ -68,7 +64,8 @@
     },
     "test_scanner": {
       "TEST_SCANNER-01": "Test graph dependencies",
-      "TEST_SCANNER-02": "Test orphan detection"
+      "TEST_SCANNER-02": "Test orphan detection",
+      "TEST_SCANNER-03": "Test duplicate ID warning"
     }
   }
 }

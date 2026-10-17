@@ -35,6 +35,8 @@ import re
 from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
+from .scanner import WorkspaceScanner
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Types
 # ──────────────────────────────────────────────────────────────────────────────
@@ -322,12 +324,6 @@ def apply_suggestions(suggestions: List[Suggestion]) -> Dict[Path, int]:
 # Public API — orchestrator used by CLI
 # ──────────────────────────────────────────────────────────────────────────────
 
-DEFAULT_IGNORE = {
-    "venv", "node_modules", "dist", "build",
-    "__pycache__", "logs", "coverage", ".git",
-}
-
-
 # @feature [ANNOTATOR-05] Collect suggestions
 def collect_suggestions(
     root: Path,
@@ -336,6 +332,9 @@ def collect_suggestions(
     """
     Walk *root*, find all un-annotated Python/TS/JS symbols, return Suggestions.
 
+    File selection matches WorkspaceScanner: git repo file lists are used when
+    available (so .gitignore'd trees are skipped), and .featureignore is honoured.
+
     IDs are derived deterministically from file path + symbol name so that two
     runs on the same codebase produce the same IDs.  Per-category dedup counters
     increment only when identical slugs collide.
@@ -343,20 +342,12 @@ def collect_suggestions(
     The returned list is ordered: Python files first, then TS/JS, both groups
     sorted by (file, line) ascending — ready for pretty printing.
     """
-    ignore = DEFAULT_IGNORE | (extra_ignore or set())
+    scanner = WorkspaceScanner(root)
+    scanner.ignore_patterns |= set(extra_ignore or set())
     used_ids: Dict[str, int] = {}  # "cat:slug" -> count
     all_suggestions: List[Suggestion] = []
 
-    for path_obj in sorted(root.rglob("*")):
-        if not path_obj.is_file():
-            continue
-        # Check if any ancestor is ignored
-        rel_parts = set(path_obj.relative_to(root).parts[:-1])
-        if rel_parts & ignore:
-            continue
-        if any(p.startswith(".") for p in path_obj.relative_to(root).parts):
-            continue
-
+    for path_obj in scanner.iter_files():
         if path_obj.suffix == ".py":
             sug = suggest_python(path_obj, root, used_ids)
             sug.sort(key=lambda s: s.line)

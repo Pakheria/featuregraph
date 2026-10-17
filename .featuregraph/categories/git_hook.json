@@ -8,8 +8,8 @@
       {
         "file": "featuregraph/hooks/git_hook.py",
         "lines": [
-          13,
-          35
+          16,
+          44
         ],
         "symbol": "GitHookManager",
         "type": "class"
@@ -25,8 +25,8 @@
       {
         "file": "featuregraph/hooks/git_hook.py",
         "lines": [
-          18,
-          26
+          21,
+          34
         ],
         "symbol": "install",
         "type": "function"
@@ -42,8 +42,8 @@
       {
         "file": "featuregraph/hooks/git_hook.py",
         "lines": [
-          30,
-          35
+          38,
+          44
         ],
         "symbol": "uninstall",
         "type": "function"

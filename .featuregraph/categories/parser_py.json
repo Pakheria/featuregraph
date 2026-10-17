@@ -10,7 +10,7 @@
         "file": "featuregraph/core/parser_py.py",
         "lines": [
           10,
-          95
+          116
         ],
         "symbol": "PythonFeatureParser",
         "type": "class"
@@ -19,12 +19,16 @@
   },
   "PARSER_PY-02": {
     "name": "Parse file",
+    "called_by": [
+      "SCANNER-01",
+      "SCANNER-03"
+    ],
     "locations": [
       {
         "file": "featuregraph/core/parser_py.py",
         "lines": [
           15,
-          95
+          116
         ],
         "symbol": "parse_file",
         "type": "function"

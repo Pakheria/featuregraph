@@ -67,6 +67,76 @@ class TestScannerWarnings(unittest.TestCase):
             self.assertNotIn("⚠ Skipped", stderr_output)
             self.assertIn("APP-01", graph.nodes)
 
+    def test_warnings_are_aggregated_into_one_line(self):
+        """Many untagged files produce a single summary warning, not one line per file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            for i in range(5):
+                (tmp_path / f"f{i}.py").write_text(f"def helper_{i}(): pass\n")
+            (tmp_path / "empty.py").write_text("")
+
+            stderr_capture = io.StringIO()
+            old_stderr = sys.stderr
+            sys.stderr = stderr_capture
+
+            try:
+                WorkspaceScanner(tmp_path).scan()
+            finally:
+                sys.stderr = old_stderr
+
+            stderr_output = stderr_capture.getvalue()
+            self.assertEqual(stderr_output.count("⚠"), 1)
+            self.assertIn("5 file(s)", stderr_output)
+            self.assertIn("(+2 more)", stderr_output)
+
+
+    def test_warns_on_unresolved_depends_on(self):
+        """An explicit @depends tag pointing at a non-existent feature is reported (alias spelling too)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            (tmp_path / "app.py").write_text(
+                "# @feature [APP-01] App\n"
+                "# @depends_on [GHOST-99]\n"
+                "def main(): pass\n"
+            )
+
+            stderr_capture = io.StringIO()
+            old_stderr = sys.stderr
+            sys.stderr = stderr_capture
+
+            try:
+                WorkspaceScanner(tmp_path).scan()
+            finally:
+                sys.stderr = old_stderr
+
+            stderr_output = stderr_capture.getvalue()
+            self.assertIn("unresolved @depends", stderr_output)
+            self.assertIn("GHOST-99", stderr_output)
+
+    def test_no_unresolved_warning_for_valid_reference(self):
+        """A @depends tag that points at an existing feature is silent."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            (tmp_path / "db.py").write_text("# @feature [DB-01] DB\ndef connect(): pass\n")
+            (tmp_path / "app.py").write_text(
+                "# @feature [APP-01] App\n"
+                "# @depends [DB-01]\n"
+                "def main(): pass\n"
+            )
+
+            stderr_capture = io.StringIO()
+            old_stderr = sys.stderr
+            sys.stderr = stderr_capture
+
+            try:
+                scanner = WorkspaceScanner(tmp_path)
+                graph = scanner.scan()
+            finally:
+                sys.stderr = old_stderr
+
+            self.assertNotIn("unresolved", stderr_capture.getvalue())
+            self.assertIn("DB-01", graph.edges["APP-01"])
+
 
 if __name__ == "__main__":
     unittest.main()

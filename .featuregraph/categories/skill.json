@@ -8,8 +8,8 @@
       {
         "file": "featuregraph/skills/skill_manager.py",
         "lines": [
-          146,
-          183
+          9,
+          51
         ],
         "symbol": "SkillManager",
         "type": "class"
