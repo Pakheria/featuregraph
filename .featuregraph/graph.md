@@ -76,7 +76,7 @@ graph TD
 | **`JSON_FORMATT-01`** | **Jsonformatter** | — | `[JSON_FORMATT-02]` | `[CLI-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L10-L110`](featuregraph/formatters/json_formatter.py#L10-L110) |
 | **`JSON_FORMATT-02`** | **Format** | — | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L71-L81`](featuregraph/formatters/json_formatter.py#L71-L81) |
 | **`JSON_FORMATT-03`** | **Write to file** | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-02]` | `[CLI-01]` | [`featuregraph/formatters/json_formatter.py#L85-L88`](featuregraph/formatters/json_formatter.py#L85-L88) |
-| **`LEXMASK-01`** | **Classify source characters** | — | — | `[ANNOTATOR-04]` `[PARSER_GENERIC-01]` | [`featuregraph/core/lexmask.py#L73-L215`](featuregraph/core/lexmask.py#L73-L215) |
+| **`LEXMASK-01`** | **Classify source characters** | — | — | `[ANNOTATOR-04]` `[PARSER_GENERIC-01]` | [`featuregraph/core/lexmask.py#L85-L227`](featuregraph/core/lexmask.py#L85-L227) |
 | **`MARKDOWN_FOR-01`** | **Markdown formatter** | — | `[MARKDOWN_FOR-02]` | `[CLI-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/markdown_formatter.py#L5-L80`](featuregraph/formatters/markdown_formatter.py#L5-L80) |
 | **`MARKDOWN_FOR-02`** | **Format** | — | — | `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/markdown_formatter.py#L10-L74`](featuregraph/formatters/markdown_formatter.py#L10-L74) |
 | **`MARKDOWN_FOR-03`** | **Write to file** | — | `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-02]` | `[CLI-01]` | [`featuregraph/formatters/markdown_formatter.py#L78-L80`](featuregraph/formatters/markdown_formatter.py#L78-L80) |

@@ -19,6 +19,11 @@ CODE = 0
 STRING = 1
 COMMENT = 2
 
+_REGEX_KEYWORDS = {
+    "return", "typeof", "case", "in", "of", "yield", "await", "void",
+    "delete", "do", "else", "instanceof",
+}
+
 _SUFFIX_LANG = {
     ".py": "python",
     ".ts": "js", ".tsx": "js", ".js": "js", ".jsx": "js",
@@ -56,17 +61,24 @@ def _flags(lang: str) -> dict:
 
 
 def _regex_allowed(source: str, i: int) -> bool:
-    """JS/TS regex literals start after an operator, delimiter, or line start."""
+    """JS/TS regex literals start after an operator, delimiter, keyword, or line start."""
     j = i - 1
     while j >= 0 and source[j] in " \t":
         j -= 1
     if j < 0 or source[j] in "\r\n":
         return True
-    return source[j] in "([{,;:=!&|?}"
+    if source[j] in "([{,;:=!&|?}":
+        return True
+    if source[j] == ">" and j > 0 and source[j - 1] == "=":
+        return True
+    k = j
+    while k >= 0 and (source[k].isalnum() or source[k] in "_$"):
+        k -= 1
+    return source[k + 1 : j + 1] in _REGEX_KEYWORDS
 
 
-# ponytail: the regex-start heuristic only sees the preceding char, so `return /x/`
-# and `) /x/` are read as division; tokenize keywords if that ever matters.
+# ponytail: ASI-sensitive `foo` newline `/re/` and `) /re/` still read as division;
+# a real tokenizer is the upgrade if either ever matters.
 
 
 # @feature [LEXMASK-01] Classify source characters

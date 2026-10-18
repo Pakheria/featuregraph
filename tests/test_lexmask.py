@@ -50,6 +50,23 @@ class TestLexmaskViews(unittest.TestCase):
             (root / "widget.ts").write_text(source)
             self.assertEqual({s.symbol for s in collect_suggestions(root)}, {"After"})
 
+    def test_keyword_position_regex_does_not_mask_following_decls(self):
+        source = (
+            "const check = (s: string) => /['\"]/.test(s);\n"
+            "function f() {\n"
+            "  return /['\"]/;\n"
+            "}\n"
+            "export const After = 1;\n"
+        )
+        code = lexmask.code_only(source, "js")
+        self.assertIn("export const After", code)
+        self.assertNotIn("'", code)
+        self.assertNotIn('"', code)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "widget.ts").write_text(source)
+            self.assertEqual({s.symbol for s in collect_suggestions(root)}, {"After"})
+
 
 class TestAnnotatorLexing(unittest.TestCase):
     def test_export_inside_template_is_not_suggested(self):
@@ -219,6 +236,23 @@ class TestParserAndResolverLexing(unittest.TestCase):
             data = _scan(root)
             self.assertNotIn("PHANTOM-RE", data)
             self.assertIn("REAL-RE", data)
+
+    def test_keyword_regex_with_backtick_keeps_template_masked(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "widget.ts").write_text(
+                "function f() {\n"
+                "  return /`/;\n"
+                "}\n"
+                "const t = `\n"
+                "// @feature [PHANTOM-KW] Nope\n"
+                "`;\n"
+                "// @feature [REAL-KW] Real\n"
+                "export const Real = 1;\n"
+            )
+            data = _scan(root)
+            self.assertNotIn("PHANTOM-KW", data)
+            self.assertIn("REAL-KW", data)
 
 
 if __name__ == "__main__":
