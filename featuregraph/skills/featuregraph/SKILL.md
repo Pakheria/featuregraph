@@ -138,6 +138,13 @@ export const AnalyticsWidget = () => { ... }
 
 Feature IDs: `[A-Za-z0-9_-]+`, normalised to UPPER.
 
+Tag rules:
+- Tags must sit on a real comment line. Text inside strings, template literals, and block comments is ignored by every parser.
+- Python: place the tag within 6 lines above the `def`/`class` (or in its docstring).
+- TypeScript/JS: place the tag above the export; the parser associates the export within 6 lines below it.
+- Other languages: place the tag above the declaration; the parser looks 6 lines below.
+- Only tagged symbols are indexed. `annotate --yes` refuses insertion points that are not code, writes atomically, and verifies each tag by re-parsing.
+
 ---
 
 ## After Running

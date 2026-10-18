@@ -10,8 +10,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          45,
-          52
+          48,
+          55
         ],
         "symbol": "Suggestion",
         "type": "class"
@@ -27,8 +27,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          112,
-          118
+          120,
+          126
         ],
         "symbol": "_next_feat_id",
         "type": "function"
@@ -48,8 +48,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          181,
-          217
+          190,
+          228
         ],
         "symbol": "suggest_typescript",
         "type": "function"
@@ -59,7 +59,8 @@
   "ANNOTATOR-04": {
     "name": "Apply suggestions",
     "depends_on": [
-      "ANNOTATOR-01"
+      "ANNOTATOR-01",
+      "LEXMASK-01"
     ],
     "called_by": [
       "CLI-01"
@@ -68,8 +69,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          284,
-          320
+          334,
+          404
         ],
         "symbol": "apply_suggestions",
         "type": "function"
@@ -91,8 +92,8 @@
       {
         "file": "featuregraph/core/annotator.py",
         "lines": [
-          328,
-          366
+          412,
+          450
         ],
         "symbol": "collect_suggestions",
         "type": "function"

@@ -2,8 +2,8 @@
   "_meta": {
     "generator": "featuregraph",
     "version": "0.1.0",
-    "total_features": 34,
-    "total_categories": 13,
+    "total_features": 35,
+    "total_categories": 14,
     "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
   },
   "categories": {
@@ -37,6 +37,9 @@
       "JSON_FORMATT-01": "Jsonformatter",
       "JSON_FORMATT-02": "Format",
       "JSON_FORMATT-03": "Write to file"
+    },
+    "lexmask": {
+      "LEXMASK-01": "Classify source characters"
     },
     "markdown_for": {
       "MARKDOWN_FOR-01": "Markdown formatter",

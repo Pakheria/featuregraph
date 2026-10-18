@@ -1,0 +1,20 @@
+{
+  "LEXMASK-01": {
+    "name": "Classify source characters",
+    "called_by": [
+      "ANNOTATOR-04",
+      "PARSER_GENERIC-01"
+    ],
+    "locations": [
+      {
+        "file": "featuregraph/core/lexmask.py",
+        "lines": [
+          73,
+          215
+        ],
+        "symbol": "classify",
+        "type": "function"
+      }
+    ]
+  }
+}

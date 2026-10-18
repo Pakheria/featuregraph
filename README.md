@@ -52,7 +52,7 @@ AI Coding Agent / Developer
 | **Enterprise Repo Index Size (500–5,000+ features)** | 10MB – 25MB+ | **125KB – 2MB (≈0.25–0.4 KB/feature, measured)** |
 | **Token Cost to Read Index** | ~50,000 to 500,000+ tokens | **Manifest + one category chunk ≈ 0.03–0.16 KB/feature (measured) — full index never read** |
 | **Line-Level Slicing** | ❌ File-level only | **✅ Exact Line Spans (`#Lstart-Lend`)** |
-| **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` AST generator** |
+| **Auto-Suggest & Write Tags** | ❌ Manual only | **✅ `featuregraph annotate` tag generator (lexer-guarded)** |
 | **Out-of-the-Box AI Agent Skills** | ❌ None | **✅ Auto-installs to Antigravity, Claude Code, Cursor** |
 | **Multi-Language Support** | Limited | **✅ Python, TS/JS, Go, Rust, Java, C#, PHP, Ruby, etc.** |
 | **Zero-Config Git Auto-Sync**| ❌ Manual re-runs | **✅ Instant Pre-Commit Git Hook** |
@@ -63,7 +63,7 @@ AI Coding Agent / Developer
 | Project | Features | Manifest (Tier 1) | Full index | One category chunk | Scan |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | Small mixed test fixture (py/ts/go) | 12 | 0.9 KB | 4 KB | ~0.4 KB | 0.08 s |
-| This repository | 34 | 2 KB | 14 KB | ~1 KB (14 categories) | 0.1 s |
+| This repository | 35 | 2 KB | 14 KB | ~1 KB (14 categories) | 0.1 s |
 | Synthetic 1,000-file repo | 1,000 | 31 KB | 254 KB | 127 KB (only 2 categories) | 0.1 s |
 
 Scaling is linear in feature count: **manifest ≈ 30–75 bytes/feature**, **full index ≈ 0.25–0.4 KB/feature**, **scan ≈ 0.1 s per 1,000 files**. Agents read the manifest plus the single category chunk they need — the full index never enters context. Uniform tags in the synthetic repo concentrate 500 features per category (a worst case); real projects spread features across more domains, shrinking chunks.
@@ -91,6 +91,20 @@ Warnings are aggregated to one line each per scan:
 ```
 
 Ambiguous symbols (one name defined by multiple features) are reported the same way; bare-name edges for those are skipped rather than guessed.
+
+---
+
+## 🏷️ Tag Rules & Coverage Model
+
+A tag only counts on a **real comment line**. All scanners, the annotator, and dependency inference share one lexical mask, so `@feature` or exported symbols inside string literals, template literals, and block comments are ignored — they can never create phantom features or get annotated.
+
+| Language | Tag placement | Symbol window |
+| :--- | :--- | :--- |
+| Python | Comment above `def` / `class` (or the docstring) | 6 lines above |
+| TypeScript / JS | Comment above the export | 6 lines below the tag |
+| Go, Rust, Java, C#, PHP, Ruby, Swift, Dart, Shell | Comment above the declaration | 6 lines below the tag |
+
+`featuregraph annotate --yes` only inserts at code positions, replaces files atomically, and re-parses every write; if a tag would not round-trip it restores the original file. Untagged symbols are not indexed — `scan` reports files with no parseable features.
 
 ---
 

@@ -9,8 +9,8 @@
       {
         "file": "featuregraph/core/parser_py.py",
         "lines": [
-          10,
-          116
+          12,
+          120
         ],
         "symbol": "PythonFeatureParser",
         "type": "class"
@@ -27,8 +27,8 @@
       {
         "file": "featuregraph/core/parser_py.py",
         "lines": [
-          15,
-          116
+          17,
+          120
         ],
         "symbol": "parse_file",
         "type": "function"

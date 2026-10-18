@@ -5,6 +5,8 @@ import re
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Any
 
+from . import lexmask
+
 # Common keywords/builtins to ignore during dependency resolution
 IGNORED_SYMBOLS = {
     # Python builtins & common keywords
@@ -90,7 +92,7 @@ class DependencyResolver:
         if ext == ".py":
             self._resolve_python(content, features_in_file, results)
         else:
-            self._resolve_tokens(content, features_in_file, results)
+            self._resolve_tokens(content, features_in_file, results, lexmask.lang_for_suffix(ext))
 
         return results
 
@@ -102,7 +104,7 @@ class DependencyResolver:
             tree = ast.parse(content)
         except Exception:
             # Fallback to token matching on syntax error
-            self._resolve_tokens(content, features_in_file, results)
+            self._resolve_tokens(content, features_in_file, results, "python")
             return
 
         # Single AST walk per file: (lineno, bare symbol, qualified symbol or "")
@@ -134,10 +136,14 @@ class DependencyResolver:
                         results[feat_id].add(target_feat)
 
     def _resolve_tokens(
-        self, content: str, features_in_file: List[Dict[str, Any]], results: Dict[str, Set[str]]
+        self,
+        content: str,
+        features_in_file: List[Dict[str, Any]],
+        results: Dict[str, Set[str]],
+        lang: str = "other",
     ):
         """Extracts identifier calls and references across TS/JS, Go, Rust, Java, C#, etc."""
-        lines = content.splitlines()
+        lines = lexmask.code_only(content, lang).splitlines()
 
         for feat in features_in_file:
             feat_id = feat["feature_id"]

@@ -4,9 +4,11 @@ import re
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
+from . import lexmask
+
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
 DEPENDS_TAG_REGEX = re.compile(r"@depends(?:_on)?\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
-# Tags are only honoured on real comment lines — strings must not create features
+# Tags are only honoured on comment lines; the comment mask rejects string/template text
 COMMENT_LINE_REGEX = re.compile(r"^\s*(?://|/\*|\*|#)")
 
 # Declarations for symbol extraction
@@ -79,19 +81,30 @@ class GenericFeatureParser:
 
         ext = file_path.suffix.lower()
         lang = SUPPORTED_EXTENSIONS.get(ext, "generic")
+        code_lines = lexmask.code_only(content, lang).splitlines()
+        comment_lines = lexmask.comment_only(content, lang).splitlines()
+        cls = lexmask.classify(content, lang)
+        starts = [0]
+        for raw_line in content.splitlines(keepends=True):
+            starts.append(starts[-1] + len(raw_line))
 
         for idx, line in enumerate(lines, 1):
-            feat_match = FEATURE_TAG_REGEX.search(line) if COMMENT_LINE_REGEX.match(line) else None
+            feat_match = (
+                FEATURE_TAG_REGEX.search(comment_lines[idx - 1])
+                if COMMENT_LINE_REGEX.match(line)
+                else None
+            )
             if not feat_match:
                 # Also check for web framework route annotations/decorators
                 route_match = GENERIC_ROUTE_REGEX.search(line)
-                if route_match:
+                route_pos = starts[idx - 1] + route_match.start() if route_match else 0
+                if route_match and route_pos < len(cls) and cls[route_pos] == lexmask.CODE:
                     # Look forward 1-3 lines for function declaration
                     symbol_name = ""
                     start_line = idx
                     end_line = idx + 15
                     for forward_i in range(idx - 1, min(len(lines), idx + 3)):
-                        decl_match = C_STYLE_DECL_REGEX.search(lines[forward_i])
+                        decl_match = C_STYLE_DECL_REGEX.search(code_lines[forward_i])
                         if decl_match:
                             symbol_name = decl_match.group(1)
                             start_line = forward_i + 1
@@ -114,7 +127,7 @@ class GenericFeatureParser:
             desc = (feat_match.group(2) or "").strip() or f"{lang.capitalize()} Feature"
 
             # Check surrounding lines for @depends
-            context_chunk = "\n".join(lines[max(0, idx - 3): min(len(lines), idx + 3)])
+            context_chunk = "\n".join(comment_lines[max(0, idx - 3): min(len(lines), idx + 3)])
             dep_match = DEPENDS_TAG_REGEX.search(context_chunk)
             deps = []
             if dep_match:
@@ -127,10 +140,10 @@ class GenericFeatureParser:
             end_line = min(idx + 25, len(lines))
 
             for forward_i in range(idx, min(len(lines), idx + 6)):
-                decl_match = C_STYLE_DECL_REGEX.search(lines[forward_i])
+                decl_match = C_STYLE_DECL_REGEX.search(code_lines[forward_i])
                 if decl_match:
                     symbol_name = decl_match.group(1)
-                    decl_line_str = lines[forward_i].lower()
+                    decl_line_str = code_lines[forward_i].lower()
                     if any(kw in decl_line_str for kw in ["class", "struct", "interface", "type", "impl"]):
                         symbol_type = "class"
                     else:

@@ -13,6 +13,7 @@ graph TD
     ANNOTATOR-03["ANNOTATOR-03: Suggest typescript"] --> ANNOTATOR-01
     ANNOTATOR-03["ANNOTATOR-03: Suggest typescript"] --> ANNOTATOR-02
     ANNOTATOR-04["ANNOTATOR-04: Apply suggestions"] --> ANNOTATOR-01
+    ANNOTATOR-04["ANNOTATOR-04: Apply suggestions"] --> LEXMASK-01
     ANNOTATOR-05["ANNOTATOR-05: Collect suggestions"] --> ANNOTATOR-01
     ANNOTATOR-05["ANNOTATOR-05: Collect suggestions"] --> ANNOTATOR-03
     ANNOTATOR-05["ANNOTATOR-05: Collect suggestions"] --> PARSER_GENERIC-01
@@ -37,6 +38,7 @@ graph TD
     MARKDOWN_FOR-01["MARKDOWN_FOR-01: Markdown formatter"] --> MARKDOWN_FOR-02
     MARKDOWN_FOR-03["MARKDOWN_FOR-03: Write to file"] --> MARKDOWN_FOR-01
     MARKDOWN_FOR-03["MARKDOWN_FOR-03: Write to file"] --> MARKDOWN_FOR-02
+    PARSER_GENERIC-01["PARSER_GENERIC-01: Generic Feature Parser"] --> LEXMASK-01
     SCANNER-01["SCANNER-01: Workspace scanner"] --> DEP_RESOLVER-01
     SCANNER-01["SCANNER-01: Workspace scanner"] --> DEP_RESOLVER-02
     SCANNER-01["SCANNER-01: Workspace scanner"] --> DEP_RESOLVER-03
@@ -48,8 +50,6 @@ graph TD
     SCANNER-01["SCANNER-01: Workspace scanner"] --> PARSER_TS-01
     SCANNER-01["SCANNER-01: Workspace scanner"] --> PARSER_TS-02
     SCANNER-03["SCANNER-03: Scan"] --> DEP_RESOLVER-01
-    SCANNER-03["SCANNER-03: Scan"] --> DEP_RESOLVER-02
-    SCANNER-03["SCANNER-03: Scan"] --> DEP_RESOLVER-03
 ```
 
 ---
@@ -57,15 +57,15 @@ graph TD
 
 | Feature ID | Feature Name | Description | Depends On | Called By | Exact Line References |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`ANNOTATOR-01`** | **Suggestion** | — | — | `[ANNOTATOR-03]` `[ANNOTATOR-04]` `[ANNOTATOR-05]` | [`featuregraph/core/annotator.py#L45-L52`](featuregraph/core/annotator.py#L45-L52) |
-| **`ANNOTATOR-02`** | **Suggest python** | — | — | `[ANNOTATOR-03]` | [`featuregraph/core/annotator.py#L112-L118`](featuregraph/core/annotator.py#L112-L118) |
-| **`ANNOTATOR-03`** | **Suggest typescript** | — | `[ANNOTATOR-01]` `[ANNOTATOR-02]` | `[ANNOTATOR-05]` | [`featuregraph/core/annotator.py#L181-L217`](featuregraph/core/annotator.py#L181-L217) |
-| **`ANNOTATOR-04`** | **Apply suggestions** | — | `[ANNOTATOR-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L284-L320`](featuregraph/core/annotator.py#L284-L320) |
-| **`ANNOTATOR-05`** | **Collect suggestions** | — | `[ANNOTATOR-01]` `[ANNOTATOR-03]` `[PARSER_GENERIC-01]` `[SCANNER-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L328-L366`](featuregraph/core/annotator.py#L328-L366) |
+| **`ANNOTATOR-01`** | **Suggestion** | — | — | `[ANNOTATOR-03]` `[ANNOTATOR-04]` `[ANNOTATOR-05]` | [`featuregraph/core/annotator.py#L48-L55`](featuregraph/core/annotator.py#L48-L55) |
+| **`ANNOTATOR-02`** | **Suggest python** | — | — | `[ANNOTATOR-03]` | [`featuregraph/core/annotator.py#L120-L126`](featuregraph/core/annotator.py#L120-L126) |
+| **`ANNOTATOR-03`** | **Suggest typescript** | — | `[ANNOTATOR-01]` `[ANNOTATOR-02]` | `[ANNOTATOR-05]` | [`featuregraph/core/annotator.py#L190-L228`](featuregraph/core/annotator.py#L190-L228) |
+| **`ANNOTATOR-04`** | **Apply suggestions** | — | `[ANNOTATOR-01]` `[LEXMASK-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L334-L404`](featuregraph/core/annotator.py#L334-L404) |
+| **`ANNOTATOR-05`** | **Collect suggestions** | — | `[ANNOTATOR-01]` `[ANNOTATOR-03]` `[PARSER_GENERIC-01]` `[SCANNER-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L412-L450`](featuregraph/core/annotator.py#L412-L450) |
 | **`CLI-01`** | **Main** | — | `[ANNOTATOR-04]` `[ANNOTATOR-05]` `[GIT_HOOK-01]` `[GIT_HOOK-02]` `[GIT_HOOK-03]` `[GRAPH-04]` `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` `[SCANNER-01]` `[SCANNER-02]` `[SCANNER-03]` `[SKILL-01]` | — | [`featuregraph/cli.py#L19-L350`](featuregraph/cli.py#L19-L350) |
-| **`DEP_RESOLVER-01`** | **Dependency Resolver** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L27-L155`](featuregraph/core/dependency_resolver.py#L27-L155) |
-| **`DEP_RESOLVER-02`** | **Register symbols** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L39-L48`](featuregraph/core/dependency_resolver.py#L39-L48) |
-| **`DEP_RESOLVER-03`** | **Resolve dependencies for file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L72-L95`](featuregraph/core/dependency_resolver.py#L72-L95) |
+| **`DEP_RESOLVER-01`** | **Dependency Resolver** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L29-L161`](featuregraph/core/dependency_resolver.py#L29-L161) |
+| **`DEP_RESOLVER-02`** | **Register symbols** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L41-L50`](featuregraph/core/dependency_resolver.py#L41-L50) |
+| **`DEP_RESOLVER-03`** | **Resolve dependencies for file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L74-L97`](featuregraph/core/dependency_resolver.py#L74-L97) |
 | **`GIT_HOOK-01`** | **Git hook manager** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L16-L44`](featuregraph/hooks/git_hook.py#L16-L44) |
 | **`GIT_HOOK-02`** | **Install** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L21-L34`](featuregraph/hooks/git_hook.py#L21-L34) |
 | **`GIT_HOOK-03`** | **Uninstall** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L38-L44`](featuregraph/hooks/git_hook.py#L38-L44) |
@@ -76,14 +76,15 @@ graph TD
 | **`JSON_FORMATT-01`** | **Jsonformatter** | — | `[JSON_FORMATT-02]` | `[CLI-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L10-L110`](featuregraph/formatters/json_formatter.py#L10-L110) |
 | **`JSON_FORMATT-02`** | **Format** | — | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` | [`featuregraph/formatters/json_formatter.py#L71-L81`](featuregraph/formatters/json_formatter.py#L71-L81) |
 | **`JSON_FORMATT-03`** | **Write to file** | — | `[JSON_FORMATT-01]` `[JSON_FORMATT-02]` | `[CLI-01]` | [`featuregraph/formatters/json_formatter.py#L85-L88`](featuregraph/formatters/json_formatter.py#L85-L88) |
+| **`LEXMASK-01`** | **Classify source characters** | — | — | `[ANNOTATOR-04]` `[PARSER_GENERIC-01]` | [`featuregraph/core/lexmask.py#L73-L215`](featuregraph/core/lexmask.py#L73-L215) |
 | **`MARKDOWN_FOR-01`** | **Markdown formatter** | — | `[MARKDOWN_FOR-02]` | `[CLI-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/markdown_formatter.py#L5-L80`](featuregraph/formatters/markdown_formatter.py#L5-L80) |
 | **`MARKDOWN_FOR-02`** | **Format** | — | — | `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` | [`featuregraph/formatters/markdown_formatter.py#L10-L74`](featuregraph/formatters/markdown_formatter.py#L10-L74) |
 | **`MARKDOWN_FOR-03`** | **Write to file** | — | `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-02]` | `[CLI-01]` | [`featuregraph/formatters/markdown_formatter.py#L78-L80`](featuregraph/formatters/markdown_formatter.py#L78-L80) |
-| **`PARSER_GENERIC-01`** | **Generic Feature Parser** | — | — | `[ANNOTATOR-05]` `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_generic.py#L61-L198`](featuregraph/core/parser_generic.py#L61-L198) |
-| **`PARSER_PY-01`** | **Python feature parser** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_py.py#L10-L116`](featuregraph/core/parser_py.py#L10-L116) |
-| **`PARSER_PY-02`** | **Parse file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_py.py#L15-L116`](featuregraph/core/parser_py.py#L15-L116) |
-| **`PARSER_TS-01`** | **Type script feature parser** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L16-L69`](featuregraph/core/parser_ts.py#L16-L69) |
-| **`PARSER_TS-02`** | **Parse file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L21-L69`](featuregraph/core/parser_ts.py#L21-L69) |
+| **`PARSER_GENERIC-01`** | **Generic Feature Parser** | — | `[LEXMASK-01]` | `[ANNOTATOR-05]` `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_generic.py#L63-L211`](featuregraph/core/parser_generic.py#L63-L211) |
+| **`PARSER_PY-01`** | **Python feature parser** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_py.py#L12-L120`](featuregraph/core/parser_py.py#L12-L120) |
+| **`PARSER_PY-02`** | **Parse file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_py.py#L17-L120`](featuregraph/core/parser_py.py#L17-L120) |
+| **`PARSER_TS-01`** | **Type script feature parser** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L18-L73`](featuregraph/core/parser_ts.py#L18-L73) |
+| **`PARSER_TS-02`** | **Parse file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L23-L73`](featuregraph/core/parser_ts.py#L23-L73) |
 | **`SCANNER-01`** | **Workspace scanner** | — | `[DEP_RESOLVER-01]` `[DEP_RESOLVER-02]` `[DEP_RESOLVER-03]` `[GRAPH-01]` `[GRAPH-02]` `[PARSER_GENERIC-01]` `[PARSER_PY-01]` `[PARSER_PY-02]` `[PARSER_TS-01]` `[PARSER_TS-02]` | `[ANNOTATOR-05]` `[CLI-01]` | [`featuregraph/core/scanner.py#L19-L180`](featuregraph/core/scanner.py#L19-L180) |
 | **`SCANNER-02`** | **Detect subprojects** | — | — | `[CLI-01]` | [`featuregraph/core/scanner.py#L28-L38`](featuregraph/core/scanner.py#L28-L38) |
 | **`SCANNER-03`** | **Scan** | — | `[DEP_RESOLVER-01]` `[DEP_RESOLVER-02]` `[DEP_RESOLVER-03]` `[GRAPH-01]` `[GRAPH-02]` `[PARSER_GENERIC-01]` `[PARSER_PY-01]` `[PARSER_PY-02]` `[PARSER_TS-01]` `[PARSER_TS-02]` | `[CLI-01]` | [`featuregraph/core/scanner.py#L93-L180`](featuregraph/core/scanner.py#L93-L180) |

@@ -1,6 +1,9 @@
 {
   "PARSER_GENERIC-01": {
     "name": "Generic Feature Parser",
+    "depends_on": [
+      "LEXMASK-01"
+    ],
     "called_by": [
       "ANNOTATOR-05",
       "SCANNER-01",
@@ -10,8 +13,8 @@
       {
         "file": "featuregraph/core/parser_generic.py",
         "lines": [
-          61,
-          198
+          63,
+          211
         ],
         "symbol": "GenericFeatureParser",
         "type": "class"

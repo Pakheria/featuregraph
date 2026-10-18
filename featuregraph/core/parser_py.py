@@ -3,6 +3,8 @@ import re
 from pathlib import Path
 from typing import Dict, List, Any
 
+from . import lexmask
+
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
 DEPENDS_TAG_REGEX = re.compile(r"@depends(?:_on)?\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 
@@ -21,6 +23,7 @@ class PythonFeatureParser:
             source = file_path.read_text(encoding="utf-8")
             tree = ast.parse(source, filename=str(file_path))
             lines = source.splitlines()
+            comment_lines = lexmask.comment_only(source, "python").splitlines()
 
             # Map method nodes to their enclosing class path (for qualified symbol resolution)
             parent_class: Dict[int, str] = {}
@@ -56,12 +59,13 @@ class PythonFeatureParser:
                 for i in range(start_line - 2, max(-1, start_line - 8), -1):
                     if i < len(lines):
                         line_str = lines[i].strip()
+                        comment_line = comment_lines[i].strip()
                         # Only real comment lines count — string literals must not create features
-                        if line_str.startswith("#"):
+                        if comment_line.startswith("#") and line_str.startswith("#"):
                             if not feat_match:
-                                feat_match = FEATURE_TAG_REGEX.search(line_str)
+                                feat_match = FEATURE_TAG_REGEX.search(comment_line)
                             if not dep_match:
-                                dep_match = DEPENDS_TAG_REGEX.search(line_str)
+                                dep_match = DEPENDS_TAG_REGEX.search(comment_line)
                         if line_str and not line_str.startswith("#") and not line_str.startswith("@"):
                             break
 
