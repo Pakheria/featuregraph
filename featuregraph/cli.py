@@ -1,3 +1,4 @@
+import json
 import sys
 import argparse
 from pathlib import Path
@@ -14,6 +15,22 @@ from featuregraph.formatters.json_formatter import JSONFormatter
 from featuregraph.formatters.markdown_formatter import MarkdownFormatter
 from featuregraph.hooks.git_hook import GitHookManager
 from featuregraph.skills.skill_manager import SkillManager
+
+
+def _guard_fresh(root: Path, index_file: Path, force: bool) -> None:
+    """Refuse stale results; the recorded stat fingerprint must match the current tree."""
+    if force or not index_file.is_file():
+        return
+    try:
+        meta = json.loads(index_file.read_text(encoding="utf-8")).get("_meta", {})
+    except (OSError, ValueError):
+        return  # unreadable/legacy artifact; scan will rewrite it
+    recorded = meta.get("tree_hash")
+    if not recorded:
+        return  # ponytail: indexes that predate fingerprints skip the check
+    if WorkspaceScanner(root).tree_hash() != recorded:
+        print("index is stale (tree changed since scan); run: featuregraph scan", file=sys.stderr)
+        sys.exit(1)
 
 # @feature [CLI-01] Main
 def main():
@@ -38,12 +55,14 @@ def main():
     query_parser.add_argument("feature_id", help="Feature ID to query (e.g. AUTH-01)")
     query_parser.add_argument("--dir", default=".", help="Project root containing .featuregraph/ (default: .)")
     query_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output (for agents/CI)")
+    query_parser.add_argument("--force", action="store_true", help="Return results even if the tree changed since scan")
 
     # Command: search
     search_parser = subparsers.add_parser("search", help="Search features by symbol, name, or keyword")
     search_parser.add_argument("query", help="Query terms or symbol name (e.g. 'parser', 'auth')")
     search_parser.add_argument("--dir", default=".", help="Project root containing .featuregraph/ (default: .)")
     search_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output (for agents/CI)")
+    search_parser.add_argument("--force", action="store_true", help="Return results even if the tree changed since scan")
 
     # Command: hook
     hook_parser = subparsers.add_parser("hook", help="Install or remove git pre-commit hook")
@@ -101,12 +120,14 @@ def main():
 
         fg_dir = root / ".featuregraph"
         fg_dir.mkdir(parents=True, exist_ok=True)
+        meta = scanner.scan_meta()
+        JSONFormatter.write_unindexed(scanner.unindexed, fg_dir)
 
         if getattr(args, "json", None):
             json_out = root / args.json
-            JSONFormatter.write_to_file(graph_dict, json_out, root)
+            JSONFormatter.write_to_file(graph_dict, json_out, root, meta=meta)
         else:
-            JSONFormatter.write_all(graph_dict, fg_dir, root)
+            JSONFormatter.write_all(graph_dict, fg_dir, root, meta=meta)
             json_out = fg_dir / "manifest.json"
 
         md_out = root / args.md if getattr(args, "md", None) else fg_dir / "graph.md"
@@ -114,7 +135,10 @@ def main():
 
         if not quiet:
             categories = JSONFormatter.split_by_category(graph_dict)
-            print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
+            if not graph_dict:
+                print("⚠ No features found — the index is empty. Add @feature tags or run 'featuregraph annotate'.")
+            else:
+                print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
             print(f"✓ Created 2-Tier Manifest: .featuregraph/manifest.json")
             print(f"✓ Created Category Chunks: .featuregraph/categories/ ({len(categories)} files)")
             print(f"✓ Created markdown graph:  {md_out.relative_to(root) if md_out.is_relative_to(root) else md_out}")
@@ -132,10 +156,12 @@ def main():
         scanner = WorkspaceScanner(root)
         graph = scanner.scan()
         graph_dict = graph.to_dict()
+        meta = scanner.scan_meta()
 
         fg_dir = root / ".featuregraph"
         fg_dir.mkdir(parents=True, exist_ok=True)
-        JSONFormatter.write_all(graph_dict, fg_dir, root)
+        JSONFormatter.write_all(graph_dict, fg_dir, root, meta=meta)
+        JSONFormatter.write_unindexed(scanner.unindexed, fg_dir)
         md_out = fg_dir / "graph.md"
         MarkdownFormatter.write_to_file(graph_dict, md_out, root)
 
@@ -148,6 +174,8 @@ def main():
 > 1. **READ `.featuregraph/manifest.json`** to identify the domain category and feature IDs.
 > 2. **READ `.featuregraph/categories/<category>.json`** to get exact line spans (`#Lstart-Lend`).
 > 3. Read **ONLY** the specific lines required for the task.
+> 4. If `_meta.status != ok`, do not treat the manifest as complete — fall back to targeted exploration or run `featuregraph annotate`/`scan`.
+> 5. If `query` refuses as stale, run `featuregraph scan`.
 > Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.
 """
         if not agents_md.exists():
@@ -163,10 +191,12 @@ def main():
         print(f"✓ Installed workspace AI agent skill: {skill_file.relative_to(root)}")
 
         categories = JSONFormatter.split_by_category(graph_dict)
-        print(f"✓ Initialized 2-Tier Index: {len(graph_dict)} features in {len(categories)} categories.")
+        if not graph_dict:
+            print("⚠ No features found — the index is empty. Add @feature tags or run 'featuregraph annotate'.")
+        else:
+            print(f"✓ Initialized 2-Tier Index: {len(graph_dict)} features in {len(categories)} categories.")
 
     elif args.command == "query":
-        import json
         root = Path(args.dir).resolve()
         idx_file = root / ".featuregraph" / "index.json"
         if not idx_file.exists():
@@ -175,6 +205,7 @@ def main():
             print(f"Error: Feature index not found under {root}. Run 'featuregraph scan' first.")
             sys.exit(1)
 
+        _guard_fresh(root, idx_file, args.force)
         data = json.loads(idx_file.read_text(encoding="utf-8"))
         feat_id = args.feature_id.upper()
         feat = data.get("features", {}).get(feat_id)
@@ -198,8 +229,6 @@ def main():
             print("=======================================================\n")
 
     elif args.command == "search":
-        import json
-
         root = Path(args.dir).resolve()
         manifest_file = root / ".featuregraph" / "manifest.json"
         idx_file = root / ".featuregraph" / "index.json"
@@ -208,6 +237,7 @@ def main():
             print(f"Error: No .featuregraph index found under {root}. Run 'featuregraph scan' first.")
             sys.exit(1)
 
+        _guard_fresh(root, idx_file if idx_file.exists() else manifest_file, args.force)
         query_text = args.query
         q_lower = query_text.lower()
         q_words = set(q_lower.split())

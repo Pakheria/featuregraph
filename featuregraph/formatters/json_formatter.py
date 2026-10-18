@@ -45,7 +45,7 @@ class JSONFormatter:
         return categories
 
     @staticmethod
-    def format_manifest(graph_dict: Dict[str, Any]) -> str:
+    def format_manifest(graph_dict: Dict[str, Any], meta: Dict[str, Any] = None) -> str:
         """
         Generates the Tier-1 manifest: one line per feature, grouped by category.
         Size scales linearly with feature count (~0.5 kB per 10 features).
@@ -56,6 +56,7 @@ class JSONFormatter:
                 "generator": "featuregraph",
                 "version": _VERSION,
                 "total_features": len(graph_dict),
+                **(meta or {}),
                 "total_categories": len(categories),
                 "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
             },
@@ -68,12 +69,13 @@ class JSONFormatter:
 
     @staticmethod
     # @feature [JSON_FORMATT-02] Format
-    def format(graph_dict: Dict[str, Any], root_dir: Path) -> str:
+    def format(graph_dict: Dict[str, Any], root_dir: Path, meta: Dict[str, Any] = None) -> str:
         data = {
             "_meta": {
                 "generator": "featuregraph",
                 "version": _VERSION,
                 "total_features": len(graph_dict),
+                **(meta or {}),
                 "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
             },
             "features": graph_dict
@@ -82,22 +84,26 @@ class JSONFormatter:
 
     @staticmethod
     # @feature [JSON_FORMATT-03] Write to file
-    def write_to_file(graph_dict: Dict[str, Any], output_path: Path, root_dir: Path):
+    def write_to_file(graph_dict: Dict[str, Any], output_path: Path, root_dir: Path, meta: Dict[str, Any] = None):
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        content = JSONFormatter.format(graph_dict, root_dir)
+        content = JSONFormatter.format(graph_dict, root_dir, meta)
         output_path.write_text(content, encoding="utf-8")
 
     @staticmethod
-    def write_all(graph_dict: Dict[str, Any], fg_dir: Path, root_dir: Path):
+    def write_unindexed(unindexed: list, fg_dir: Path):
+        (fg_dir / "unindexed.json").write_text(json.dumps(sorted(unindexed), indent=2), encoding="utf-8")
+
+    @staticmethod
+    def write_all(graph_dict: Dict[str, Any], fg_dir: Path, root_dir: Path, meta: Dict[str, Any] = None):
         """Writes manifest.json, unified index.json, and all category files."""
         fg_dir.mkdir(parents=True, exist_ok=True)
 
         # 1. Tier-1 Manifest
-        manifest_content = JSONFormatter.format_manifest(graph_dict)
+        manifest_content = JSONFormatter.format_manifest(graph_dict, meta)
         (fg_dir / "manifest.json").write_text(manifest_content, encoding="utf-8")
 
         # 2. Unified index.json
-        unified_content = JSONFormatter.format(graph_dict, root_dir)
+        unified_content = JSONFormatter.format(graph_dict, root_dir, meta)
         (fg_dir / "index.json").write_text(unified_content, encoding="utf-8")
 
         # 3. Tier-2 Category Chunks

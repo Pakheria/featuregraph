@@ -3,6 +3,11 @@
     "generator": "featuregraph",
     "version": "0.1.0",
     "total_features": 35,
+    "tree_hash": "3bf5cdf86af8ba3e3df6b7ae6bc92629dfa6239346e8044d25a6d8aa44fa75cd",
+    "status": "partial",
+    "total_files": 27,
+    "indexed_files": 14,
+    "unindexed_files": 13,
     "total_categories": 14,
     "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
   },

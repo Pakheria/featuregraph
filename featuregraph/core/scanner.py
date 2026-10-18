@@ -1,8 +1,9 @@
+import hashlib
 import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Tuple
 
 from .parser_py import PythonFeatureParser
 from .parser_ts import TypeScriptFeatureParser
@@ -89,6 +90,30 @@ class WorkspaceScanner:
                 if not file.startswith("."):
                     yield Path(root) / file
 
+    def _source_files(self) -> Iterator[Tuple[Path, Path, os.stat_result]]:
+        """Exact file set scan parses: supported, non-empty, selected by iter_files."""
+        for path in self.iter_files():
+            try:
+                st = path.stat()
+            except OSError:
+                continue
+            if st.st_size == 0:
+                continue  # empty files (e.g. __init__.py) are not "unparsed"
+            if not (
+                path.suffix == ".py"
+                or path.suffix in (".ts", ".tsx", ".js", ".jsx")
+                or GenericFeatureParser.is_supported(path)
+            ):
+                continue
+            yield path, path.relative_to(self.root_dir), st
+
+    def tree_hash(self) -> str:
+        """sha256 over sorted (relpath, size, mtime_ns); .featuregraph is hidden, so iter_files skips it."""
+        h = hashlib.sha256()
+        for _, rel_path, st in sorted(self._source_files(), key=lambda f: f[1].as_posix()):
+            h.update(f"{rel_path.as_posix()}\0{st.st_size}\0{st.st_mtime_ns}\n".encode())
+        return h.hexdigest()
+
     # @feature [SCANNER-03] Scan
     def scan(self) -> FeatureGraph:
         graph = FeatureGraph()
@@ -97,24 +122,19 @@ class WorkspaceScanner:
         # Pass 1: Parse all files & index defined symbols
         scanned_files = []
         unparsed: List[str] = []
+        hasher = hashlib.sha256()
+        total_files = 0
 
-        for path in self.iter_files():
-            rel_path = path.relative_to(self.root_dir)
-
-            try:
-                if path.stat().st_size == 0:
-                    continue  # empty files (e.g. __init__.py) are not "unparsed"
-            except OSError:
-                continue
+        for path, rel_path, st in sorted(self._source_files(), key=lambda f: f[1].as_posix()):
+            total_files += 1
+            hasher.update(f"{rel_path.as_posix()}\0{st.st_size}\0{st.st_mtime_ns}\n".encode())
 
             if path.suffix == ".py":
                 parsed = PythonFeatureParser.parse_file(path)
             elif path.suffix in [".ts", ".tsx", ".js", ".jsx"]:
                 parsed = TypeScriptFeatureParser.parse_file(path)
-            elif GenericFeatureParser.is_supported(path):
-                parsed = GenericFeatureParser.parse_file(path)
             else:
-                continue
+                parsed = GenericFeatureParser.parse_file(path)
 
             if parsed:
                 resolver.register_feature_symbols(parsed)
@@ -177,5 +197,23 @@ class WorkspaceScanner:
                 file=sys.stderr,
             )
 
+        # B4: truthful manifest fields; empty wins regardless of file counts.
+        self.tree_hash_value = hasher.hexdigest()
+        self.total_files = total_files
+        self.indexed_files = len(scanned_files)
+        self.unindexed = sorted(unparsed)
+        self.status = (
+            "empty" if not graph.nodes else "ok" if not unparsed else "partial"
+        )
+
         return graph
+
+    def scan_meta(self) -> dict:
+        return {
+            "tree_hash": self.tree_hash_value,
+            "status": self.status,
+            "total_files": self.total_files,
+            "indexed_files": self.indexed_files,
+            "unindexed_files": len(self.unindexed),
+        }
 

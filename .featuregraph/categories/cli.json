@@ -21,8 +21,8 @@
       {
         "file": "featuregraph/cli.py",
         "lines": [
-          19,
-          350
+          36,
+          380
         ],
         "symbol": "main",
         "type": "function"

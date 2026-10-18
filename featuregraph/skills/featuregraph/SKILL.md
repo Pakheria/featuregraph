@@ -39,11 +39,10 @@ featuregraph init
 2. **Turn 2:** Read only that domain's file: `.featuregraph/categories/<category>.json`.
 3. **Turn 3:** Read and edit **ONLY** the exact line spans (`#Lstart-Lend`). Never do full-file exploratory reads.
 
-### If EXISTS → Check staleness
-If the last git commit is newer than the index, re-scan silently before reading:
-```bash
-featuregraph scan --quiet
-```
+### If EXISTS → Check status and freshness
+Read `_meta` first:
+- If `_meta.status != ok`, do not treat the manifest as complete — fall back to targeted exploration or run `featuregraph annotate` (adds tags) then `featuregraph scan`.
+- `query` and `search` refuse stale results (nonzero exit); run `featuregraph scan`. Use `--force` only to inspect an already-stale index.
 
 ---
 

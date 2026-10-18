@@ -21,8 +21,8 @@
       {
         "file": "featuregraph/core/scanner.py",
         "lines": [
-          19,
-          180
+          20,
+          218
         ],
         "symbol": "WorkspaceScanner",
         "type": "class"
@@ -38,8 +38,8 @@
       {
         "file": "featuregraph/core/scanner.py",
         "lines": [
-          28,
-          38
+          29,
+          39
         ],
         "symbol": "detect_subprojects",
         "type": "function"
@@ -67,8 +67,8 @@
       {
         "file": "featuregraph/core/scanner.py",
         "lines": [
-          93,
-          180
+          118,
+          209
         ],
         "symbol": "scan",
         "type": "function"
