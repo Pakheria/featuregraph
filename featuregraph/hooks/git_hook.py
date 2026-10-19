@@ -4,6 +4,7 @@ from pathlib import Path
 HOOK_MARKER = "# featuregraph-managed-hook"
 
 HOOK_SCRIPT = f"""#!/usr/bin/env bash
+set -e
 {HOOK_MARKER}
 # Auto-sync FeatureGraph on every git commit
 if command -v featuregraph >/dev/null 2>&1; then
@@ -13,29 +14,31 @@ if command -v featuregraph >/dev/null 2>&1; then
     fi
     echo "⚡ [FeatureGraph] Auto-syncing Feature Graph & Line Index..."
     featuregraph scan --quiet
-    git add -f .featuregraph/ 2>/dev/null || true
+    git add -f .featuregraph/
 fi
 """
 
 
 def _hook_path(repo_root: Path) -> Path | None:
-    """Resolve the pre-commit hook path, including git worktrees and submodules."""
-    git_dir = repo_root / ".git"
-    if not git_dir.exists():
-        return None
-    if git_dir.is_dir():
-        return git_dir / "hooks" / "pre-commit"
+    """Resolve the pre-commit hook path, including worktrees and core.hooksPath."""
     try:
         result = subprocess.run(
             ["git", "-C", str(repo_root), "rev-parse", "--git-path", "hooks"],
             capture_output=True, text=True, check=True,
         )
+        raw = result.stdout.strip()
+        if raw:
+            hooks = Path(raw)
+            if not hooks.is_absolute():
+                hooks = repo_root / hooks
+            return hooks / "pre-commit"
     except (OSError, subprocess.SubprocessError):
-        return None
-    hooks = Path(result.stdout.strip())
-    if not hooks.is_absolute():
-        hooks = repo_root / hooks
-    return hooks / "pre-commit"
+        pass
+
+    git_dir = repo_root / ".git"
+    if git_dir.is_dir():
+        return git_dir / "hooks" / "pre-commit"
+    return None
 
 # @feature [GIT_HOOK-01] Git hook manager
 class GitHookManager:
@@ -44,13 +47,20 @@ class GitHookManager:
     @staticmethod
     # @feature [GIT_HOOK-02] Install
     def install(repo_root: Path) -> str:
-        """Returns 'installed', 'no-git', or 'foreign-hook' (existing hook left untouched)."""
+        """Returns 'installed', 'upgraded', 'no-git', or 'foreign-hook' (foreign hooks untouched)."""
         hook_path = _hook_path(repo_root)
         if hook_path is None:
             return "no-git"
 
-        if hook_path.exists() and HOOK_MARKER not in hook_path.read_text(encoding="utf-8", errors="ignore"):
-            return "foreign-hook"
+        if hook_path.exists():
+            existing = hook_path.read_text(encoding="utf-8", errors="ignore")
+            if HOOK_MARKER not in existing:
+                # Pre-marker FeatureGraph hooks carry the same banner; take them over.
+                if "Auto-sync FeatureGraph" not in existing:
+                    return "foreign-hook"
+                hook_path.write_text(HOOK_SCRIPT, encoding="utf-8")
+                hook_path.chmod(0o755)
+                return "upgraded"
 
         hook_path.parent.mkdir(parents=True, exist_ok=True)
         hook_path.write_text(HOOK_SCRIPT, encoding="utf-8")

@@ -3,7 +3,7 @@ import json
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -32,6 +32,20 @@ class TestCliJson(unittest.TestCase):
             data = json.loads(out.getvalue())
             self.assertEqual(data["id"], "AUTH-01")
             self.assertEqual(data["name"], "Auth gate")
+
+    def test_search_reports_corrupt_category(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._make_project(root)
+            (root / ".featuregraph" / "categories" / "auth.json").write_text('{"AUTH-01":')
+
+            err = io.StringIO()
+            with patch.object(sys, "argv", ["featuregraph", "search", "auth", "--dir", str(root)]), \
+                    redirect_stderr(err), self.assertRaises(SystemExit) as ctx:
+                main()
+
+            self.assertEqual(ctx.exception.code, 1)
+            self.assertIn("corrupt category file", err.getvalue())
 
     def test_search_json(self):
         with tempfile.TemporaryDirectory() as tmpdir:

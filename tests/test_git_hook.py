@@ -38,6 +38,24 @@ class TestGitHookManager(unittest.TestCase):
             self.assertFalse(GitHookManager.uninstall(root))
             self.assertTrue(hook.exists())
 
+    def test_legacy_featuregraph_hook_is_upgraded(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            hook_dir = root / ".git" / "hooks"
+            hook_dir.mkdir(parents=True)
+            hook = hook_dir / "pre-commit"
+            hook.write_text(
+                "#!/usr/bin/env bash\n"
+                "# Auto-sync FeatureGraph on every git commit\n"
+                "featuregraph scan --quiet\n"
+                "git add -f .featuregraph/index.json .featuregraph/graph.md\n"
+            )
+
+            self.assertEqual(GitHookManager.install(root), "upgraded")
+            content = hook.read_text()
+            self.assertIn(HOOK_MARKER, content)
+            self.assertNotIn("index.json", content)
+
     def test_no_git_directory(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             self.assertEqual(GitHookManager.install(Path(tmpdir)), "no-git")
@@ -45,6 +63,18 @@ class TestGitHookManager(unittest.TestCase):
     def test_hook_skips_dirty_worktree(self):
         self.assertIn("git diff --quiet", HOOK_SCRIPT)
         self.assertIn("git ls-files --others --exclude-standard", HOOK_SCRIPT)
+
+    @unittest.skipUnless(shutil.which("git"), "git not available")
+    def test_install_respects_core_hooks_path(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            repo.mkdir()
+            subprocess.run(["git", "-C", str(repo), "init", "-q"], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "core.hooksPath", "custom-hooks"], check=True)
+
+            self.assertEqual(GitHookManager.install(repo), "installed")
+            self.assertTrue((repo / "custom-hooks" / "pre-commit").exists())
+            self.assertTrue(GitHookManager.uninstall(repo))
 
     @unittest.skipUnless(shutil.which("git"), "git not available")
     def test_install_in_git_worktree(self):

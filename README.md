@@ -153,7 +153,7 @@ featuregraph init
 - Installs the workspace AI agent skill (`.agents/skills/featuregraph/SKILL.md`)
 - Installs the `.git/hooks/pre-commit` hook (if in a git repository)
 
-All artifacts are kept inside a clean `.featuregraph/` directory to prevent cluttering your repository root.
+All artifacts are kept inside a clean `.featuregraph/` directory to prevent cluttering your repository root; agent integration lives in `AGENTS.md` and `.agents/skills/featuregraph/`.
 
 ### 3. Install Global AI Agent Skills (Multi-IDE / Multi-CLI)
 ```bash

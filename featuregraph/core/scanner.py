@@ -1,3 +1,4 @@
+import fnmatch
 import hashlib
 import os
 import re
@@ -61,6 +62,51 @@ def _file_level_item(path: Path, rel_path: Path) -> dict:
         "rel_path": rel_path.as_posix(),
     }
 
+class _GitignoreMatcher:
+    """Minimal .gitignore support for scans outside a git repository.
+
+    Last matching pattern wins; supports negation, dir-only and anchored patterns.
+    ponytail: root .gitignore only; ``*`` may cross ``/``; no ``**`` rules. Inside a
+    repo git itself supplies the exact list, so this fallback stays deliberately small.
+    """
+
+    def __init__(self, root_dir: Path):
+        self.rules: List[tuple] = []
+        ignore_file = root_dir / ".gitignore"
+        if not ignore_file.exists():
+            return
+        try:
+            lines = ignore_file.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            return
+        for raw in lines:
+            line = raw.rstrip()
+            if not line or line.startswith("#"):
+                continue
+            negated = line.startswith("!")
+            if negated:
+                line = line[1:]
+            if not line:
+                continue
+            dir_only = line.endswith("/")
+            pattern = line.rstrip("/")
+            anchored = pattern.startswith("/") or "/" in pattern
+            self.rules.append((pattern.lstrip("/"), negated, dir_only, anchored))
+
+    def ignores(self, rel_path: str, is_dir: bool = False) -> bool:
+        ignored = False
+        for pattern, negated, dir_only, anchored in self.rules:
+            if dir_only and not is_dir:
+                continue
+            if anchored:
+                matched = fnmatch.fnmatch(rel_path, pattern)
+            else:
+                matched = any(fnmatch.fnmatch(part, pattern) for part in rel_path.split("/"))
+            if matched:
+                ignored = not negated
+        return ignored
+
+
 # @feature [SCANNER-01] Workspace scanner
 class WorkspaceScanner:
     """Recursively scans codebase directories and parses feature tags into a FeatureGraph."""
@@ -113,8 +159,9 @@ class WorkspaceScanner:
     def iter_files(self) -> Iterator[Path]:
         """
         Yields candidate source files. Inside a git repo uses git's file list so
-        .gitignore'd trees (vendor, target, .next, …) are never scanned; falls back
-        to a filtered os.walk elsewhere. Always honours .featureignore and hidden dirs.
+        .gitignore'd trees (vendor, target, .next, …) are never scanned; elsewhere the
+        walk is filtered by a minimal root-.gitignore matcher. Always honours
+        .featureignore and hidden dirs.
         """
         git_files = self._git_file_list()
         if git_files is not None:
@@ -129,10 +176,20 @@ class WorkspaceScanner:
                     yield path
             return
 
+        matcher = _GitignoreMatcher(self.root_dir)
         for root, dirs, files in os.walk(self.root_dir, topdown=True):
-            dirs[:] = sorted(d for d in dirs if not self._should_ignore_dir(d))
+            dirs[:] = sorted(
+                d for d in dirs
+                if not self._should_ignore_dir(d)
+                and not matcher.ignores(
+                    (Path(root) / d).relative_to(self.root_dir).as_posix(), is_dir=True
+                )
+            )
             for file in sorted(files):
-                if not file.startswith("."):
+                if file.startswith("."):
+                    continue
+                rel = (Path(root) / file).relative_to(self.root_dir).as_posix()
+                if not matcher.ignores(rel):
                     yield Path(root) / file
 
     def _source_files(self) -> Iterator[Tuple[Path, Path, os.stat_result]]:
@@ -196,7 +253,7 @@ class WorkspaceScanner:
             sample = ", ".join(unparsed[:3])
             suffix = f" (+{len(unparsed) - 3} more)" if len(unparsed) > 3 else ""
             print(
-                f"⚠ {len(unparsed)} file(s) with no parseable features (untagged or syntax error): {sample}{suffix}",
+                f"⚠ {len(unparsed)} file(s) with no parseable features (untagged, unreadable, or syntax error): {sample}{suffix}",
                 file=sys.stderr,
             )
 

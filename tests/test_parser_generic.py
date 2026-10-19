@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 from pathlib import Path
-from featuregraph.core.parser_generic import GenericFeatureParser
 from featuregraph.core.scanner import WorkspaceScanner
 from featuregraph.core.annotator import collect_suggestions, apply_suggestions
 

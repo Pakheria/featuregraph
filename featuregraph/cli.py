@@ -1,6 +1,7 @@
 import json
 import sys
 import argparse
+import tempfile
 from pathlib import Path
 
 # Support running as a standalone script or installed module
@@ -9,6 +10,7 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(0, str(file_path.parent.parent))
     __package__ = "featuregraph"
 
+from featuregraph import __version__
 from featuregraph.core.scanner import WorkspaceScanner
 from featuregraph.core.dependency_resolver import build_symbol_aliases
 from featuregraph.core.annotator import collect_suggestions, apply_suggestions, _comment_prefix
@@ -58,6 +60,7 @@ def main():
         description="Token-efficient AST-indexed feature topology map for AI coding agents."
     )
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
+    parser.add_argument("--version", action="version", version=f"featuregraph {__version__}")
 
     # Command: scan
     scan_parser = subparsers.add_parser("scan", help="Scan codebase and generate feature graph files")
@@ -127,6 +130,14 @@ def main():
         quiet = getattr(args, "quiet", False)
 
         scanner = WorkspaceScanner(root)
+        fg_dir = root / ".featuregraph"
+        try:
+            fg_dir.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=fg_dir):
+                pass
+        except OSError as exc:
+            print(f"Error: cannot write .featuregraph in {root}: {exc}. Check directory permissions.", file=sys.stderr)
+            sys.exit(1)
 
         if not quiet:
             subprojects = scanner.detect_subprojects()
@@ -164,6 +175,8 @@ def main():
         hook_status = GitHookManager.install(root)
         if hook_status == "installed":
             print("✓ Installed git pre-commit hook.")
+        elif hook_status == "upgraded":
+            print("✓ Upgraded legacy FeatureGraph pre-commit hook.")
         elif hook_status == "foreign-hook":
             print("ℹ Skipped git hook: existing pre-commit hook found (not overwritten).")
         else:
@@ -279,7 +292,11 @@ def main():
         if cats_dir.is_dir():
             for cat_json in cats_dir.glob("*.json"):
                 cat_name = cat_json.stem
-                cat_data = json.loads(cat_json.read_text(encoding="utf-8"))
+                try:
+                    cat_data = json.loads(cat_json.read_text(encoding="utf-8"))
+                except (OSError, ValueError) as exc:
+                    print(f"Error: corrupt category file {cat_json}: {exc}. Run 'featuregraph scan'.", file=sys.stderr)
+                    sys.exit(1)
                 for fid, fmeta in cat_data.items():
                     features[fid] = fmeta
                     categories[fid] = cat_name
@@ -345,6 +362,8 @@ def main():
             status = GitHookManager.install(root)
             if status == "installed":
                 print("✓ Git pre-commit hook installed.")
+            elif status == "upgraded":
+                print("✓ Upgraded legacy FeatureGraph pre-commit hook.")
             elif status == "foreign-hook":
                 print("ℹ Existing pre-commit hook found — not overwritten.")
             else:

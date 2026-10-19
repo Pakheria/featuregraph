@@ -53,6 +53,16 @@ class TestCommonJSExtraction(unittest.TestCase):
             run = next(item for item in items if item["symbol"] == "run")
             self.assertEqual(run["end_line"], 8)
 
+    def test_tagged_default_export_uses_component_symbol(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = Path(tmpdir) / "page.tsx"
+            src.write_text(
+                "// @feature [PAGE-01] Page\n"
+                "export default function Home() { return null; }\n"
+            )
+            item = TypeScriptFeatureParser.parse_file(src)[0]
+            self.assertEqual(item["symbol"], "Home")
+
     def test_tagged_js_keeps_tag_only_behavior(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             src = Path(tmpdir) / "legacy.js"
@@ -64,6 +74,21 @@ class TestCommonJSExtraction(unittest.TestCase):
             items = TypeScriptFeatureParser.parse_file(src)
             self.assertEqual([item["feature_id"] for item in items], ["LEGACY-01"])
             self.assertNotIn("auto", items[0])
+
+
+class TestBrokenJavaScript(unittest.TestCase):
+    def test_syntactically_broken_js_falls_back_to_file_level(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "bad-broken.js").write_text("function broken( {\n  return 1\n")
+            code, _, err = _run(["scan", "--dir", str(root), "--quiet"])
+            self.assertEqual(code, 0, err)
+            features = json.loads(
+                (root / ".featuregraph" / "index.json").read_text()
+            )["features"]
+            keys = list(features)
+            self.assertTrue(any(k.startswith("FILE-") for k in keys), keys)
+            self.assertFalse(any(k.startswith("CJS-") for k in keys), keys)
 
 
 class TestFileLevelFallback(unittest.TestCase):

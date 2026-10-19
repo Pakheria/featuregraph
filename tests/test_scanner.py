@@ -1,9 +1,6 @@
 import io
 import sys
 import unittest
-from pathlib import Path
-from featuregraph.core.parser_py import PythonFeatureParser
-from featuregraph.core.parser_ts import TypeScriptFeatureParser
 from featuregraph.core.graph import FeatureGraph
 
 class TestFeatureGraph(unittest.TestCase):

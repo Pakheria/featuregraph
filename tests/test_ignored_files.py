@@ -46,5 +46,25 @@ class TestFeatureignore(unittest.TestCase):
             self.assertNotIn("untagged.py", files)
 
 
+class TestGitignoreWithoutRepo(unittest.TestCase):
+    def test_gitignored_paths_are_skipped_outside_git(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / ".gitignore").write_text("secret.py\nbuild/\n*.js\n!keep.js\n")
+            (root / "secret.py").write_text("# @feature [SECRET-01] Secret\ndef s(): pass\n")
+            (root / "app.py").write_text("# @feature [APP-01] App\ndef main(): pass\n")
+            (root / "build").mkdir()
+            (root / "build" / "gen.py").write_text("# @feature [GEN-01] Gen\ndef g(): pass\n")
+            (root / "debug.js").write_text("// @feature [DEBUG-01] Debug\nfunction d() {}\n")
+            (root / "keep.js").write_text("// @feature [KEEP-01] Keep\nfunction k() {}\n")
+
+            data = WorkspaceScanner(root).scan().to_dict()
+            self.assertIn("APP-01", data)
+            self.assertIn("KEEP-01", data)
+            self.assertNotIn("SECRET-01", data)
+            self.assertNotIn("GEN-01", data)
+            self.assertNotIn("DEBUG-01", data)
+
+
 if __name__ == "__main__":
     unittest.main()

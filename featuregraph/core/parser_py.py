@@ -114,7 +114,7 @@ class PythonFeatureParser:
                             })
                             break
 
-        except (SyntaxError, UnicodeDecodeError, ValueError):
+        except (SyntaxError, UnicodeDecodeError, ValueError, OSError):
             pass
 
         return results

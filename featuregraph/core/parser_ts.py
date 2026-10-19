@@ -8,11 +8,33 @@ FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", 
 DEPENDS_TAG_REGEX = re.compile(r"@depends(?:_on)?\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 # Tags are only honoured on comment lines; the comment mask rejects string/template text
 COMMENT_LINE_REGEX = re.compile(r"^[ \t]*(?://|/\*|\*|#)")
-COMPONENT_EXPORT_REGEX = re.compile(r"export\s+(?:const|function|class)\s+([A-Za-z0-9_]+)", re.MULTILINE)
-# ponytail: fixed-window end estimate — overshoots into the next component and clips long ones, which
-# bleeds token-derived deps across components. Exact JS/TS ranges need tree-sitter; brace heuristics
-# break on JSX/template/regex literals. Add the dep only if slicing precision ever matters.
-TS_END_LINE_LOOKAHEAD = 35  # max lines scanned forward as component end estimate
+COMPONENT_EXPORT_REGEX = re.compile(r"export\s+(?:default\s+)?(?:const|function|class)\s+([A-Za-z0-9_]+)", re.MULTILINE)
+# End estimate: when the symbol's opening brace closes its (masked) line, brace depth runs
+# to the real close — strings, comments and template literals cannot close the block early.
+# Everything else (single-line bodies, JSX-paren arrows) keeps the fixed lookahead window.
+# ponytail: exact JSX ranges need tree-sitter; the window is the honest ceiling until then.
+TS_END_LINE_LOOKAHEAD = 35  # fallback max-lines window when no block brace is found
+
+
+def _ts_symbol_end(code_lines: List[str], start_idx: int, fallback_end: int) -> int:
+    """1-based inclusive end of the block opening in the symbol's header lines.
+
+    The opener must end its masked line; depth then runs to the matching close.
+    Returns fallback_end when no opener is found or the block never closes.
+    """
+    opener = None
+    for i in range(start_idx, min(start_idx + 4, len(code_lines))):
+        if code_lines[i].rstrip().endswith("{"):
+            opener = i
+            break
+    if opener is None:
+        return fallback_end
+    depth = 0
+    for i in range(opener, len(code_lines)):
+        depth += code_lines[i].count("{") - code_lines[i].count("}")
+        if depth <= 0:
+            return i + 1
+    return fallback_end
 
 # CommonJS extractor. Untagged .js files get synthetic feature IDs for their
 # declarations/exports; explicit @feature tags keep the existing tag-only path above.
@@ -198,14 +220,18 @@ class TypeScriptFeatureParser:
                     
                     # Look ahead for component export
                     symbol_name = file_path.stem
-                    end_line = min(idx + TS_END_LINE_LOOKAHEAD, len(lines))
+                    sym_idx = idx - 1
                     
                     # Check next 6 lines for export statement
                     for sub_idx in range(idx, min(idx + 6, len(lines))):
                         exp_match = COMPONENT_EXPORT_REGEX.search(code_lines[sub_idx])
                         if exp_match:
                             symbol_name = exp_match.group(1)
+                            sym_idx = sub_idx
                             break
+                    end_line = _ts_symbol_end(
+                        code_lines, sym_idx, min(idx + TS_END_LINE_LOOKAHEAD, len(lines))
+                    )
                             
                     dep_match = DEPENDS_TAG_REGEX.search("\n".join(comment_lines[max(0, idx - 2):min(len(lines), idx + 3)]))
                     deps = []
@@ -231,5 +257,10 @@ class TypeScriptFeatureParser:
                 content = file_path.read_text(encoding="utf-8")
             except (UnicodeDecodeError, OSError):
                 return []
-            return _cjs_auto_symbols(file_path, lexmask.code_only(content, "js"))
+            masked = lexmask.code_only(content, "js")
+            # ponytail: brace-balance gate — syntactically broken JS must not mint features;
+            # real syntax validation needs node/tree-sitter.
+            if masked.count("{") != masked.count("}"):
+                return []
+            return _cjs_auto_symbols(file_path, masked)
         return results
