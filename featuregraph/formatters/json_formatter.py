@@ -109,6 +109,8 @@ class JSONFormatter:
         # 3. Tier-2 Category Chunks
         cat_dir = fg_dir / "categories"
         cat_dir.mkdir(parents=True, exist_ok=True)
+        for stale in cat_dir.glob("*.json"):
+            stale.unlink()
         categories = JSONFormatter.split_by_category(graph_dict)
 
         for cat_name, cat_features in categories.items():

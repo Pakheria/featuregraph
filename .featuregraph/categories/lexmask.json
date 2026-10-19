@@ -13,6 +13,7 @@
           227
         ],
         "symbol": "classify",
+        "symbol_id": "classify",
         "type": "function"
       }
     ]

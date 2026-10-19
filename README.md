@@ -20,9 +20,9 @@
 
 FeatureGraph is engineered around four core metrics:
 
-1. **2-Tier Hierarchical Token Budget:** Compact `manifest.json` (one line per feature — 30–75 bytes per feature, measured) lets agents pinpoint domain categories, then read only that domain's file `categories/<domain>.json` (typically 150–2,000 bytes) before slicing exact lines.
-2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function calls, type references, and component usages to wire `depends_on` and `called_by` with zero manual effort.
-3. **Line-Exact Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature.
+1. **2-Tier Hierarchical Token Budget:** Compact `manifest.json` (one line per feature — 30–75 bytes per feature, measured) lets agents pinpoint domain categories, then read only that domain's file `categories/<domain>.json` (typically 150–2,000 bytes) before slicing only the target lines.
+2. **Automated AST Call-Graph Dependency Resolution:** Automatically detects function/method calls and component usages to wire `depends_on` and `called_by` with zero manual effort.
+3. **Line-Range Slicing (`#Lstart-Lend`):** Directs the AI to read and edit *only* the specific lines of the target feature. Python ranges are exact; TS/JS ends are a bounded 35-line estimate.
 4. **Sub-Second Scan Speed:** Optimized two-pass AST mapping — 1,000 files scanned in ~0.1 s (measured).
 
 ```text
@@ -74,10 +74,10 @@ Scaling is linear in feature count: **manifest ≈ 30–75 bytes/feature**, **fu
 
 FeatureGraph does **not** require manual `@depends` comments to build a real dependency graph:
 
-1. **Pass 1 (Symbol Indexing):** Scans all codebase files and maps defined functions, classes, and components to their Feature IDs.
+1. **Pass 1 (Symbol Indexing):** Scans all codebase files and maps defined functions, classes, and components to feature IDs and deterministic symbol IDs (bare when unique, path-qualified on collision).
 2. **Pass 2 (AST Call-Site Inference):** Analyzes call-sites, type references, and JSX usage inside each feature's line boundaries.
 3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges, generates Mermaid DAGs in `.featuregraph/graph.md`, and lists isolated features (no deps, no callers) for dead-code review.
-4. **Manual Overrides & Trust Checks:** `@depends` (or `@depends_on`) tags add explicit edges; dangling references and names defined by multiple features are warned about at scan time instead of being silently guessed.
+4. **Manual Overrides & Trust Checks:** `@depends` (or `@depends_on`) tags add explicit edges; dangling references are warned about. Colliding symbol names are qualified deterministically (e.g. `web.app.layout` vs `web.app.docs.layout`), and bare calls resolve through the same IDs by path affinity; exact ties are left unresolved, never guessed.
 
 ---
 
@@ -90,19 +90,25 @@ Warnings are aggregated to one line each per scan:
 ⚠ 1 unresolved @depends reference(s) — no such feature: DANGLE-01 → GHOST-77
 ```
 
-Ambiguous symbols (one name defined by multiple features) are reported the same way; bare-name edges for those are skipped rather than guessed.
+### Symbol IDs & collisions
+
+A tagged location's symbol ID is its bare symbol when unique (`validate_token`) and a deterministic path prefix on collision (`web.app.layout` vs `web.app.docs.layout`; when even the directory repeats, the full path is used, e.g. `test.bypass_matrix.1_drifted_params.processPayment`). Explicit `@feature [ID]` tags remain the canonical feature ID.
+
+`query` and `search` accept a feature ID, a qualified symbol ID, or an unambiguous bare symbol. An ambiguous bare name exits 1 and lists the candidate qualified IDs. Inferred calls use the same IDs with path affinity (same file > same directory > longest shared path); exact ties are left unresolved, not guessed.
 
 ---
 
 ## 🏷️ Tag Rules & Coverage Model
 
-A tag only counts on a **real comment line**. All scanners, the annotator, and dependency inference share one lexical mask, so `@feature` or exported symbols inside string literals, template literals, and block comments are ignored — they can never create phantom features or get annotated.
+A tag only counts on a **real comment line**. All scanners, the annotator, and dependency inference share one lexical mask, so `@feature` or exported symbols inside string literals and template literals are ignored — they can never create phantom features or get annotated.
 
 | Language | Tag placement | Symbol window |
 | :--- | :--- | :--- |
 | Python | Comment above `def` / `class` (or the docstring) | 6 lines above |
 | TypeScript / JS | Comment above the export | 6 lines below the tag |
 | Go, Rust, Java, C#, PHP, Ruby, Swift, Dart, Shell | Comment above the declaration | 6 lines below the tag |
+
+Python end lines are exact; TS/JS end lines use a fixed 35-line lookahead and can overshoot or clip long components.
 
 `featuregraph annotate --yes` only inserts at code positions, replaces files atomically, and re-parses every write; if a tag would not round-trip it restores the original file. Untagged symbols are not indexed — `scan` reports files with no parseable features.
 
@@ -116,6 +122,9 @@ Search symbols and line ranges in <50ms without bloating your context window:
 featuregraph search "parser"
 # Output gives exact file paths and surgical #Lstart-Lend ranges:
 # • featuregraph/core/parser_py.py #L10-L95 (PythonFeatureParser)
+
+featuregraph query web.app.docs.layout   # qualified symbol ID
+featuregraph query layout                # ambiguous -> exit 1 + candidate IDs
 ```
 
 ---

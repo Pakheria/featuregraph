@@ -12,10 +12,11 @@
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          10,
-          82
+          11,
+          83
         ],
         "symbol": "FeatureGraph",
+        "symbol_id": "FeatureGraph",
         "type": "class"
       }
     ]
@@ -33,10 +34,11 @@
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          19,
-          49
+          20,
+          50
         ],
         "symbol": "add_feature",
+        "symbol_id": "add_feature",
         "type": "function"
       }
     ]
@@ -50,10 +52,11 @@
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          52,
-          58
+          53,
+          59
         ],
         "symbol": "get_orphans",
+        "symbol_id": "get_orphans",
         "type": "function"
       }
     ]
@@ -68,10 +71,11 @@
       {
         "file": "featuregraph/core/graph.py",
         "lines": [
-          61,
-          82
+          62,
+          83
         ],
         "symbol": "to_dict",
+        "symbol_id": "to_dict",
         "type": "function"
       }
     ]

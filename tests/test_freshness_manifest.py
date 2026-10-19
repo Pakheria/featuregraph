@@ -156,6 +156,39 @@ class TestTruthfulManifest(unittest.TestCase):
             self._scan(root)
             self.assertEqual(_tree(root), first)
 
+    def test_rescan_removes_stale_category(self):
+        """A category with no remaining features must not survive as a ghost search hit."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            src = root / "auth.py"
+            src.write_text("# @feature [AUTH-01] Auth\ndef auth(): pass\n")
+            self._scan(root)
+            self.assertTrue((root / ".featuregraph" / "categories" / "auth.json").exists())
+
+            src.write_text("def auth(): pass\n")
+            self._scan(root)
+            self.assertFalse((root / ".featuregraph" / "categories" / "auth.json").exists())
+
+            code, out, err = _run(["search", "auth", "--dir", str(root)])
+            self.assertEqual(code, 0, err)
+            self.assertNotIn("AUTH-01", out)
+
+    def test_scan_json_also_updates_canonical_index(self):
+        """--json is an extra copy; the canonical manifest/categories must still be written."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "app.py").write_text("# @feature [A-01] A\ndef a(): pass\n")
+
+            code, out, err = _run(["scan", "--dir", str(root), "--json", "custom.json"])
+            self.assertEqual(code, 0, err)
+            self.assertTrue((root / "custom.json").exists())
+            self.assertTrue((root / ".featuregraph" / "manifest.json").exists())
+            self.assertTrue((root / ".featuregraph" / "categories" / "a.json").exists())
+
+            code, out, err = _run(["query", "A-01", "--dir", str(root)])
+            self.assertEqual(code, 0, err)
+            self.assertIn("A-01", out)
+
 
 if __name__ == "__main__":
     unittest.main()

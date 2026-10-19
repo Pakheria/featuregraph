@@ -35,7 +35,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional
 
 from . import lexmask
 from .scanner import WorkspaceScanner
@@ -104,11 +104,16 @@ def _leading_indent(source_lines: List[str], lineno: int) -> str:
     return ""
 
 
-def _has_tag_above(comment_lines: List[str], lineno: int, lookahead: int = 6) -> bool:
-    """True if any of the `lookahead` comment lines above lineno contain a @feature tag."""
-    start = max(0, lineno - 1 - lookahead)
-    chunk = "\n".join(comment_lines[start : lineno - 1])
-    return bool(FEATURE_TAG_RE.search(chunk))
+def _has_tag_above(
+    source_lines: List[str], comment_lines: List[str], lineno: int, lookahead: int = 6
+) -> bool:
+    """True if the contiguous comment block above lineno contains a @feature tag."""
+    for i in range(lineno - 2, max(-1, lineno - 2 - lookahead), -1):
+        if source_lines[i].strip() and not comment_lines[i].strip():
+            break  # code line: tags above it belong to a previous symbol
+        if FEATURE_TAG_RE.search(comment_lines[i]):
+            return True
+    return False
 
 
 def _lexer_lang(lang: str) -> str:
@@ -150,7 +155,7 @@ def suggest_python(file_path: Path, root: Path, used_ids: Dict[str, int]) -> Lis
         if name.startswith("__") and name.endswith("__"):
             continue  # dunder methods
 
-        if _has_tag_above(comment_lines, node.lineno):
+        if _has_tag_above(lines, comment_lines, min([node.lineno] + [d.lineno for d in node.decorator_list])):
             continue  # already tagged
 
         cat = _category_from_path(rel)
@@ -206,7 +211,7 @@ def suggest_typescript(file_path: Path, root: Path, used_ids: Dict[str, int]) ->
         name   = match.group("name")
         indent = match.group("indent")
 
-        if _has_tag_above(comment_lines, lineno, lookahead=4):
+        if _has_tag_above(lines, comment_lines, lineno, lookahead=4):
             continue
 
         cat = _category_from_path(rel)
@@ -261,7 +266,7 @@ def suggest_generic(file_path: Path, root: Path, used_ids: Dict[str, int]) -> Li
         name = match.group("name")
         indent = match.group("indent")
 
-        if _has_tag_above(comment_lines, lineno, lookahead=4):
+        if _has_tag_above(lines, comment_lines, lineno, lookahead=4):
             continue
 
         cat = _category_from_path(rel)

@@ -14,6 +14,7 @@
           19
         ],
         "symbol": "test_graph_dependencies",
+        "symbol_id": "test_graph_dependencies",
         "type": "function"
       }
     ]
@@ -33,6 +34,7 @@
           25
         ],
         "symbol": "test_orphan_detection",
+        "symbol_id": "test_orphan_detection",
         "type": "function"
       }
     ]
@@ -51,6 +53,7 @@
           47
         ],
         "symbol": "test_same_id_across_files_warns_and_merges",
+        "symbol_id": "test_same_id_across_files_warns_and_merges",
         "type": "function"
       }
     ]

@@ -126,6 +126,20 @@ def invoke(x):
             data = WorkspaceScanner(tmp_path).scan().to_dict()
             self.assertEqual(data["CALLER-01"].get("depends_on", []), [])
 
+    def test_python_local_assignment_is_not_a_dependency(self):
+        """A local variable that shadows a feature name is not a dependency."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            (tmp_path / "helper.py").write_text(
+                "# @feature [B-01] Helper\ndef helper():\n    return 1\n"
+            )
+            (tmp_path / "caller.py").write_text(
+                "# @feature [A-01] Caller\ndef caller():\n    helper = 2\n    return helper\n"
+            )
+
+            data = WorkspaceScanner(tmp_path).scan().to_dict()
+            self.assertEqual(data["A-01"].get("depends_on", []), [])
+
     def test_scan_is_deterministic(self):
         """Two scans of the same tree produce byte-identical graph data."""
         with tempfile.TemporaryDirectory() as tmpdir:

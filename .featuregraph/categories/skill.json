@@ -12,6 +12,7 @@
           51
         ],
         "symbol": "SkillManager",
+        "symbol_id": "SkillManager",
         "type": "class"
       }
     ]

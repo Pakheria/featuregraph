@@ -21,10 +21,11 @@
       {
         "file": "featuregraph/cli.py",
         "lines": [
-          36,
-          380
+          55,
+          426
         ],
         "symbol": "main",
+        "symbol_id": "main",
         "type": "function"
       }
     ]

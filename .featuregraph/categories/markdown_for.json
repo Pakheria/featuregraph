@@ -16,6 +16,7 @@
           80
         ],
         "symbol": "MarkdownFormatter",
+        "symbol_id": "MarkdownFormatter",
         "type": "class"
       }
     ]
@@ -34,6 +35,7 @@
           74
         ],
         "symbol": "format",
+        "symbol_id": "featuregraph.formatters.markdown_formatter.format",
         "type": "function"
       }
     ]
@@ -55,6 +57,7 @@
           80
         ],
         "symbol": "write_to_file",
+        "symbol_id": "featuregraph.formatters.markdown_formatter.write_to_file",
         "type": "function"
       }
     ]

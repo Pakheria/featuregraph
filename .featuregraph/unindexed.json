@@ -11,5 +11,6 @@
   "tests/test_parser_generic.py",
   "tests/test_phantom_tags.py",
   "tests/test_scanner_warnings.py",
-  "tests/test_skills.py"
+  "tests/test_skills.py",
+  "tests/test_symbol_ids.py"
 ]

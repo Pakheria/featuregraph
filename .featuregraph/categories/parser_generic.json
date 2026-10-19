@@ -17,6 +17,7 @@
           211
         ],
         "symbol": "GenericFeatureParser",
+        "symbol_id": "GenericFeatureParser",
         "type": "class"
       }
     ]

@@ -137,7 +137,8 @@ class WorkspaceScanner:
                 parsed = GenericFeatureParser.parse_file(path)
 
             if parsed:
-                resolver.register_feature_symbols(parsed)
+                for item in parsed:
+                    item["rel_path"] = rel_path.as_posix()
                 scanned_files.append((path, rel_path, parsed))
             else:
                 unparsed.append(str(rel_path))
@@ -151,14 +152,8 @@ class WorkspaceScanner:
             )
 
         # Pass 2: Infer cross-feature dependencies & populate graph
-        if resolver.ambiguous_symbols:
-            sample = ", ".join(sorted(resolver.ambiguous_symbols)[:5])
-            suffix = "…" if len(resolver.ambiguous_symbols) > 5 else ""
-            print(
-                f"⚠ {len(resolver.ambiguous_symbols)} symbol name(s) defined by multiple features — "
-                f"bare-name edges skipped, qualified calls still resolved: {sample}{suffix}",
-                file=sys.stderr,
-            )
+        all_features = [item for _, _, parsed in scanned_files for item in parsed]
+        resolver.register_feature_symbols(all_features)
 
         for path, rel_path, parsed in scanned_files:
             inferred_deps = resolver.resolve_file_dependencies(path, parsed)
@@ -173,6 +168,7 @@ class WorkspaceScanner:
                     "file": str(rel_path),
                     "lines": [item["start_line"], item["end_line"]],
                     "symbol": item["symbol"],
+                    "symbol_id": item.get("symbol_id", item["symbol"]),
                     "type": item["type"],
                 }]
                 graph.add_feature(feat_id, {

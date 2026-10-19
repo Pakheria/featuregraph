@@ -42,3 +42,14 @@ featuregraph = "featuregraph.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["featuregraph"]
 artifacts = ["featuregraph/skills/featuregraph/SKILL.md"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/.featuregraph",
+  "/.pytest_cache",
+  "/.ruff_cache",
+  "/demo",
+  "/dist",
+  "/graphify-out",
+  "/uv.lock",
+]

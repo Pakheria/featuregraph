@@ -100,6 +100,10 @@ featuregraph annotate --dir ./src --yes --limit 50
 ### Query a feature
 ```bash
 featuregraph query AUTH-01
+# Symbol IDs: bare when unique, path-qualified on collision
+featuregraph query web.app.docs.layout
+# Ambiguous bare name -> exit 1 + candidate qualified IDs
+featuregraph query layout
 ```
 
 ### Hook management
@@ -136,6 +140,8 @@ export const AnalyticsWidget = () => { ... }
 ```
 
 Feature IDs: `[A-Za-z0-9_-]+`, normalised to UPPER.
+
+Symbol IDs are separate aliases. Each tagged location gets its bare symbol when unique, or a deterministic path-qualified ID on collision (e.g. `web.app.layout` vs `web.app.docs.layout`). `query`/`search` resolve feature IDs, qualified symbol IDs, and unambiguous bare symbols; an ambiguous bare name exits 1 with candidates. Inferred call edges use the same qualification with path affinity (same file > same directory > longest shared path); exact ties stay unresolved.
 
 Tag rules:
 - Tags must sit on a real comment line. Text inside strings, template literals, and block comments is ignored by every parser.

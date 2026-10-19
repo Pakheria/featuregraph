@@ -1,8 +1,10 @@
+import shutil
+import subprocess
 import unittest
 import tempfile
 from pathlib import Path
 
-from featuregraph.hooks.git_hook import GitHookManager, HOOK_MARKER
+from featuregraph.hooks.git_hook import GitHookManager, HOOK_MARKER, HOOK_SCRIPT
 
 
 class TestGitHookManager(unittest.TestCase):
@@ -39,6 +41,30 @@ class TestGitHookManager(unittest.TestCase):
     def test_no_git_directory(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             self.assertEqual(GitHookManager.install(Path(tmpdir)), "no-git")
+
+    def test_hook_skips_dirty_worktree(self):
+        self.assertIn("git diff --quiet", HOOK_SCRIPT)
+        self.assertIn("git ls-files --others --exclude-standard", HOOK_SCRIPT)
+
+    @unittest.skipUnless(shutil.which("git"), "git not available")
+    def test_install_in_git_worktree(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            repo.mkdir()
+            subprocess.run(["git", "-C", str(repo), "init", "-q"], check=True)
+            subprocess.run(
+                ["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t",
+                 "commit", "-q", "--allow-empty", "-m", "init"],
+                check=True,
+            )
+            worktree = Path(tmpdir) / "worktree"
+            subprocess.run(["git", "-C", str(repo), "worktree", "add", "-q", str(worktree)], check=True)
+
+            self.assertEqual(GitHookManager.install(worktree), "installed")
+            hook = repo / ".git" / "hooks" / "pre-commit"
+            self.assertTrue(hook.exists())
+            self.assertTrue(GitHookManager.uninstall(worktree))
+            self.assertFalse(hook.exists())
 
 
 if __name__ == "__main__":

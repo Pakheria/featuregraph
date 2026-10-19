@@ -77,6 +77,34 @@ class TestAnnotator(unittest.TestCase):
             suggestions = collect_suggestions(tmp_path)
             self.assertEqual(len(suggestions), 0)
 
+    def test_tag_above_previous_symbol_does_not_cover_next(self):
+        """A tag above one symbol must not hide the next unannotated symbol."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "calc.py").write_text(
+                "# @feature [CALC-ADD] Add\n"
+                "def add(a, b):\n"
+                "    return a + b\n"
+                "def sub(a, b):\n"
+                "    return a - b\n"
+            )
+
+            suggestions = collect_suggestions(root)
+            self.assertEqual([s.symbol for s in suggestions], ["sub"])
+
+    def test_tag_above_decorator_still_counts(self):
+        """Tags above decorators still cover the decorated symbol."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "calc.py").write_text(
+                "# @feature [CALC-ADD] Add\n"
+                "@staticmethod\n"
+                "def add(a, b):\n"
+                "    return a + b\n"
+            )
+
+            self.assertEqual(collect_suggestions(root), [])
+
 
 if __name__ == "__main__":
     unittest.main()

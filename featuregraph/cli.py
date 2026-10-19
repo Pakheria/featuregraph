@@ -10,6 +10,7 @@ if __name__ == "__main__" and __package__ is None:
     __package__ = "featuregraph"
 
 from featuregraph.core.scanner import WorkspaceScanner
+from featuregraph.core.dependency_resolver import build_symbol_aliases
 from featuregraph.core.annotator import collect_suggestions, apply_suggestions, _comment_prefix
 from featuregraph.formatters.json_formatter import JSONFormatter
 from featuregraph.formatters.markdown_formatter import MarkdownFormatter
@@ -32,6 +33,24 @@ def _guard_fresh(root: Path, index_file: Path, force: bool) -> None:
         print("index is stale (tree changed since scan); run: featuregraph scan", file=sys.stderr)
         sys.exit(1)
 
+def _print_ambiguous(query: str, candidates, as_json: bool):
+    if as_json:
+        print(json.dumps({
+            "error": "ambiguous",
+            "query": query,
+            "candidates": [
+                {"id": symbol_id, "feature_id": feature_id, "file": file_path}
+                for symbol_id, feature_id, file_path in candidates
+            ],
+        }, indent=2))
+    else:
+        print(f"Ambiguous name '{query}' — {len(candidates)} candidates:")
+        for symbol_id, feature_id, file_path in candidates:
+            print(f"  {symbol_id} -> {feature_id} ({file_path})")
+        print("Use a qualified ID.")
+    sys.exit(1)
+
+
 # @feature [CLI-01] Main
 def main():
     parser = argparse.ArgumentParser(
@@ -43,23 +62,23 @@ def main():
     # Command: scan
     scan_parser = subparsers.add_parser("scan", help="Scan codebase and generate feature graph files")
     scan_parser.add_argument("--dir", default=".", help="Root directory to scan (default: .)")
-    scan_parser.add_argument("--json", default=None, help="Output JSON path (default: .featuregraph/index.json)")
+    scan_parser.add_argument("--json", default=None, help="Write an extra copy of the JSON index to this path")
     scan_parser.add_argument("--md", default=None, help="Output Markdown path (default: .featuregraph/graph.md)")
     scan_parser.add_argument("--quiet", action="store_true", help="Suppress console output")
 
     # Command: init
-    init_parser = subparsers.add_parser("init", help="Initialize FeatureGraph in current repository with pre-commit hook")
+    subparsers.add_parser("init", help="Initialize FeatureGraph in current repository with pre-commit hook")
 
     # Command: query
-    query_parser = subparsers.add_parser("query", help="Query a specific feature ID and print its exact line ranges and dependencies")
-    query_parser.add_argument("feature_id", help="Feature ID to query (e.g. AUTH-01)")
+    query_parser = subparsers.add_parser("query", help="Query a feature ID or symbol ID and print its exact line ranges and dependencies")
+    query_parser.add_argument("feature_id", help="Feature ID, qualified symbol ID, or unambiguous symbol (e.g. AUTH-01 or web.app.layout)")
     query_parser.add_argument("--dir", default=".", help="Project root containing .featuregraph/ (default: .)")
     query_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output (for agents/CI)")
     query_parser.add_argument("--force", action="store_true", help="Return results even if the tree changed since scan")
 
     # Command: search
-    search_parser = subparsers.add_parser("search", help="Search features by symbol, name, or keyword")
-    search_parser.add_argument("query", help="Query terms or symbol name (e.g. 'parser', 'auth')")
+    search_parser = subparsers.add_parser("search", help="Search features by symbol ID, name, or keyword")
+    search_parser.add_argument("query", help="Symbol ID, unambiguous symbol, or search terms (e.g. 'web.app.layout', 'parser')")
     search_parser.add_argument("--dir", default=".", help="Project root containing .featuregraph/ (default: .)")
     search_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output (for agents/CI)")
     search_parser.add_argument("--force", action="store_true", help="Return results even if the tree changed since scan")
@@ -76,7 +95,7 @@ def main():
     )
     ann_parser.add_argument("--dir", default=".", help="Root directory to annotate (default: .)")
     ann_parser.add_argument(
-        "--dry-run", action="store_true", default=False,
+        "--dry-run", action="store_true", default=True,
         help="Preview suggestions without writing to files (default)"
     )
     ann_parser.add_argument(
@@ -123,12 +142,9 @@ def main():
         meta = scanner.scan_meta()
         JSONFormatter.write_unindexed(scanner.unindexed, fg_dir)
 
+        JSONFormatter.write_all(graph_dict, fg_dir, root, meta=meta)
         if getattr(args, "json", None):
-            json_out = root / args.json
-            JSONFormatter.write_to_file(graph_dict, json_out, root, meta=meta)
-        else:
-            JSONFormatter.write_all(graph_dict, fg_dir, root, meta=meta)
-            json_out = fg_dir / "manifest.json"
+            JSONFormatter.write_to_file(graph_dict, root / args.json, root, meta=meta)
 
         md_out = root / args.md if getattr(args, "md", None) else fg_dir / "graph.md"
         MarkdownFormatter.write_to_file(graph_dict, md_out, root)
@@ -139,7 +155,7 @@ def main():
                 print("⚠ No features found — the index is empty. Add @feature tags or run 'featuregraph annotate'.")
             else:
                 print(f"✓ Mapped {len(graph_dict)} features across {len(categories)} domain categories.")
-            print(f"✓ Created 2-Tier Manifest: .featuregraph/manifest.json")
+            print("✓ Created 2-Tier Manifest: .featuregraph/manifest.json")
             print(f"✓ Created Category Chunks: .featuregraph/categories/ ({len(categories)} files)")
             print(f"✓ Created markdown graph:  {md_out.relative_to(root) if md_out.is_relative_to(root) else md_out}")
 
@@ -171,7 +187,7 @@ def main():
 
 > 🛑 **MANDATORY SHORT-CIRCUIT DIRECTIVE:**
 > When asked about features, architecture, onboarding, or where code lives:
-> 1. **READ `.featuregraph/manifest.json`** to identify the domain category and feature IDs.
+> 1. **READ `.featuregraph/manifest.json`** to identify the domain category, feature IDs, and symbol IDs. Symbol IDs are bare when unique and path-qualified on collision (e.g. `web.app.layout` vs `web.app.docs.layout`); an ambiguous bare name exits 1 with candidates.
 > 2. **READ `.featuregraph/categories/<category>.json`** to get exact line spans (`#Lstart-Lend`).
 > 3. Read **ONLY** the specific lines required for the task.
 > 4. If `_meta.status != ok`, do not treat the manifest as complete — fall back to targeted exploration or run `featuregraph annotate`/`scan`.
@@ -207,18 +223,32 @@ def main():
 
         _guard_fresh(root, idx_file, args.force)
         data = json.loads(idx_file.read_text(encoding="utf-8"))
+        features = data.get("features", {})
         feat_id = args.feature_id.upper()
-        feat = data.get("features", {}).get(feat_id)
+        feat = features.get(feat_id)
         if not feat:
-            print(f"Feature '{feat_id}' not found in index.")
+            by_id, by_symbol = build_symbol_aliases(features)
+            target = by_id.get(args.feature_id.casefold())
+            if target:
+                feat_id = target
+                feat = features.get(target)
+            else:
+                candidates = by_symbol.get(args.feature_id.casefold(), [])
+                if len(candidates) > 1:
+                    _print_ambiguous(args.feature_id, candidates, args.json)
+                if candidates:
+                    feat_id = candidates[0][1]
+                    feat = features.get(feat_id)
+        if not feat:
+            print(f"Feature '{args.feature_id.upper()}' not found in index.")
             sys.exit(1)
 
         if args.json:
             print(json.dumps({"id": feat_id, **feat}, indent=2))
         else:
-            print(f"\n=======================================================")
+            print("\n=======================================================")
             print(f"  FEATURE: [{feat_id}] {feat.get('name', '')}")
-            print(f"=======================================================")
+            print("=======================================================")
             print(f"Description : {feat.get('description', 'N/A')}")
             print(f"Depends On  : {', '.join(feat.get('depends_on', [])) or 'None'}")
             print(f"Called By   : {', '.join(feat.get('called_by', [])) or 'None'}")
@@ -242,23 +272,39 @@ def main():
         q_lower = query_text.lower()
         q_words = set(q_lower.split())
 
-        matched_features = []
+        features = {}
+        categories = {}
         cats_dir = root / ".featuregraph" / "categories"
         if cats_dir.is_dir():
             for cat_json in cats_dir.glob("*.json"):
                 cat_name = cat_json.stem
                 cat_data = json.loads(cat_json.read_text(encoding="utf-8"))
                 for fid, fmeta in cat_data.items():
-                    name = fmeta.get("name", "").lower()
-                    desc = fmeta.get("description", "").lower()
-                    locs = " ".join(loc.get("symbol", "").lower() for loc in fmeta.get("locations", []))
-                    text = f"{cat_name.lower()} {fid.lower()} {name} {desc} {locs}"
-                    if any(w in text for w in q_words) or q_lower in text:
-                        matched_features.append((cat_name, fid, fmeta))
+                    features[fid] = fmeta
+                    categories[fid] = cat_name
         elif idx_file.exists():
             idx_data = json.loads(idx_file.read_text(encoding="utf-8"))
             for fid, fmeta in idx_data.get("features", {}).items():
-                cat_name = fmeta.get("category", "core")
+                features[fid] = fmeta
+                categories[fid] = fmeta.get("category", "core")
+
+        matched_features = []
+        target = query_text.upper() if query_text.upper() in features else None
+        if not target:
+            by_id, by_symbol = build_symbol_aliases(features)
+            target = by_id.get(query_text.casefold())
+            if not target:
+                candidates = by_symbol.get(query_text.casefold(), [])
+                if len(candidates) > 1:
+                    _print_ambiguous(query_text, candidates, args.json)
+                if candidates:
+                    target = candidates[0][1]
+
+        if target:
+            matched_features.append((categories.get(target, "core"), target, features[target]))
+        else:
+            for fid, fmeta in features.items():
+                cat_name = categories.get(fid, fmeta.get("category", "core"))
                 name = fmeta.get("name", "").lower()
                 desc = fmeta.get("description", "").lower()
                 locs = " ".join(loc.get("symbol", "").lower() for loc in fmeta.get("locations", []))

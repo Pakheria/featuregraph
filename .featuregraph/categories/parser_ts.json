@@ -13,6 +13,7 @@
           73
         ],
         "symbol": "TypeScriptFeatureParser",
+        "symbol_id": "TypeScriptFeatureParser",
         "type": "class"
       }
     ]
@@ -31,6 +32,7 @@
           73
         ],
         "symbol": "parse_file",
+        "symbol_id": "featuregraph.core.parser_ts.parse_file",
         "type": "function"
       }
     ]
