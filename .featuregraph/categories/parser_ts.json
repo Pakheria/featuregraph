@@ -9,8 +9,8 @@
       {
         "file": "featuregraph/core/parser_ts.py",
         "lines": [
-          18,
-          73
+          174,
+          235
         ],
         "symbol": "TypeScriptFeatureParser",
         "symbol_id": "TypeScriptFeatureParser",
@@ -28,8 +28,8 @@
       {
         "file": "featuregraph/core/parser_ts.py",
         "lines": [
-          23,
-          73
+          179,
+          235
         ],
         "symbol": "parse_file",
         "symbol_id": "featuregraph.core.parser_ts.parse_file",

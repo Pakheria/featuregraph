@@ -148,7 +148,9 @@ Tag rules:
 - Python: place the tag within 6 lines above the `def`/`class` (or in its docstring).
 - TypeScript/JS: place the tag above the export; the parser associates the export within 6 lines below it.
 - Other languages: place the tag above the declaration; the parser looks 6 lines below.
-- Only tagged symbols are indexed. `annotate --yes` refuses insertion points that are not code, writes atomically, and verifies each tag by re-parsing.
+- Untagged `.js` files are auto-indexed as `CJS-<path>-<symbol>` for classes, functions, arrow functions, class/prototype methods, and `exports`/`module.exports` members. Tagged files keep tag-only behavior, so existing feature IDs and inferred edges do not churn.
+- Files with no symbols still get a `FILE-<path>` file-level entry. They remain in the warning list but count as indexed (`unindexed_files: 0`) and are reported as `_meta.file_level_files`.
+- `annotate --yes` refuses insertion points that are not code, writes atomically, and verifies each tag by re-parsing.
 
 ---
 

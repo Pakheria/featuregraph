@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -8,13 +9,57 @@ from typing import Iterator, List, Optional, Tuple
 from .parser_py import PythonFeatureParser
 from .parser_ts import TypeScriptFeatureParser
 from .parser_generic import GenericFeatureParser
-from .dependency_resolver import DependencyResolver
+from .dependency_resolver import DependencyResolver, assign_symbol_ids
 from .graph import FeatureGraph
 
 DEFAULT_IGNORE = {
     "venv", "node_modules", "dist", "build",
     "__pycache__", "logs", "coverage"
 }
+
+
+_CATEGORY_SKIP = {
+    "lib", "bin", "src", "app", "components", "pages", "views",
+    "tests", "test", "featuregraph", "__pycache__",
+}
+
+
+def _id_slug(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9]+", "-", text).strip("-").upper()
+
+
+def _category_for(rel_path: Path) -> str:
+    parts = list(rel_path.parts)
+    dirs = [p for p in parts[:-1] if p.lower() not in _CATEGORY_SKIP]
+    token = dirs[-1] if dirs else rel_path.stem
+    return re.sub(r"[^a-z0-9_]", "_", token.lower()).strip("_") or "general"
+
+
+def _auto_feature_id(rel_path: Path, item: dict) -> str:
+    path = _id_slug(rel_path.with_suffix("").as_posix())
+    symbol = _id_slug(str(item.get("symbol") or rel_path.stem))
+    return f"CJS-{path}-{symbol}" if item.get("type") != "file" else f"FILE-{_id_slug(rel_path.as_posix())}"
+
+
+def _file_level_item(path: Path, rel_path: Path) -> dict:
+    try:
+        line_count = len(path.read_text(encoding="utf-8", errors="replace").splitlines())
+    except OSError:
+        line_count = 1
+    return {
+        "feature_id": _auto_feature_id(rel_path, {"type": "file", "symbol": path.stem}),
+        "name": f"File {rel_path.as_posix()}",
+        "symbol": path.name,
+        "qualname": path.name,
+        "type": "file",
+        "start_line": 1,
+        "end_line": max(line_count, 1),
+        "depends_on": [],
+        "category": "file_index",
+        "auto": True,
+        "file": str(path),
+        "rel_path": rel_path.as_posix(),
+    }
 
 # @feature [SCANNER-01] Workspace scanner
 class WorkspaceScanner:
@@ -139,9 +184,13 @@ class WorkspaceScanner:
             if parsed:
                 for item in parsed:
                     item["rel_path"] = rel_path.as_posix()
+                    if not item.get("feature_id"):
+                        item["feature_id"] = _auto_feature_id(rel_path, item)
+                        item["category"] = _category_for(rel_path)
                 scanned_files.append((path, rel_path, parsed))
             else:
                 unparsed.append(str(rel_path))
+                scanned_files.append((path, rel_path, [_file_level_item(path, rel_path)]))
 
         if unparsed:
             sample = ", ".join(unparsed[:3])
@@ -153,10 +202,16 @@ class WorkspaceScanner:
 
         # Pass 2: Infer cross-feature dependencies & populate graph
         all_features = [item for _, _, parsed in scanned_files for item in parsed]
-        resolver.register_feature_symbols(all_features)
+        assign_symbol_ids(all_features)
+        resolver.register_feature_symbols(
+            [item for item in all_features if not item.get("auto")], assign=False
+        )
 
         for path, rel_path, parsed in scanned_files:
-            inferred_deps = resolver.resolve_file_dependencies(path, parsed)
+            real_items = [item for item in parsed if not item.get("auto")]
+            inferred_deps = (
+                resolver.resolve_file_dependencies(path, real_items) if real_items else {}
+            )
 
             for item in parsed:
                 feat_id = item["feature_id"]
@@ -171,11 +226,14 @@ class WorkspaceScanner:
                     "symbol_id": item.get("symbol_id", item["symbol"]),
                     "type": item["type"],
                 }]
-                graph.add_feature(feat_id, {
+                data = {
                     "name": item["name"],
                     "depends_on": all_deps,
-                    "locations": item_loc
-                })
+                    "locations": item_loc,
+                }
+                if item.get("category"):
+                    data["category"] = item["category"]
+                graph.add_feature(feat_id, data)
 
         # Explicit @depends tags may point at features that do not exist (typo, rename, deletion).
         # Inferred deps can't dangle — the resolver only knows registered feature IDs.
@@ -197,7 +255,8 @@ class WorkspaceScanner:
         self.tree_hash_value = hasher.hexdigest()
         self.total_files = total_files
         self.indexed_files = len(scanned_files)
-        self.unindexed = sorted(unparsed)
+        self.unindexed = []
+        self.file_level = sorted(unparsed)
         self.status = (
             "empty" if not graph.nodes else "ok" if not unparsed else "partial"
         )
@@ -211,5 +270,6 @@ class WorkspaceScanner:
             "total_files": self.total_files,
             "indexed_files": self.indexed_files,
             "unindexed_files": len(self.unindexed),
+            "file_level_files": len(self.file_level),
         }
 

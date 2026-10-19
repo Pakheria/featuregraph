@@ -98,21 +98,28 @@ class TestTruthfulManifest(unittest.TestCase):
     def _meta(self, root: Path) -> dict:
         return json.loads((root / ".featuregraph" / "manifest.json").read_text())["_meta"]
 
-    def test_empty_repo_warns_and_reports_empty(self):
+    def test_empty_repo_indexes_file_level_fallback(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             (root / "app.py").write_text("def untagged(): pass\n")
             code, out, err = self._scan(root)
             self.assertEqual(code, 0)
-            self.assertIn("⚠ No features found", out)
-            self.assertNotIn("Mapped 0 features", out)
+            self.assertNotIn("⚠ No features found", out)
             self.assertIn("app.py", err)
             meta = self._meta(root)
-            self.assertEqual(meta["status"], "empty")
-            self.assertEqual(meta["total_features"], 0)
+            self.assertEqual(meta["status"], "partial")
+            self.assertEqual(meta["total_features"], 1)
             self.assertEqual(meta["total_files"], 1)
-            self.assertEqual(meta["indexed_files"], 0)
-            self.assertEqual(meta["unindexed_files"], 1)
+            self.assertEqual(meta["indexed_files"], 1)
+            self.assertEqual(meta["unindexed_files"], 0)
+            self.assertEqual(meta["file_level_files"], 1)
+            unindexed = json.loads((root / ".featuregraph" / "unindexed.json").read_text())
+            self.assertEqual(unindexed, [])
+            feature_id, feature = next(iter(json.loads(
+                (root / ".featuregraph" / "index.json").read_text()
+            )["features"].items()))
+            self.assertEqual(feature["locations"][0]["file"], "app.py")
+            self.assertTrue(feature_id.startswith("FILE-"))
 
     def test_mixed_repo_is_partial_with_matching_unindexed_set(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -127,10 +134,11 @@ class TestTruthfulManifest(unittest.TestCase):
             meta = self._meta(root)
             self.assertEqual(meta["status"], "partial")
             self.assertEqual(meta["total_files"], 2)
-            self.assertEqual(meta["indexed_files"], 1)
-            self.assertEqual(meta["unindexed_files"], 1)
+            self.assertEqual(meta["indexed_files"], 2)
+            self.assertEqual(meta["unindexed_files"], 0)
+            self.assertEqual(meta["file_level_files"], 1)
             unindexed = json.loads((root / ".featuregraph" / "unindexed.json").read_text())
-            self.assertEqual(unindexed, ["untagged.py"])
+            self.assertEqual(unindexed, [])
 
     def test_fully_tagged_repo_is_ok(self):
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -108,9 +108,11 @@ A tag only counts on a **real comment line**. All scanners, the annotator, and d
 | TypeScript / JS | Comment above the export | 6 lines below the tag |
 | Go, Rust, Java, C#, PHP, Ruby, Swift, Dart, Shell | Comment above the declaration | 6 lines below the tag |
 
-Python end lines are exact; TS/JS end lines use a fixed 35-line lookahead and can overshoot or clip long components.
+Python and auto-indexed CommonJS end lines are exact; tagged TS/JS end lines use a fixed 35-line lookahead and can overshoot or clip long components.
 
-`featuregraph annotate --yes` only inserts at code positions, replaces files atomically, and re-parses every write; if a tag would not round-trip it restores the original file. Untagged symbols are not indexed — `scan` reports files with no parseable features.
+`featuregraph annotate --yes` only inserts at code positions, replaces files atomically, and re-parses every write; if a tag would not round-trip it restores the original file.
+
+**Coverage fallbacks.** Untagged `.js` files are still indexed: classes, functions, arrow functions, class/prototype methods, and `exports`/`module.exports` members become deterministic `CJS-<path>-<symbol>` features. Tagged files keep tag-only behavior, so existing feature IDs and inferred edges do not churn. Any supported file that yields no symbols (shell, config, data-only modules, declaration files) gets a file-level `FILE-<path>` entry; it remains in the warning list, but counts as indexed (`unindexed_files: 0`) and is reported separately as `_meta.file_level_files`.
 
 ---
 

@@ -1,16 +1,1 @@
-[
-  "featuregraph/__init__.py",
-  "featuregraph/skills/__init__.py",
-  "tests/test_annotator.py",
-  "tests/test_cli_json.py",
-  "tests/test_dependency_resolver.py",
-  "tests/test_freshness_manifest.py",
-  "tests/test_git_hook.py",
-  "tests/test_ignored_files.py",
-  "tests/test_lexmask.py",
-  "tests/test_parser_generic.py",
-  "tests/test_phantom_tags.py",
-  "tests/test_scanner_warnings.py",
-  "tests/test_skills.py",
-  "tests/test_symbol_ids.py"
-]
+[]

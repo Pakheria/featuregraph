@@ -62,10 +62,25 @@ graph TD
 | **`ANNOTATOR-03`** | **Suggest typescript** | — | `[ANNOTATOR-01]` `[ANNOTATOR-02]` | `[ANNOTATOR-05]` | [`featuregraph/core/annotator.py#L195-L233`](featuregraph/core/annotator.py#L195-L233) |
 | **`ANNOTATOR-04`** | **Apply suggestions** | — | `[LEXMASK-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L339-L409`](featuregraph/core/annotator.py#L339-L409) |
 | **`ANNOTATOR-05`** | **Collect suggestions** | — | `[ANNOTATOR-03]` `[PARSER_GENERIC-01]` `[SCANNER-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L417-L455`](featuregraph/core/annotator.py#L417-L455) |
-| **`CLI-01`** | **Main** | — | `[ANNOTATOR-04]` `[ANNOTATOR-05]` `[GIT_HOOK-01]` `[GIT_HOOK-02]` `[GIT_HOOK-03]` `[GRAPH-04]` `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` `[SCANNER-01]` `[SCANNER-02]` `[SCANNER-03]` `[SKILL-01]` | — | [`featuregraph/cli.py#L55-L426`](featuregraph/cli.py#L55-L426) |
-| **`DEP_RESOLVER-01`** | **Dependency Resolver** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L136-L328`](featuregraph/core/dependency_resolver.py#L136-L328) |
-| **`DEP_RESOLVER-02`** | **Register symbols** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L149-L168`](featuregraph/core/dependency_resolver.py#L149-L168) |
-| **`DEP_RESOLVER-03`** | **Resolve dependencies for file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L238-L261`](featuregraph/core/dependency_resolver.py#L238-L261) |
+| **`CLI-01`** | **Main** | — | `[ANNOTATOR-04]` `[ANNOTATOR-05]` `[GIT_HOOK-01]` `[GIT_HOOK-02]` `[GIT_HOOK-03]` `[GRAPH-04]` `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` `[SCANNER-01]` `[SCANNER-02]` `[SCANNER-03]` `[SKILL-01]` | — | [`featuregraph/cli.py#L55-L427`](featuregraph/cli.py#L55-L427) |
+| **`DEP_RESOLVER-01`** | **Dependency Resolver** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L136-L329`](featuregraph/core/dependency_resolver.py#L136-L329) |
+| **`DEP_RESOLVER-02`** | **Register symbols** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L149-L169`](featuregraph/core/dependency_resolver.py#L149-L169) |
+| **`DEP_RESOLVER-03`** | **Resolve dependencies for file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L239-L262`](featuregraph/core/dependency_resolver.py#L239-L262) |
+| **`FILE-FEATUREGRAPH-INIT-PY`** | **File featuregraph/__init__.py** | — | — | — | [`featuregraph/__init__.py#L1-L6`](featuregraph/__init__.py#L1-L6) |
+| **`FILE-FEATUREGRAPH-SKILLS-INIT-PY`** | **File featuregraph/skills/__init__.py** | — | — | — | [`featuregraph/skills/__init__.py#L1-L3`](featuregraph/skills/__init__.py#L1-L3) |
+| **`FILE-TESTS-TEST-ANNOTATOR-PY`** | **File tests/test_annotator.py** | — | — | — | [`tests/test_annotator.py#L1-L110`](tests/test_annotator.py#L1-L110) |
+| **`FILE-TESTS-TEST-CJS-COVERAGE-PY`** | **File tests/test_cjs_coverage.py** | — | — | — | [`tests/test_cjs_coverage.py#L1-L116`](tests/test_cjs_coverage.py#L1-L116) |
+| **`FILE-TESTS-TEST-CLI-JSON-PY`** | **File tests/test_cli_json.py** | — | — | — | [`tests/test_cli_json.py#L1-L51`](tests/test_cli_json.py#L1-L51) |
+| **`FILE-TESTS-TEST-DEPENDENCY-RESOLVER-PY`** | **File tests/test_dependency_resolver.py** | — | — | — | [`tests/test_dependency_resolver.py#L1-L164`](tests/test_dependency_resolver.py#L1-L164) |
+| **`FILE-TESTS-TEST-FRESHNESS-MANIFEST-PY`** | **File tests/test_freshness_manifest.py** | — | — | — | [`tests/test_freshness_manifest.py#L1-L202`](tests/test_freshness_manifest.py#L1-L202) |
+| **`FILE-TESTS-TEST-GIT-HOOK-PY`** | **File tests/test_git_hook.py** | — | — | — | [`tests/test_git_hook.py#L1-L71`](tests/test_git_hook.py#L1-L71) |
+| **`FILE-TESTS-TEST-IGNORED-FILES-PY`** | **File tests/test_ignored_files.py** | — | — | — | [`tests/test_ignored_files.py#L1-L50`](tests/test_ignored_files.py#L1-L50) |
+| **`FILE-TESTS-TEST-LEXMASK-PY`** | **File tests/test_lexmask.py** | — | — | — | [`tests/test_lexmask.py#L1-L259`](tests/test_lexmask.py#L1-L259) |
+| **`FILE-TESTS-TEST-PARSER-GENERIC-PY`** | **File tests/test_parser_generic.py** | — | — | — | [`tests/test_parser_generic.py#L1-L70`](tests/test_parser_generic.py#L1-L70) |
+| **`FILE-TESTS-TEST-PHANTOM-TAGS-PY`** | **File tests/test_phantom_tags.py** | — | — | — | [`tests/test_phantom_tags.py#L1-L71`](tests/test_phantom_tags.py#L1-L71) |
+| **`FILE-TESTS-TEST-SCANNER-WARNINGS-PY`** | **File tests/test_scanner_warnings.py** | — | — | — | [`tests/test_scanner_warnings.py#L1-L142`](tests/test_scanner_warnings.py#L1-L142) |
+| **`FILE-TESTS-TEST-SKILLS-PY`** | **File tests/test_skills.py** | — | — | — | [`tests/test_skills.py#L1-L39`](tests/test_skills.py#L1-L39) |
+| **`FILE-TESTS-TEST-SYMBOL-IDS-PY`** | **File tests/test_symbol_ids.py** | — | — | — | [`tests/test_symbol_ids.py#L1-L103`](tests/test_symbol_ids.py#L1-L103) |
 | **`GIT_HOOK-01`** | **Git hook manager** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L41-L70`](featuregraph/hooks/git_hook.py#L41-L70) |
 | **`GIT_HOOK-02`** | **Install** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L46-L58`](featuregraph/hooks/git_hook.py#L46-L58) |
 | **`GIT_HOOK-03`** | **Uninstall** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L62-L70`](featuregraph/hooks/git_hook.py#L62-L70) |
@@ -83,15 +98,16 @@ graph TD
 | **`PARSER_GENERIC-01`** | **Generic Feature Parser** | — | `[LEXMASK-01]` | `[ANNOTATOR-05]` `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_generic.py#L63-L211`](featuregraph/core/parser_generic.py#L63-L211) |
 | **`PARSER_PY-01`** | **Python feature parser** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_py.py#L12-L120`](featuregraph/core/parser_py.py#L12-L120) |
 | **`PARSER_PY-02`** | **Parse file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_py.py#L17-L120`](featuregraph/core/parser_py.py#L17-L120) |
-| **`PARSER_TS-01`** | **Type script feature parser** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L18-L73`](featuregraph/core/parser_ts.py#L18-L73) |
-| **`PARSER_TS-02`** | **Parse file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L23-L73`](featuregraph/core/parser_ts.py#L23-L73) |
-| **`SCANNER-01`** | **Workspace scanner** | — | `[DEP_RESOLVER-01]` `[DEP_RESOLVER-02]` `[DEP_RESOLVER-03]` `[GRAPH-01]` `[GRAPH-02]` `[PARSER_GENERIC-01]` `[PARSER_PY-01]` `[PARSER_PY-02]` `[PARSER_TS-01]` `[PARSER_TS-02]` | `[ANNOTATOR-05]` `[CLI-01]` | [`featuregraph/core/scanner.py#L20-L214`](featuregraph/core/scanner.py#L20-L214) |
-| **`SCANNER-02`** | **Detect subprojects** | — | — | `[CLI-01]` | [`featuregraph/core/scanner.py#L29-L39`](featuregraph/core/scanner.py#L29-L39) |
-| **`SCANNER-03`** | **Scan** | — | `[DEP_RESOLVER-01]` `[DEP_RESOLVER-02]` `[DEP_RESOLVER-03]` `[GRAPH-01]` `[GRAPH-02]` `[PARSER_GENERIC-01]` `[PARSER_PY-01]` `[PARSER_PY-02]` `[PARSER_TS-01]` `[PARSER_TS-02]` | `[CLI-01]` | [`featuregraph/core/scanner.py#L118-L205`](featuregraph/core/scanner.py#L118-L205) |
+| **`PARSER_TS-01`** | **Type script feature parser** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L174-L235`](featuregraph/core/parser_ts.py#L174-L235) |
+| **`PARSER_TS-02`** | **Parse file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/parser_ts.py#L179-L235`](featuregraph/core/parser_ts.py#L179-L235) |
+| **`SCANNER-01`** | **Workspace scanner** | — | `[DEP_RESOLVER-01]` `[DEP_RESOLVER-02]` `[DEP_RESOLVER-03]` `[GRAPH-01]` `[GRAPH-02]` `[PARSER_GENERIC-01]` `[PARSER_PY-01]` `[PARSER_PY-02]` `[PARSER_TS-01]` `[PARSER_TS-02]` | `[ANNOTATOR-05]` `[CLI-01]` | [`featuregraph/core/scanner.py#L65-L274`](featuregraph/core/scanner.py#L65-L274) |
+| **`SCANNER-02`** | **Detect subprojects** | — | — | `[CLI-01]` | [`featuregraph/core/scanner.py#L74-L84`](featuregraph/core/scanner.py#L74-L84) |
+| **`SCANNER-03`** | **Scan** | — | `[DEP_RESOLVER-01]` `[DEP_RESOLVER-02]` `[DEP_RESOLVER-03]` `[GRAPH-01]` `[GRAPH-02]` `[PARSER_GENERIC-01]` `[PARSER_PY-01]` `[PARSER_PY-02]` `[PARSER_TS-01]` `[PARSER_TS-02]` | `[CLI-01]` | [`featuregraph/core/scanner.py#L163-L264`](featuregraph/core/scanner.py#L163-L264) |
 | **`SKILL-01`** | **Skill Manager** | — | — | `[CLI-01]` | [`featuregraph/skills/skill_manager.py#L9-L51`](featuregraph/skills/skill_manager.py#L9-L51) |
 | **`TEST_SCANNER-01`** | **Test graph dependencies** | — | `[GRAPH-01]` `[GRAPH-02]` `[GRAPH-04]` | — | [`tests/test_scanner.py#L11-L19`](tests/test_scanner.py#L11-L19) |
 | **`TEST_SCANNER-02`** | **Test orphan detection** | — | `[GRAPH-01]` `[GRAPH-02]` `[GRAPH-03]` | — | [`tests/test_scanner.py#L22-L25`](tests/test_scanner.py#L22-L25) |
 | **`TEST_SCANNER-03`** | **Test duplicate ID warning** | — | `[GRAPH-01]` `[GRAPH-02]` | — | [`tests/test_scanner.py#L28-L47`](tests/test_scanner.py#L28-L47) |
+**Isolated features** (no dependencies, no dependents — verify intent): `FILE-FEATUREGRAPH-INIT-PY`, `FILE-FEATUREGRAPH-SKILLS-INIT-PY`, `FILE-TESTS-TEST-ANNOTATOR-PY`, `FILE-TESTS-TEST-CJS-COVERAGE-PY`, `FILE-TESTS-TEST-CLI-JSON-PY`, `FILE-TESTS-TEST-DEPENDENCY-RESOLVER-PY`, `FILE-TESTS-TEST-FRESHNESS-MANIFEST-PY`, `FILE-TESTS-TEST-GIT-HOOK-PY`, `FILE-TESTS-TEST-IGNORED-FILES-PY`, `FILE-TESTS-TEST-LEXMASK-PY` (+5 more)
 
 ---
 

@@ -191,7 +191,8 @@ def main():
 > 2. **READ `.featuregraph/categories/<category>.json`** to get exact line spans (`#Lstart-Lend`).
 > 3. Read **ONLY** the specific lines required for the task.
 > 4. If `_meta.status != ok`, do not treat the manifest as complete — fall back to targeted exploration or run `featuregraph annotate`/`scan`.
-> 5. If `query` refuses as stale, run `featuregraph scan`.
+> 5. `_meta.file_level_files` counts files indexed only at file granularity (data/shell/config or no named symbols); query them by `FILE-...` ID.
+> 6. If `query` refuses as stale, run `featuregraph scan`.
 > Do NOT execute recursive ListDir sweeps or multi-file exploratory reads.
 """
         if not agents_md.exists():

@@ -22,7 +22,7 @@
         "file": "featuregraph/cli.py",
         "lines": [
           55,
-          426
+          427
         ],
         "symbol": "main",
         "symbol_id": "main",

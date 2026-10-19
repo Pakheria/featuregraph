@@ -7,12 +7,168 @@ from . import lexmask
 FEATURE_TAG_REGEX = re.compile(r"@feature\s+\[([A-Za-z0-9_\-]+)\](?:\s+(.*))?", re.IGNORECASE)
 DEPENDS_TAG_REGEX = re.compile(r"@depends(?:_on)?\s+\[([A-Za-z0-9_\-,\s]+)\]", re.IGNORECASE)
 # Tags are only honoured on comment lines; the comment mask rejects string/template text
-COMMENT_LINE_REGEX = re.compile(r"^\s*(?://|/\*|\*|#)")
+COMMENT_LINE_REGEX = re.compile(r"^[ \t]*(?://|/\*|\*|#)")
 COMPONENT_EXPORT_REGEX = re.compile(r"export\s+(?:const|function|class)\s+([A-Za-z0-9_]+)", re.MULTILINE)
 # ponytail: fixed-window end estimate — overshoots into the next component and clips long ones, which
 # bleeds token-derived deps across components. Exact JS/TS ranges need tree-sitter; brace heuristics
 # break on JSX/template/regex literals. Add the dep only if slicing precision ever matters.
 TS_END_LINE_LOOKAHEAD = 35  # max lines scanned forward as component end estimate
+
+# CommonJS extractor. Untagged .js files get synthetic feature IDs for their
+# declarations/exports; explicit @feature tags keep the existing tag-only path above.
+CJS_CLASS_REGEX = re.compile(r"(?m)^[ \t]*(?:module\.exports\s*=\s*)?class\s+([A-Za-z_$][\w$]*)")
+CJS_FUNCTION_REGEX = re.compile(r"(?m)^[ \t]*(?:module\.exports\s*=\s*)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)")
+CJS_ARROW_REGEX = re.compile(
+    r"(?m)^[ \t]*(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?"
+    r"(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)"
+)
+CJS_PROTOTYPE_REGEX = re.compile(
+    r"(?m)^[ \t]*([A-Za-z_$][\w$]*)\.prototype\.([A-Za-z_$][\w$]*)\s*="
+)
+CJS_EXPORT_MEMBER_REGEX = re.compile(
+    r"(?m)^[ \t]*(?:module\.)?exports\.([A-Za-z_$][\w$]*)\s*="
+)
+CJS_EXPORT_OBJECT_REGEX = re.compile(r"module\.exports\s*=\s*\{")
+CJS_CLASS_MEMBER_REGEX = re.compile(
+    r"^[ \t]*(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?"
+    r"([A-Za-z_$][\w$]*)\s*\("
+)
+CJS_CLASS_FIELD_REGEX = re.compile(
+    r"^[ \t]*(?:static\s+)?([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?"
+    r"(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>"
+)
+CJS_OBJECT_PROPERTY_REGEX = re.compile(
+    r"^[ \t]*(?:async\s+)?(?:get\s+|set\s+)?([A-Za-z_$][\w$]*)\s*(?:\(|:|,|$)"
+)
+CJS_SKIP_MEMBER_NAMES = {
+    "if", "for", "while", "switch", "catch", "function", "return", "new",
+    "constructor", "do", "else", "try", "with",
+}
+
+
+def _cjs_brace_end(code_lines: List[str], start_idx: int) -> int:
+    """Line after the block that opens at/after start_idx (0-indexed)."""
+    depth = 0
+    opened = False
+    for i in range(start_idx, len(code_lines)):
+        line = code_lines[i]
+        opens = line.count("{")
+        closes = line.count("}")
+        if opens:
+            opened = True
+        depth += opens - closes
+        if opened and depth <= 0:
+            return i + 1
+    return min(start_idx + 40, len(code_lines))
+
+
+def _cjs_value_end(code_lines: List[str], start_idx: int) -> int:
+    """End line for an assignment whose value may be a block or concise expression."""
+    line = code_lines[start_idx]
+    if "{" in line or re.search(r"\b(?:function|class)\b", line):
+        return _cjs_brace_end(code_lines, start_idx)
+    if "=>" in line:
+        for i in range(start_idx, min(start_idx + 10, len(code_lines))):
+            if ";" in code_lines[i] or code_lines[i].rstrip().endswith(","):
+                return i + 1
+        return start_idx + 1
+    return start_idx + 1
+
+
+def _cjs_human(name: str) -> str:
+    name = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", name).replace("_", " ")
+    return name[:1].upper() + name[1:]
+
+
+def _cjs_auto_symbols(file_path: Path, code: str) -> List[Dict[str, Any]]:
+    """Extract classes/functions/methods/export names from masked CommonJS code."""
+    lines = code.splitlines()
+    found: List[Dict[str, Any]] = []
+
+    def add(name: str, kind: str, start: int, end: int, qualname: str = ""):
+        found.append({
+            "feature_id": "",
+            "name": _cjs_human(name),
+            "symbol": name,
+            "qualname": qualname or name,
+            "type": kind,
+            "start_line": start,
+            "end_line": end,
+            "depends_on": [],
+            "auto": True,
+        })
+
+    class_ranges = []
+    for match in CJS_CLASS_REGEX.finditer(code):
+        start = code[: match.start()].count("\n")
+        end = _cjs_brace_end(lines, start)
+        class_ranges.append((match.group(1), start, end))
+        add(match.group(1), "class", start + 1, end, match.group(1))
+
+    for class_name, start, end in class_ranges:
+        depth = 0
+        opened = False
+        for i in range(start, end):
+            line = lines[i]
+            if not opened:
+                depth += line.count("{") - line.count("}")
+                opened = "{" in line
+                continue
+            if depth == 1:
+                match = CJS_CLASS_MEMBER_REGEX.match(line)
+                if not match:
+                    match = CJS_CLASS_FIELD_REGEX.match(line)
+                if match:
+                    name = match.group(1)
+                    if name not in CJS_SKIP_MEMBER_NAMES:
+                        add(name, "method", i + 1, _cjs_value_end(lines, i), f"{class_name}.{name}")
+            depth += line.count("{") - line.count("}")
+
+    for match in CJS_FUNCTION_REGEX.finditer(code):
+        start = code[: match.start()].count("\n")
+        add(match.group(1), "function", start + 1, _cjs_value_end(lines, start), match.group(1))
+
+    for match in CJS_ARROW_REGEX.finditer(code):
+        start = code[: match.start()].count("\n")
+        add(match.group(1), "function", start + 1, _cjs_value_end(lines, start), match.group(1))
+
+    for match in CJS_PROTOTYPE_REGEX.finditer(code):
+        start = code[: match.start()].count("\n")
+        add(match.group(2), "method", start + 1, _cjs_value_end(lines, start), f"{match.group(1)}.{match.group(2)}")
+
+    for match in CJS_EXPORT_MEMBER_REGEX.finditer(code):
+        start = code[: match.start()].count("\n")
+        add(match.group(1), "export", start + 1, _cjs_value_end(lines, start), match.group(1))
+
+    for match in CJS_EXPORT_OBJECT_REGEX.finditer(code):
+        start = code[: match.start()].count("\n")
+        end = _cjs_brace_end(lines, start)
+        depth = 0
+        for i in range(start, end):
+            line = lines[i]
+            if i != start and depth == 1:
+                prop = CJS_OBJECT_PROPERTY_REGEX.match(line)
+                if prop and prop.group(1) not in CJS_SKIP_MEMBER_NAMES:
+                    end_line = _cjs_value_end(lines, i)
+                    add(prop.group(1), "export", i + 1, end_line, prop.group(1))
+            depth += line.count("{") - line.count("}")
+
+    # Export aliases point at an already-extracted function/class; keep one feature per symbol.
+    seen = {item["symbol"] for item in found if item["type"] != "export"}
+    unique = []
+    seen_locations = set()
+    for item in found:
+        if item["type"] == "export" and item["symbol"] in seen:
+            continue
+        key = (item["symbol"], item["start_line"], item["qualname"])
+        if key not in seen_locations:
+            seen_locations.add(key)
+            unique.append(item)
+
+    for item in unique:
+        item["file"] = str(file_path)
+    return unique
+
 
 # @feature [PARSER_TS-01] Type script feature parser
 class TypeScriptFeatureParser:
@@ -70,4 +226,10 @@ class TypeScriptFeatureParser:
         except (UnicodeDecodeError, OSError):
             pass
 
+        if not results and file_path.suffix.lower() == ".js":
+            try:
+                content = file_path.read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                return []
+            return _cjs_auto_symbols(file_path, lexmask.code_only(content, "js"))
         return results

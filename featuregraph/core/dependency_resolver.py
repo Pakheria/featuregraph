@@ -146,9 +146,10 @@ class DependencyResolver:
         self._qual_seen: Dict[str, str] = {}
 
     # @feature [DEP_RESOLVER-02] Register symbols
-    def register_feature_symbols(self, features_data: List[Dict[str, Any]]):
+    def register_feature_symbols(self, features_data: List[Dict[str, Any]], assign: bool = True):
         """Registers all definitions after parsing so collisions can be qualified globally."""
-        assign_symbol_ids(features_data)
+        if assign:
+            assign_symbol_ids(features_data)
         for feat in features_data:
             feat_id = feat.get("feature_id", "").upper()
             symbol = feat.get("symbol", "").strip()

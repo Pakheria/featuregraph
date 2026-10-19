@@ -2,15 +2,32 @@
   "_meta": {
     "generator": "featuregraph",
     "version": "0.1.0",
-    "total_features": 35,
-    "tree_hash": "a871fca431f77843ffb31fcef8d6d3932b238b243927b1cb8a10426189ec8012",
+    "total_features": 50,
+    "tree_hash": "6b0c501e5569fc1ca2f7d34322944c2a08d42c237366a411018595e52018cc11",
     "status": "partial",
-    "total_files": 28,
-    "indexed_files": 14,
-    "unindexed_files": 14,
+    "total_files": 29,
+    "indexed_files": 29,
+    "unindexed_files": 0,
+    "file_level_files": 15,
     "instruction": "Inspect [locations] for exact #Lstart-Lend before reading source code. Check [depends_on] to preserve cross-cutting invariants."
   },
   "features": {
+    "FILE-FEATUREGRAPH-INIT-PY": {
+      "name": "File featuregraph/__init__.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "featuregraph/__init__.py",
+          "lines": [
+            1,
+            6
+          ],
+          "symbol": "__init__.py",
+          "symbol_id": "featuregraph.__init___py",
+          "type": "file"
+        }
+      ]
+    },
     "CLI-01": {
       "name": "Main",
       "depends_on": [
@@ -34,7 +51,7 @@
           "file": "featuregraph/cli.py",
           "lines": [
             55,
-            426
+            427
           ],
           "symbol": "main",
           "symbol_id": "main",
@@ -155,7 +172,7 @@
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
             136,
-            328
+            329
           ],
           "symbol": "DependencyResolver",
           "symbol_id": "DependencyResolver",
@@ -174,7 +191,7 @@
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
             149,
-            168
+            169
           ],
           "symbol": "register_feature_symbols",
           "symbol_id": "register_feature_symbols",
@@ -192,8 +209,8 @@
         {
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
-            238,
-            261
+            239,
+            262
           ],
           "symbol": "resolve_file_dependencies",
           "symbol_id": "resolve_file_dependencies",
@@ -372,8 +389,8 @@
         {
           "file": "featuregraph/core/parser_ts.py",
           "lines": [
-            18,
-            73
+            174,
+            235
           ],
           "symbol": "TypeScriptFeatureParser",
           "symbol_id": "TypeScriptFeatureParser",
@@ -391,8 +408,8 @@
         {
           "file": "featuregraph/core/parser_ts.py",
           "lines": [
-            23,
-            73
+            179,
+            235
           ],
           "symbol": "parse_file",
           "symbol_id": "featuregraph.core.parser_ts.parse_file",
@@ -422,8 +439,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            20,
-            214
+            65,
+            274
           ],
           "symbol": "WorkspaceScanner",
           "symbol_id": "WorkspaceScanner",
@@ -440,8 +457,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            29,
-            39
+            74,
+            84
           ],
           "symbol": "detect_subprojects",
           "symbol_id": "detect_subprojects",
@@ -470,8 +487,8 @@
         {
           "file": "featuregraph/core/scanner.py",
           "lines": [
-            118,
-            205
+            163,
+            264
           ],
           "symbol": "scan",
           "symbol_id": "scan",
@@ -659,6 +676,22 @@
         }
       ]
     },
+    "FILE-FEATUREGRAPH-SKILLS-INIT-PY": {
+      "name": "File featuregraph/skills/__init__.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "featuregraph/skills/__init__.py",
+          "lines": [
+            1,
+            3
+          ],
+          "symbol": "__init__.py",
+          "symbol_id": "featuregraph.skills.__init___py",
+          "type": "file"
+        }
+      ]
+    },
     "SKILL-01": {
       "name": "Skill Manager",
       "called_by": [
@@ -674,6 +707,166 @@
           "symbol": "SkillManager",
           "symbol_id": "SkillManager",
           "type": "class"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-ANNOTATOR-PY": {
+      "name": "File tests/test_annotator.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_annotator.py",
+          "lines": [
+            1,
+            110
+          ],
+          "symbol": "test_annotator.py",
+          "symbol_id": "test_annotator_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-CJS-COVERAGE-PY": {
+      "name": "File tests/test_cjs_coverage.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_cjs_coverage.py",
+          "lines": [
+            1,
+            116
+          ],
+          "symbol": "test_cjs_coverage.py",
+          "symbol_id": "test_cjs_coverage_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-CLI-JSON-PY": {
+      "name": "File tests/test_cli_json.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_cli_json.py",
+          "lines": [
+            1,
+            51
+          ],
+          "symbol": "test_cli_json.py",
+          "symbol_id": "test_cli_json_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-DEPENDENCY-RESOLVER-PY": {
+      "name": "File tests/test_dependency_resolver.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_dependency_resolver.py",
+          "lines": [
+            1,
+            164
+          ],
+          "symbol": "test_dependency_resolver.py",
+          "symbol_id": "test_dependency_resolver_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-FRESHNESS-MANIFEST-PY": {
+      "name": "File tests/test_freshness_manifest.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_freshness_manifest.py",
+          "lines": [
+            1,
+            202
+          ],
+          "symbol": "test_freshness_manifest.py",
+          "symbol_id": "test_freshness_manifest_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-GIT-HOOK-PY": {
+      "name": "File tests/test_git_hook.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_git_hook.py",
+          "lines": [
+            1,
+            71
+          ],
+          "symbol": "test_git_hook.py",
+          "symbol_id": "test_git_hook_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-IGNORED-FILES-PY": {
+      "name": "File tests/test_ignored_files.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_ignored_files.py",
+          "lines": [
+            1,
+            50
+          ],
+          "symbol": "test_ignored_files.py",
+          "symbol_id": "test_ignored_files_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-LEXMASK-PY": {
+      "name": "File tests/test_lexmask.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_lexmask.py",
+          "lines": [
+            1,
+            259
+          ],
+          "symbol": "test_lexmask.py",
+          "symbol_id": "test_lexmask_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-PARSER-GENERIC-PY": {
+      "name": "File tests/test_parser_generic.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_parser_generic.py",
+          "lines": [
+            1,
+            70
+          ],
+          "symbol": "test_parser_generic.py",
+          "symbol_id": "test_parser_generic_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-PHANTOM-TAGS-PY": {
+      "name": "File tests/test_phantom_tags.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_phantom_tags.py",
+          "lines": [
+            1,
+            71
+          ],
+          "symbol": "test_phantom_tags.py",
+          "symbol_id": "test_phantom_tags_py",
+          "type": "file"
         }
       ]
     },
@@ -733,6 +926,54 @@
           "symbol": "test_same_id_across_files_warns_and_merges",
           "symbol_id": "test_same_id_across_files_warns_and_merges",
           "type": "function"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-SCANNER-WARNINGS-PY": {
+      "name": "File tests/test_scanner_warnings.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_scanner_warnings.py",
+          "lines": [
+            1,
+            142
+          ],
+          "symbol": "test_scanner_warnings.py",
+          "symbol_id": "test_scanner_warnings_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-SKILLS-PY": {
+      "name": "File tests/test_skills.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_skills.py",
+          "lines": [
+            1,
+            39
+          ],
+          "symbol": "test_skills.py",
+          "symbol_id": "test_skills_py",
+          "type": "file"
+        }
+      ]
+    },
+    "FILE-TESTS-TEST-SYMBOL-IDS-PY": {
+      "name": "File tests/test_symbol_ids.py",
+      "category": "file_index",
+      "locations": [
+        {
+          "file": "tests/test_symbol_ids.py",
+          "lines": [
+            1,
+            103
+          ],
+          "symbol": "test_symbol_ids.py",
+          "symbol_id": "test_symbol_ids_py",
+          "type": "file"
         }
       ]
     }

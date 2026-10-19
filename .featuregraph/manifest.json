@@ -2,13 +2,14 @@
   "_meta": {
     "generator": "featuregraph",
     "version": "0.1.0",
-    "total_features": 35,
-    "tree_hash": "a871fca431f77843ffb31fcef8d6d3932b238b243927b1cb8a10426189ec8012",
+    "total_features": 50,
+    "tree_hash": "6b0c501e5569fc1ca2f7d34322944c2a08d42c237366a411018595e52018cc11",
     "status": "partial",
-    "total_files": 28,
-    "indexed_files": 14,
-    "unindexed_files": 14,
-    "total_categories": 14,
+    "total_files": 29,
+    "indexed_files": 29,
+    "unindexed_files": 0,
+    "file_level_files": 15,
+    "total_categories": 15,
     "instruction": "Read this manifest to find the category, then read only .featuregraph/categories/<category>.json for exact lines (#Lstart-Lend)."
   },
   "categories": {
@@ -26,6 +27,23 @@
       "DEP_RESOLVER-01": "Dependency Resolver",
       "DEP_RESOLVER-02": "Register symbols",
       "DEP_RESOLVER-03": "Resolve dependencies for file"
+    },
+    "file_index": {
+      "FILE-FEATUREGRAPH-INIT-PY": "File featuregraph/__init__.py",
+      "FILE-FEATUREGRAPH-SKILLS-INIT-PY": "File featuregraph/skills/__init__.py",
+      "FILE-TESTS-TEST-ANNOTATOR-PY": "File tests/test_annotator.py",
+      "FILE-TESTS-TEST-CJS-COVERAGE-PY": "File tests/test_cjs_coverage.py",
+      "FILE-TESTS-TEST-CLI-JSON-PY": "File tests/test_cli_json.py",
+      "FILE-TESTS-TEST-DEPENDENCY-RESOLVER-PY": "File tests/test_dependency_resolver.py",
+      "FILE-TESTS-TEST-FRESHNESS-MANIFEST-PY": "File tests/test_freshness_manifest.py",
+      "FILE-TESTS-TEST-GIT-HOOK-PY": "File tests/test_git_hook.py",
+      "FILE-TESTS-TEST-IGNORED-FILES-PY": "File tests/test_ignored_files.py",
+      "FILE-TESTS-TEST-LEXMASK-PY": "File tests/test_lexmask.py",
+      "FILE-TESTS-TEST-PARSER-GENERIC-PY": "File tests/test_parser_generic.py",
+      "FILE-TESTS-TEST-PHANTOM-TAGS-PY": "File tests/test_phantom_tags.py",
+      "FILE-TESTS-TEST-SCANNER-WARNINGS-PY": "File tests/test_scanner_warnings.py",
+      "FILE-TESTS-TEST-SKILLS-PY": "File tests/test_skills.py",
+      "FILE-TESTS-TEST-SYMBOL-IDS-PY": "File tests/test_symbol_ids.py"
     },
     "git_hook": {
       "GIT_HOOK-01": "Git hook manager",
