@@ -4,7 +4,7 @@ import ast
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Set, Tuple, Any
 
 from . import lexmask
 
@@ -176,14 +176,14 @@ class DependencyResolver:
             self._qual_seen[name] = feat_id
             self.qualname_to_feature[name] = feat_id
 
-    def _resolve_bare(self, symbol: str, caller_file: str) -> Optional[str]:
-        """Resolve a bare name by path affinity; ties are left unresolved, not guessed."""
+    def _resolve_bare(self, symbol: str, caller_file: str) -> Set[str]:
+        """Resolve a bare name to the closest definitions; ties keep all, never dropped."""
         target = self.symbol_to_feature.get(symbol)
         if target:
-            return target
+            return {target}
         candidates = self.symbol_candidates.get(symbol)
         if not candidates:
-            return None
+            return set()
 
         caller = Path(caller_file)
 
@@ -213,12 +213,14 @@ class DependencyResolver:
             key=lambda item: (item[0], item[1]["symbol_id"]),
             reverse=True,
         )
-        best_score, best = ranked[0]
-        if len(ranked) > 1 and ranked[1][0] == best_score:
-            return None
+        best_score = ranked[0][0]
         if best_score == (0, 0):
-            return None
-        return best["feature_id"]
+            return set()
+        return {
+            candidate["feature_id"]
+            for score, candidate in ranked
+            if score == best_score
+        }
 
     @staticmethod
     def _dotted(node: ast.AST) -> str:
@@ -298,10 +300,8 @@ class DependencyResolver:
             for lineno, sym, qual in line_symbols:
                 if start_line <= lineno <= end_line:
                     target_feat = self.qualname_to_feature.get(qual) if qual else None
-                    if target_feat is None:
-                        target_feat = self._resolve_bare(sym, str(file_path))
-                    if target_feat and target_feat != feat_id:
-                        results[feat_id].add(target_feat)
+                    targets = {target_feat} if target_feat else self._resolve_bare(sym, str(file_path))
+                    results[feat_id].update(t for t in targets if t != feat_id)
 
     def _resolve_tokens(
         self,
@@ -324,6 +324,5 @@ class DependencyResolver:
             tokens = set(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\b", chunk))
 
             for tok in tokens:
-                target_feat = self._resolve_bare(tok, str(file_path))
-                if target_feat and target_feat != feat_id:
-                    results[feat_id].add(target_feat)
+                targets = self._resolve_bare(tok, str(file_path))
+                results[feat_id].update(t for t in targets if t != feat_id)

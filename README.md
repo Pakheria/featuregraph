@@ -77,7 +77,7 @@ FeatureGraph does **not** require manual `@depends` comments to build a real dep
 1. **Pass 1 (Symbol Indexing):** Scans all codebase files and maps defined functions, classes, and components to feature IDs and deterministic symbol IDs (bare when unique, path-qualified on collision).
 2. **Pass 2 (AST Call-Site Inference):** Analyzes call-sites, type references, and JSX usage inside each feature's line boundaries.
 3. **Graph Topology:** Automatically wires `depends_on` and `called_by` edges, generates Mermaid DAGs in `.featuregraph/graph.md`, and lists isolated features (no deps, no callers) for dead-code review.
-4. **Manual Overrides & Trust Checks:** `@depends` (or `@depends_on`) tags add explicit edges; dangling references are warned about. Colliding symbol names are qualified deterministically (e.g. `web.app.layout` vs `web.app.docs.layout`), and bare calls resolve through the same IDs by path affinity; exact ties are left unresolved, never guessed.
+4. **Manual Overrides & Trust Checks:** `@depends` (or `@depends_on`) tags add explicit edges; dangling references are warned about. Colliding symbol names are qualified deterministically (e.g. `web.app.layout` vs `web.app.docs.layout`), and bare calls resolve through the same IDs by path affinity; equally-near ties keep all candidate IDs rather than dropping the edge.
 
 ---
 
@@ -94,7 +94,7 @@ Warnings are aggregated to one line each per scan:
 
 A tagged location's symbol ID is its bare symbol when unique (`validate_token`) and a deterministic path prefix on collision (`web.app.layout` vs `web.app.docs.layout`; when even the directory repeats, the full path is used, e.g. `test.bypass_matrix.1_drifted_params.processPayment`). Explicit `@feature [ID]` tags remain the canonical feature ID.
 
-`query` and `search` accept a feature ID, a qualified symbol ID, or an unambiguous bare symbol. An ambiguous bare name exits 1 and lists the candidate qualified IDs. Inferred calls use the same IDs with path affinity (same file > same directory > longest shared path); exact ties are left unresolved, not guessed.
+`query` and `search` accept a feature ID, a qualified symbol ID, or an unambiguous bare symbol. An ambiguous bare name exits 1 and lists the candidate qualified IDs. Inferred calls use the same IDs with path affinity (same file > same directory > longest shared path); if definitions tie, all equally-near IDs are kept rather than dropped.
 
 ---
 

@@ -63,9 +63,9 @@ graph TD
 | **`ANNOTATOR-04`** | **Apply suggestions** | — | `[LEXMASK-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L339-L409`](featuregraph/core/annotator.py#L339-L409) |
 | **`ANNOTATOR-05`** | **Collect suggestions** | — | `[ANNOTATOR-03]` `[PARSER_GENERIC-01]` `[SCANNER-01]` | `[CLI-01]` | [`featuregraph/core/annotator.py#L417-L455`](featuregraph/core/annotator.py#L417-L455) |
 | **`CLI-01`** | **Main** | — | `[ANNOTATOR-04]` `[ANNOTATOR-05]` `[GIT_HOOK-01]` `[GIT_HOOK-02]` `[GIT_HOOK-03]` `[GRAPH-04]` `[JSON_FORMATT-01]` `[JSON_FORMATT-03]` `[MARKDOWN_FOR-01]` `[MARKDOWN_FOR-03]` `[SCANNER-01]` `[SCANNER-02]` `[SCANNER-03]` `[SKILL-01]` | — | [`featuregraph/cli.py#L55-L426`](featuregraph/cli.py#L55-L426) |
-| **`DEP_RESOLVER-01`** | **Dependency Resolver** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L136-L329`](featuregraph/core/dependency_resolver.py#L136-L329) |
+| **`DEP_RESOLVER-01`** | **Dependency Resolver** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L136-L328`](featuregraph/core/dependency_resolver.py#L136-L328) |
 | **`DEP_RESOLVER-02`** | **Register symbols** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L149-L168`](featuregraph/core/dependency_resolver.py#L149-L168) |
-| **`DEP_RESOLVER-03`** | **Resolve dependencies for file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L236-L259`](featuregraph/core/dependency_resolver.py#L236-L259) |
+| **`DEP_RESOLVER-03`** | **Resolve dependencies for file** | — | — | `[SCANNER-01]` `[SCANNER-03]` | [`featuregraph/core/dependency_resolver.py#L238-L261`](featuregraph/core/dependency_resolver.py#L238-L261) |
 | **`GIT_HOOK-01`** | **Git hook manager** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L41-L70`](featuregraph/hooks/git_hook.py#L41-L70) |
 | **`GIT_HOOK-02`** | **Install** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L46-L58`](featuregraph/hooks/git_hook.py#L46-L58) |
 | **`GIT_HOOK-03`** | **Uninstall** | — | — | `[CLI-01]` | [`featuregraph/hooks/git_hook.py#L62-L70`](featuregraph/hooks/git_hook.py#L62-L70) |

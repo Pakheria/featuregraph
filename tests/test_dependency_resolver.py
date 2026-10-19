@@ -106,8 +106,8 @@ def run(alpha):
             self.assertIn("A-CLASS", user_deps)
             self.assertNotIn("B-METHOD", user_deps)
 
-    def test_bare_ambiguous_name_skipped(self):
-        """A bare call to a name defined by multiple features produces no guessed edge."""
+    def test_bare_ambiguous_name_keeps_all_equally_near_definitions(self):
+        """Equally near definitions are all kept; a bare call is never dropped."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
             (tmp_path / "a.py").write_text("""# @feature [A-METHOD] Alpha parse
@@ -124,7 +124,7 @@ def invoke(x):
 """)
 
             data = WorkspaceScanner(tmp_path).scan().to_dict()
-            self.assertEqual(data["CALLER-01"].get("depends_on", []), [])
+            self.assertEqual(data["CALLER-01"].get("depends_on", []), ["A-METHOD", "B-METHOD"])
 
     def test_python_local_assignment_is_not_a_dependency(self):
         """A local variable that shadows a feature name is not a dependency."""

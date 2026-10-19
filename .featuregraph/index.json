@@ -3,7 +3,7 @@
     "generator": "featuregraph",
     "version": "0.1.0",
     "total_features": 35,
-    "tree_hash": "55076fa3255c55e0b7b48d9f62442b8361c6ccdb1e0702d6d7f89edc2059f4f6",
+    "tree_hash": "a871fca431f77843ffb31fcef8d6d3932b238b243927b1cb8a10426189ec8012",
     "status": "partial",
     "total_files": 28,
     "indexed_files": 14,
@@ -155,7 +155,7 @@
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
             136,
-            329
+            328
           ],
           "symbol": "DependencyResolver",
           "symbol_id": "DependencyResolver",
@@ -192,8 +192,8 @@
         {
           "file": "featuregraph/core/dependency_resolver.py",
           "lines": [
-            236,
-            259
+            238,
+            261
           ],
           "symbol": "resolve_file_dependencies",
           "symbol_id": "resolve_file_dependencies",
